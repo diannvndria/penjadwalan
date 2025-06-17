@@ -1,0 +1,85 @@
+@extends('layouts.app')
+
+@section('header')
+    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        {{ __('Tambah Mahasiswa Baru') }}
+    </h2>
+@endsection
+
+@section('content')
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 bg-white border-b border-gray-200">
+
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Oops!</strong> Ada beberapa masalah dengan input Anda.
+                    <ul class="mt-2 list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('mahasiswa.store') }}" class="space-y-4">
+                @csrf
+
+                <div>
+                    <label for="nim" class="block text-sm font-medium text-gray-700">NIM</label>
+                    <input type="text" id="nim" name="nim" value="{{ old('nim') }}" required autofocus
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('nim') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                    <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('nama') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="angkatan" class="block text-sm font-medium text-gray-700">Angkatan</label>
+                    <input type="number" id="angkatan" name="angkatan" value="{{ old('angkatan', date('Y')) }}" required min="2000" max="{{ date('Y') }}"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    @error('angkatan') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="judul_skripsi" class="block text-sm font-medium text-gray-700">Judul Skripsi</label>
+                    <textarea id="judul_skripsi" name="judul_skripsi" rows="3" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('judul_skripsi') }}</textarea>
+                    @error('judul_skripsi') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="id_dospem" class="block text-sm font-medium text-gray-700">Dosen Pembimbing</label>
+                    <select id="id_dospem" name="id_dospem" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="">Pilih Dosen</option>
+                        @foreach($dosens as $dosen)
+                            <option value="{{ $dosen->id }}" {{ old('id_dospem') == $dosen->id ? 'selected' : '' }}>
+                                {{ $dosen->nama }} {{-- Anda bisa tambahkan detail seperti kapasitas di sini jika diperlukan --}}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_dospem') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="siap_sidang" name="siap_sidang" value="1" {{ old('siap_sidang') ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                    <label for="siap_sidang" class="ml-2 block text-sm text-gray-900">Siap Sidang</label>
+                    @error('siap_sidang') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        Simpan Mahasiswa
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+@endsection
