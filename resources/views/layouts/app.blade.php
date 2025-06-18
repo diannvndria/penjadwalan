@@ -19,11 +19,11 @@
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #94a3b8; /* Warna thumb scrollbar (gray-400) */
+            background: #94a3b8; /* gray-400 */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #64748b; /* Warna thumb scrollbar saat hover (gray-600) */
+            background: #64748b; /* gray-600 */
         }
         /* Basic dropdown styling for demonstration (can be enhanced with JS if needed) */
         .group:hover .group-hover-show {
@@ -33,23 +33,15 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
     {{-- Main container: Mengisi seluruh tinggi layar dan menggunakan flexbox --}}
-    <div class="flex h-screen">
+    <div class="flex h-screen p-4 space-x-4"> {{-- p-4 untuk margin dari tepi layar, space-x-4 untuk jarak antara sidebar dan main-content-wrapper --}}
 
         <!-- Sidebar (Panel Navigasi Kiri) -->
-        {{-- Sidebar sebagai kartu mengambang:
-             w-64: lebar tetap 256px
-             bg-white: latar belakang putih
-             shadow-lg: bayangan besar
-             py-6: padding vertikal 24px
-             flex flex-col justify-between: flex container, elemen bertumpuk vertikal, dorong ke atas/bawah
-             overflow-y-auto: memungkinkan scroll jika konten sidebar panjang
-             rounded-3xl: sudut membulat 24px
-             m-4: margin 16px di semua sisi untuk efek mengambang --}}
-        <aside class="w-64 bg-white shadow-lg py-6 flex flex-col justify-between overflow-y-auto rounded-3xl m-4">
+        {{-- Sidebar sebagai kartu mengambang: w-64, bg-white, shadow-lg, py-6, rounded-xl --}}
+        {{-- m-0 karena p-4 di parent dan space-x-4, rounded-xl (lebih halus dari 3xl) --}}
+        <aside class="w-64 bg-white shadow-lg py-6 flex flex-col justify-between overflow-y-auto rounded-xl">
             <div>
                 <!-- Logo & Nama Aplikasi -->
-                {{-- px-6: padding horizontal 24px untuk konsistensi dengan elemen lain
-                     mb-8: margin bawah 32px untuk pemisah dengan navigasi --}}
+                {{-- px-6: padding horizontal 24px --}}
                 <div class="flex items-center px-6 mb-8">
                     {{-- Sumber gambar logo UIN Sunan Kalijaga --}}
                     <img src="{{ asset('images/logo-uin-suka.png') }}" alt="Logo UIN Sunan Kalijaga" class="h-9 w-9 mr-3">
@@ -60,13 +52,6 @@
                 {{-- space-y-3: jarak vertikal 12px antar link
                      px-5: padding horizontal 20px untuk item menu --}}
                 <nav class="space-y-3 px-5">
-                    {{-- Setiap link navigasi:
-                         flex items-center: ikon dan teks sejajar
-                         p-3: padding 12px
-                         rounded-lg: sudut membulat 8px
-                         text-gray-700: warna teks default
-                         hover:bg-blue-50 hover:text-blue-700: efek hover
-                         {{ request()->routeIs('...') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}: gaya untuk link aktif --}}
                     <a href="{{ route('dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
                         <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-7 7m7-7v10a1 1 0 01-1 1h-3m-6-13a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         Dashboard
@@ -100,9 +85,8 @@
             </div>
 
             <!-- Login/Register Links (for Guest Users) -->
-            {{-- Bagian ini hanya tampil jika user belum login --}}
             <div class="mt-auto pt-6 border-t border-gray-200 px-6">
-                @guest {{-- Only show login/register if not authenticated --}}
+                @guest
                     <a href="{{ route('login') }}" class="flex items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700">
                         <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                         Login
@@ -115,10 +99,10 @@
             </div>
         </aside>
 
-        <!-- Main Content Area (Sisa ruang di sebelah kanan sidebar) -->
-        {{-- ml-[calc(16rem+1rem)]: Memberi margin kiri seukuran lebar sidebar + margin sidebar.
-             Ini mendorong area konten utama ke kanan untuk memberi ruang sidebar mengambang. --}}
-        <div class="flex-1 flex flex-col ml-[calc(16rem+1rem)]">
+        <!-- Main Content Area (right of sidebar) -->
+        {{-- flex-1: mengambil sisa ruang --}}
+        {{-- flex flex-col: konten di dalamnya bertumpuk vertikal --}}
+        <div class="flex-1 flex flex-col">
             <!-- Top Header Bar -->
             {{-- Header sebagai kartu mengambang:
                  bg-white shadow-sm: latar belakang putih dengan bayangan kecil
