@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <title>Sistem Penjadwalan Skripsi</title>
     {{-- Vite directive untuk mengkompilasi CSS dan JS --}}
     @vite('resources/css/app.css')
@@ -53,31 +55,34 @@
                      px-5: padding horizontal 20px untuk item menu --}}
                 <nav class="space-y-3 px-5">
                     <a href="{{ route('dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-7 7m7-7v10a1 1 0 01-1 1h-3m-6-13a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <i class="fas fa-house mr-3"></i>
                         Dashboard
                     </a>
 
                     <a href="{{ route('mahasiswa.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('mahasiswa.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-4a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v11a2 2 0 01-2 2z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M10 9a2 2 0 11-4 0 2 2 0 014 0zM7 13.5a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+                        <i class="fas fa-user-graduate mr-3"></i>
                         Data Mahasiswa
                     </a>
+
                     <a href="{{ route('dosen.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dosen.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354c-1.189-1.189-3.08-1.583-4.524-.913C6.313 3.86 4 6.313 4 8.78V16c0 1.25.75 2.5 2 2.5h12c1.25 0 2-1.25 2-2.5V8.78c0-2.467-2.313-4.92-3.476-6.345-1.444-.67-3.335-.276-4.524.913z"></path></svg>
+                        <i class="fas fa-chalkboard-teacher mr-3"></i>
                         Daftar Dosen
                     </a>
+
                     <a href="{{ route('penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <i class="fas fa-user-tie mr-3"></i>
                         Daftar Penguji
                     </a>
+
                     <a href="{{ route('jadwal-penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('jadwal-penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <i class="fas fa-calendar-check mr-3"></i>
                         Jadwal Penguji
                     </a>
+
                     <a href="{{ route('munaqosah.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('munaqosah.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        <i class="fas fa-file-alt mr-3"></i>
                         Jadwal Sidang
                     </a>
-
                     @if (Auth::user()->isAdmin())
                         {{-- Admin-specific links if any --}}
                     @endif
