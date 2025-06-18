@@ -15,7 +15,7 @@ class Munaqosah extends Model
         'waktu_mulai',
         'waktu_selesai',
         'id_penguji1',
-        'id_penguji2', // Hapus 'id_penguji_utama' dari sini
+        'id_penguji2', // Hanya ini
         'status_konfirmasi',
     ];
 
@@ -38,11 +38,8 @@ class Munaqosah extends Model
         return $this->belongsTo(Penguji::class, 'id_penguji2');
     }
 
-    // --- Hapus relasi pengujiUtama() ---
-    // public function pengujiUtama()
-    // {
-    //     return $this->belongsTo(Penguji::class, 'id_penguji_utama');
-    // }
+    // Pastikan tidak ada relasi pengujiUtama()
+    // public function pengujiUtama() { return $this->belongsTo(Penguji::class, 'id_penguji_utama'); }
 
     public function historiPerubahan()
     {

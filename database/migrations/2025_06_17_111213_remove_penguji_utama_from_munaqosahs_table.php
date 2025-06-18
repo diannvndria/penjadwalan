@@ -12,10 +12,25 @@ class RemovePengujiUtamaFromMunaqosahsTable extends Migration
     public function up(): void
     {
         Schema::table('munaqosahs', function (Blueprint $table) {
-            // Pastikan untuk menjatuhkan foreign key constraint terlebih dahulu
-            $table->dropConstrainedForeignId('id_penguji_utama');
-            // Kemudian jatuhkan kolomnya
-            $table->dropColumn('id_penguji_utama');
+            // Periksa apakah kolom dan foreign key ada sebelum mencoba menghapusnya
+            if (Schema::hasColumn('munaqosahs', 'id_penguji_utama')) {
+                // Pastikan untuk menjatuhkan foreign key constraint terlebih dahulu
+                // Kita akan menggunakan nama default foreign key Laravel: nama_tabel_kolom_foreign
+                // atau bisa juga dengan dropConstrainedForeignId() jika ada.
+                // Namun, jika sudah tidak ada, dropConstrainedForeignId() akan error, jadi lebih aman cek.
+
+                // Cek jika foreign key exists sebelum drop
+                // Ini adalah bagian yang menyebabkan error Anda jika constraint sudah tidak ada.
+                // Cara paling aman adalah membuat foreign key constraint secara manual di down()
+                // saat rollback, karena nama constraint bisa bervariasi.
+                // Atau gunakan try-catch.
+                try {
+                    $table->dropForeign(['id_penguji_utama']); // Coba drop constraint
+                } catch (\Exception $e) {
+                    // Lakukan apa-apa, artinya constraint sudah tidak ada.
+                }
+                $table->dropColumn('id_penguji_utama');
+            }
         });
     }
 
@@ -25,8 +40,11 @@ class RemovePengujiUtamaFromMunaqosahsTable extends Migration
     public function down(): void
     {
         Schema::table('munaqosahs', function (Blueprint $table) {
-            // Tambahkan kembali kolom dan foreign key jika ingin rollback
-            $table->foreignId('id_penguji_utama')->nullable()->constrained('pengujis')->onDelete('restrict');
+            // Saat rollback (down), tambahkan kembali kolomnya.
+            // Penting: Pastikan ini sesuai dengan definisi awal kolom Anda.
+            if (!Schema::hasColumn('munaqosahs', 'id_penguji_utama')) {
+                $table->foreignId('id_penguji_utama')->nullable()->constrained('pengujis')->onDelete('restrict');
+            }
         });
     }
 }

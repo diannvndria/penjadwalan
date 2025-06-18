@@ -26,9 +26,6 @@ class Penguji extends Model
         return $this->hasMany(Munaqosah::class, 'id_penguji2');
     }
 
-    // --- Hapus relasi munaqosahsAsPengujiUtama() ---
-    // public function munaqosahsAsPengujiUtama()
-    // {
-    //     return $this->hasMany(Munaqosah::class, 'id_penguji_utama');
-    // }
+    // Pastikan tidak ada relasi munaqosahsAsPengujiUtama()
+    // public function munaqosahsAsPengujiUtama() { return $this->hasMany(Munaqosah::class, 'id_penguji_utama'); }
 }

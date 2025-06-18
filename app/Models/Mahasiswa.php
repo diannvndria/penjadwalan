@@ -14,21 +14,17 @@ class Mahasiswa extends Model
         'nama',
         'angkatan',
         'judul_skripsi',
+        'profil_lulusan', // Pastikan ini ada
+        'penjurusan',     // Pastikan ini ada
         'id_dospem',
         'siap_sidang',
     ];
 
-    /**
-     * Relasi: Mahasiswa dimiliki oleh satu Dosen (pembimbing).
-     */
     public function dospem()
     {
         return $this->belongsTo(Dosen::class, 'id_dospem');
     }
 
-    /**
-     * Relasi: Satu Mahasiswa memiliki satu jadwal Munaqosah.
-     */
     public function munaqosah()
     {
         return $this->hasOne(Munaqosah::class, 'id_mahasiswa');

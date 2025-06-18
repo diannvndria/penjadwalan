@@ -3,12 +3,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
 use App\Models\Dosen;
-use App\Models\Penguji; // Tambahkan import Penguji
-use App\Models\JadwalPenguji; // Tambahkan import JadwalPenguji
-use App\Models\Munaqosah; // Tambahkan import Munaqosah
+use App\Models\Penguji;
+use App\Models\JadwalPenguji;
+use App\Models\Munaqosah;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // Untuk transaksi
-use Carbon\Carbon; // Untuk manipulasi tanggal/waktu
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MahasiswaController extends Controller
 {
@@ -17,15 +17,15 @@ class MahasiswaController extends Controller
      */
     public function index(Request $request)
     {
-        $angkatan = $request->query('angkatan'); // Ambil parameter 'angkatan' dari URL
-        $mahasiswas = Mahasiswa::query(); // Mulai query untuk model Mahasiswa
+        $angkatan = $request->query('angkatan');
+        $mahasiswas = Mahasiswa::query();
 
         if ($angkatan) {
-            $mahasiswas->where('angkatan', $angkatan); // Terapkan filter jika 'angkatan' ada
+            $mahasiswas->where('angkatan', $angkatan);
         }
 
         // Eager load relasi 'dospem' untuk menghindari N+1 query problem
-        $mahasiswas = $mahasiswas->with('dospem')->paginate(10); // Ambil 10 data per halaman
+        $mahasiswas = $mahasiswas->with('dospem')->paginate(10);
 
         // Ambil daftar angkatan unik yang tersedia di database untuk dropdown filter
         $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'asc')->pluck('angkatan');
@@ -48,12 +48,14 @@ class MahasiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nim' => 'required|string|max:20|unique:mahasiswas,nim', // NIM harus unik dan maks 20 karakter
+            'nim' => 'required|string|max:20|unique:mahasiswas,nim',
             'nama' => 'required|string|max:255',
-            'angkatan' => 'required|integer|min:2000|max:' . date('Y'), // Angkatan valid antara 2000 sampai tahun sekarang
+            'angkatan' => 'required|integer|min:2000|max:' . date('Y'),
             'judul_skripsi' => 'required|string',
-            'id_dospem' => 'required|exists:dosens,id', // id_dospem harus ada di tabel dosens
-            'siap_sidang' => 'boolean', // Ini akan otomatis diset jika checkbox dicentang
+            'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional', // Validasi profil lulusan
+            'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
+            'id_dospem' => 'required|exists:dosens,id',
+            'siap_sidang' => 'boolean',
         ]);
 
         $dosen = Dosen::find($request->id_dospem);
@@ -77,6 +79,7 @@ class MahasiswaController extends Controller
 
     /**
      * Memperbarui data mahasiswa di database.
+     * Termasuk logika pemicu penjadwalan otomatis jika status siap_sidang berubah (jika diaktifkan).
      */
     public function update(Request $request, Mahasiswa $mahasiswa)
     {
@@ -87,6 +90,8 @@ class MahasiswaController extends Controller
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:' . date('Y'),
             'judul_skripsi' => 'required|string',
+            'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional',
+            'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
             'id_dospem' => 'required|exists:dosens,id',
             'siap_sidang' => 'boolean',
         ]);
@@ -101,12 +106,13 @@ class MahasiswaController extends Controller
         DB::transaction(function () use ($request, $mahasiswa, $oldSiapSidang) {
             $mahasiswa->update($request->all());
 
-            // === Logika Penjadwalan Otomatis Dimulai Di Sini ===
-            // Jika status siap_sidang diubah menjadi TRUE dan sebelumnya FALSE, dan belum ada jadwal munaqosah
+            // Logika penjadwalan otomatis (jika ada):
+            // Pastikan Anda telah mengimplementasikan metode findAvailableMunaqosahSlot dan checkPengujiConflict di controller ini
+            // atau di service terpisah.
+            /*
             if ($request->boolean('siap_sidang') && !$oldSiapSidang && !$mahasiswa->munaqosah) {
                 $pesanOtomatisasi = '';
                 try {
-                    // Panggil fungsi untuk mencoba membuat jadwal munaqosah otomatis
                     $jadwalTersedia = $this->findAvailableMunaqosahSlot($mahasiswa);
 
                     if ($jadwalTersedia) {
@@ -116,23 +122,21 @@ class MahasiswaController extends Controller
                             'waktu_mulai' => $jadwalTersedia['waktu_mulai'],
                             'waktu_selesai' => $jadwalTersedia['waktu_selesai'],
                             'id_penguji1' => $jadwalTersedia['penguji1']->id,
-                            'id_penguji2' => $jadwalTersedia['penguji2']->id, // Pastikan ini tidak null
-                            'status_konfirmasi' => 'pending', // Default status untuk jadwal otomatis
+                            'id_penguji2' => $jadwalTersedia['penguji2']->id,
+                            'status_konfirmasi' => 'pending',
                         ]);
                         $pesanOtomatisasi = ' Jadwal munaqosah otomatis berhasil dibuat.';
                     } else {
-                        $pesanOtomatisasi = ' Tidak dapat menemukan slot jadwal munaqosah otomatis yang tersedia.';
+                        $pesanOtomatisasi = ' Tidak dapat menemukan slot jadwal munaqosah otomatis yang tersedia. Silakan jadwalkan secara manual.';
                     }
                 } catch (\Exception $e) {
                     $pesanOtomatisasi = ' Gagal membuat jadwal munaqosah otomatis: ' . $e->getMessage();
-                    // Log error untuk debugging lebih lanjut
                     \Log::error('Error penjadwalan otomatis mahasiswa ' . $mahasiswa->id . ': ' . $e->getMessage());
                 }
-                session()->flash('info', $pesanOtomatisasi); // Gunakan flash session untuk info tambahan
+                session()->flash('info', $pesanOtomatisasi);
             }
-            // === Logika Penjadwalan Otomatis Berakhir Di Sini ===
+            */
         });
-
 
         return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.' . (session('info') ?? ''));
     }
@@ -150,29 +154,28 @@ class MahasiswaController extends Controller
         }
     }
 
+    // Metode findAvailableMunaqosahSlot dan checkPengujiConflict harus ada jika auto-schedule diaktifkan
+    // Saya akan menyertakan kode metode ini di bagian bawah, di luar konteks store/update/destroy
+    // untuk menjaga modularitas.
+
     /**
-     * Metode pembantu untuk menemukan slot munaqosah yang tersedia (disesuaikan untuk 2 penguji).
-     *
-     * @param Mahasiswa $mahasiswa
-     * @return array|null Mengembalikan array dengan detail jadwal jika ditemukan, null jika tidak.
+     * Metode pembantu (private) untuk menemukan slot munaqosah yang tersedia secara otomatis.
+     * Algoritma mencari kombinasi tanggal, waktu, dan 2 penguji yang tidak bentrok.
      */
     private function findAvailableMunaqosahSlot(Mahasiswa $mahasiswa)
     {
-        $durationInMinutes = 90; // Durasi standar munaqosah
-        $maxDaysAhead = 30; // Cari slot hingga 30 hari ke depan
-        $startTimeLimit = '08:00'; // Munaqosah tidak dimulai sebelum jam 8 pagi
-        $endTimeLimit = '17:00'; // Munaqosah tidak selesai setelah jam 5 sore
+        $durationInMinutes = 90;
+        $maxDaysAhead = 30;
+        $startTimeLimit = '08:00';
+        $endTimeLimit = '17:00';
 
         $allPengujis = Penguji::all();
-        if ($allPengujis->count() < 2) { // Minimal butuh 2 penguji
+        if ($allPengujis->count() < 2) {
             throw new \Exception('Tidak cukup penguji terdaftar (minimal 2) untuk menjadwalkan munaqosah otomatis.');
         }
 
         for ($i = 0; $i <= $maxDaysAhead; $i++) {
             $currentDate = Carbon::now()->addDays($i)->format('Y-m-d');
-            // Anda bisa menambahkan logika untuk melewati hari libur/akhir pekan jika diperlukan
-            // $dayOfWeek = Carbon::parse($currentDate)->dayOfWeek;
-            // if ($dayOfWeek == Carbon::SUNDAY || $dayOfWeek == Carbon::SATURDAY) { continue; }
 
             $currentTime = Carbon::parse($currentDate . ' ' . $startTimeLimit);
             $endOfDay = Carbon::parse($currentDate . ' ' . $endTimeLimit);
@@ -196,7 +199,6 @@ class MahasiswaController extends Controller
                     }
                 }
 
-                // Jika setidaknya ada 2 penguji yang tersedia
                 if ($availablePengujisForSlot->count() >= 2) {
                     $penguji1 = $availablePengujisForSlot->shift();
                     $penguji2 = $availablePengujisForSlot->shift();
@@ -211,18 +213,11 @@ class MahasiswaController extends Controller
                 }
             }
         }
-        return null; // Tidak menemukan slot yang tersedia
+        return null;
     }
 
     /**
-     * Metode pembantu untuk mengecek bentrok jadwal penguji (disesuaikan untuk 2 penguji).
-     *
-     * @param int $pengujiId
-     * @param string $tanggal
-     * @param string $waktuMulai
-     * @param string $waktuSelesai
-     * @param int|null $excludeMunaqosahId ID munaqosah yang dikecualikan dari pengecekan (saat update)
-     * @return bool True jika ada bentrok, False jika tidak.
+     * Metode pembantu (private) untuk mengecek bentrok jadwal penguji.
      */
     private function checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai, $excludeMunaqosahId = null)
     {
@@ -240,8 +235,7 @@ class MahasiswaController extends Controller
         }
 
         // Cek bentrok di tabel munaqosahs (jadwal munaqosah penguji lain)
-        $queryMunaqosah = Munaqosah::where(function($query) use ($pengujiId) {
-                // Hanya cek id_penguji1 dan id_penguji2
+        $queryMunaqosah = Munaqosah::where(function ($query) use ($pengujiId) {
                 $query->where('id_penguji1', $pengujiId)
                       ->orWhere('id_penguji2', $pengujiId);
             })
