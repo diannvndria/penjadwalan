@@ -27,7 +27,6 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b; /* gray-600 */
-            cursor: pointer; /* Menambahkan cursor pointer untuk indikasi interaksi */
         }
         /* Basic dropdown styling for demonstration (can be enhanced with JS if needed) */
         .group:hover .group-hover-show {
@@ -37,6 +36,13 @@
         .fa-fw {
             width: 1.2857142857em; /* Standar Font Awesome untuk fixed-width icons */
             text-align: center;
+        }
+        /* Penyesuaian tambahan untuk ikon Font Awesome agar center vertikal dengan teks */
+        .fa-fw-aligned {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Untuk ikon yang sudah memiliki lebar tetap, ini membuatnya center */
+            height: 1em; /* Tinggi ikon agar sejajar dengan tinggi baris teks */
         }
     </style>
 </head>
@@ -56,28 +62,28 @@
                 <!-- Main Navigation Menu -->
                 <nav class="space-y-3 px-5">
                     <a href="{{ route('dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-home fa-fw mr-4"></i> {{-- Dashboard: Home (mr-4) --}}
+                        <i class="fas fa-home fa-fw mr-3"></i> {{-- Dashboard: Home (kembali ke mr-3) --}}
                         Dashboard
                     </a>
 
                     <a href="{{ route('mahasiswa.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('mahasiswa.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-user-graduate fa-fw mr-4"></i> {{-- Data Mahasiswa: User-graduate (student) (mr-4) --}}
+                        <i class="fas fa-user-graduate fa-fw mr-3"></i> {{-- Data Mahasiswa: User-graduate (student) (kembali ke mr-3) --}}
                         Data Mahasiswa
                     </a>
                     <a href="{{ route('dosen.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dosen.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-chalkboard-teacher fa-fw mr-4"></i> {{-- Daftar Dosen: Chalkboard-teacher (mr-4) --}}
+                        <i class="fas fa-chalkboard-teacher fa-fw mr-3"></i> {{-- Daftar Dosen: Chalkboard-teacher (kembali ke mr-3) --}}
                         Daftar Dosen
                     </a>
                     <a href="{{ route('penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-user-tie fa-fw mr-4"></i> {{-- Daftar Penguji: User-tie (professional) (mr-4) --}}
+                        <i class="fas fa-user-tie fa-fw mr-3"></i> {{-- Daftar Penguji: User-tie (professional) (kembali ke mr-3) --}}
                         Daftar Penguji
                     </a>
                     <a href="{{ route('jadwal-penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('jadwal-penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-calendar-alt fa-fw mr-4"></i> {{-- Jadwal Penguji: Calendar-alt (mr-4) --}}
+                        <i class="fas fa-calendar-alt fa-fw mr-3"></i> {{-- Jadwal Penguji: Calendar-alt (kembali ke mr-3) --}}
                         Jadwal Penguji
                     </a>
                     <a href="{{ route('munaqosah.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('munaqosah.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-book fa-fw mr-4"></i> {{-- Jadwal Sidang: Book (mr-4) --}}
+                        <i class="fas fa-book fa-fw mr-3"></i> {{-- Jadwal Sidang: Book (kembali ke mr-3) --}}
                         Jadwal Sidang
                     </a>
 
@@ -91,11 +97,11 @@
             <div class="mt-auto pt-6 border-t border-gray-200 px-6">
                 @guest
                     <a href="{{ route('login') }}" class="flex items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                        <i class="fas fa-sign-in-alt fa-fw mr-4"></i> {{-- Login: Sign-in-alt (mr-4) --}}
+                        <i class="fas fa-sign-in-alt fa-fw mr-3"></i> {{-- Login: Sign-in-alt (kembali ke mr-3) --}}
                         Login
                     </a>
                     <a href="{{ route('register') }}" class="flex items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 mt-2">
-                        <i class="fas fa-user-plus fa-fw mr-4"></i> {{-- Register: User-plus (mr-4) --}}
+                        <i class="fas fa-user-plus fa-fw mr-3"></i> {{-- Register: User-plus (kembali ke mr-3) --}}
                         Register
                     </a>
                 @endguest
