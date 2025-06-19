@@ -16,6 +16,11 @@ class HistoriMunaqosah extends Model
         'id_munaqosah',
         'perubahan',
         'dilakukan_oleh',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
     /**
