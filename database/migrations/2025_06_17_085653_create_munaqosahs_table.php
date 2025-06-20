@@ -20,7 +20,6 @@ class CreateMunaqosahsTable extends Migration
             $table->time('waktu_selesai');
             $table->foreignId('id_penguji1')->constrained('pengujis')->onDelete('restrict'); // Penguji wajib
             $table->foreignId('id_penguji2')->nullable()->constrained('pengujis')->onDelete('restrict'); // Penguji opsional
-            $table->foreignId('id_penguji_utama')->nullable()->constrained('pengujis')->onDelete('restrict'); // Penguji utama (opsional)
             $table->enum('status_konfirmasi', ['pending', 'dikonfirmasi', 'ditolak'])->default('pending'); // Status konfirmasi admin
             $table->timestamps();
         });

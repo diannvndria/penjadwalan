@@ -88,7 +88,7 @@
                     </a>
 
                     @if (Auth::user()->isAdmin())
-                        {{-- Admin-specific links if any --}}
+                        <a href="{{ route('auto-schedule.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('auto-schedule.*') ? 'font-semibold' : '' }}">Auto-Schedule</a>
                     @endif
                 </nav>
             </div>
@@ -155,5 +155,7 @@
     </div>
     <!-- Alpine.js CDN (make sure it's loaded) -->
     <script src="//unpkg.com/alpinejs" defer></script>
+    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

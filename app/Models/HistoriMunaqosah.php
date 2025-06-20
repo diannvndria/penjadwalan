@@ -9,8 +9,8 @@ class HistoriMunaqosah extends Model
 {
     use HasFactory;
 
-    // Nonaktifkan updated_at, karena hanya ada created_at
-    public $timestamps = false;
+    // Disable updated_at, hanya gunakan created_at
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'id_munaqosah',

@@ -7,6 +7,7 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\PengujiController;
 use App\Http\Controllers\JadwalPengujiController;
 use App\Http\Controllers\MunaqosahController;
+use App\Http\Controllers\AutoScheduleController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -72,4 +73,28 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin bisa melakukan CRUD Jadwal Munaqosah
     Route::resource('munaqosah', MunaqosahController::class)->except(['index', 'histori']); // Kecualikan index & histori
+
+    // === AUTO SCHEDULE ROUTES ===
+    Route::prefix('auto-schedule')->name('auto-schedule.')->middleware('admin')->group(function () {
+        // Halaman utama auto-schedule
+        Route::get('/', function() {
+            return view('auto-schedule.index');
+        })->name('index');
+        
+        // Mendapatkan mahasiswa yang siap untuk auto-schedule
+        Route::get('/ready-students', [AutoScheduleController::class, 'getReadyStudents'])->name('ready-students');
+        
+        // Auto-schedule untuk satu mahasiswa
+        Route::post('/schedule-student', [AutoScheduleController::class, 'scheduleStudent'])->name('schedule-student');
+        
+        // Auto-schedule untuk semua mahasiswa yang siap sidang
+        Route::post('/batch-schedule', [AutoScheduleController::class, 'batchScheduleAll'])->name('batch-schedule');
+        
+        // Simulasi auto-schedule (untuk testing)
+        Route::post('/simulate', [AutoScheduleController::class, 'simulateSchedule'])->name('simulate');
+        
+        // Konfigurasi auto-schedule
+        Route::get('/configuration', [AutoScheduleController::class, 'getConfiguration'])->name('configuration');
+        Route::put('/configuration', [AutoScheduleController::class, 'updateConfiguration'])->name('update-configuration');
+    });
 });
