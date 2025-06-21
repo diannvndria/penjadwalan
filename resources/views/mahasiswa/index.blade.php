@@ -46,6 +46,17 @@
                         <option value="{{ $a }}" {{ (string)$angkatan === (string)$a ? 'selected' : '' }}>{{ $a }}</option>
                     @endforeach
                 </select>
+
+                <label for="dospem_id" class="ml-4 block text-sm font-medium text-gray-700">Dosen Pembimbing:</label>
+            <select name="dospem_id" id="dospem_id" onchange="this.form.submit()"
+                    class="mt-1 block w-48 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                <option value="">Semua Dosen</option>
+                @foreach ($dosens as $dosen)
+                    <option value="{{ $dosen->id }}" {{ request('dospem_id') == $dosen->id ? 'selected' : '' }}>
+                        {{ $dosen->nama }}
+                    </option>
+                @endforeach
+            </select>
             </form>
 
             {{-- Tombol Tambah Mahasiswa (Hanya untuk Admin) --}}

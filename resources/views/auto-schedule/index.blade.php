@@ -206,38 +206,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function saveConfiguration(event) {
+        // Perintah ini sudah benar, untuk mencegah refresh
         event.preventDefault();
-        
-        const formData = new FormData(event.target);
-        const data = {
-            duration_minutes: parseInt(formData.get('duration_minutes')),
+
+        const formData = new FormData(this);
+
+        // Pastikan kita membuat objek `newData` dengan struktur dan nama key
+        // yang SAMA PERSIS dengan yang diharapkan oleh validasi di Controller Laravel.
+        const newData = {
+            _method: 'PUT',
+
+            // Key di sini 'duration_minutes' HARUS cocok dengan aturan validasi di backend.
+            // Kita ambil nilainya dari input HTML yang memiliki name="duration_minutes".
+            duration_minutes: parseInt(formData.get('duration_minutes')) || 0,
+
+            // Key 'working_hours' adalah sebuah object yang berisi 'start' dan 'end'.
+            // Kita ambil nilainya dari input dengan name="working_hours[start]" dan "working_hours[end]"
             working_hours: {
                 start: formData.get('working_hours[start]'),
                 end: formData.get('working_hours[end]')
             }
+            
+            // Jika Anda memiliki input untuk 'search_days_range', tambahkan di sini juga.
+            // Contoh: search_days_range: parseInt(formData.get('search_range_input_name'))
         };
-        
-        fetch('/auto-schedule/configuration', {
-            method: 'PUT',
+
+        const url = '{{ route('auto-schedule.update-configuration') }}';
+
+        fetch(url, {
+            // --- PERUBAHAN #2: UBAH METHOD MENJADI 'POST' ---
+            method: 'POST',
+            // ------------------------------------------------
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(newData)
         })
-        .then(response => response.json())
+        .then(response => {
+            // --- PERUBAHAN #3: LOGIKA ERROR HANDLING YANG DIPERBAIKI ---
+            // Langsung coba parse sebagai JSON. Jika gagal, akan dilempar ke .catch()
+            return response.json().then(data => {
+                // Tambahkan status 'ok' dari response ke data agar bisa dicek bersamaan
+                if (!response.ok) {
+                    throw data; // Jika status tidak 2xx, lempar data error ke .catch()
+                }
+                return data;
+            });
+        })
         .then(data => {
+            // Cek 'success' flag dari response JSON Anda
             if (data.success) {
-                showAlert(data.message, 'success');
+                showAlert('Konfigurasi berhasil disimpan', 'success');
                 loadConfiguration();
                 hideConfigForm();
             } else {
-                showAlert(data.message, 'error');
+                // Seharusnya ini ditangkap oleh .catch(), tapi sebagai cadangan
+                showAlert('Gagal menyimpan: ' + (data.message || 'Error dari server'), 'error');
             }
         })
         .catch(error => {
             console.error('Error saving configuration:', error);
-            showAlert('Error saving configuration', 'error');
+            // 'error' di sini adalah object JSON dari server atau error lainnya
+            const errorMessage = error.message || 'Terjadi kesalahan yang tidak terduga. Cek console.';
+            showAlert(`Gagal menyimpan: ${errorMessage}`, 'error');
         });
     }
     

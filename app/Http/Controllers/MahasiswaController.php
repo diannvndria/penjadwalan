@@ -16,22 +16,46 @@ class MahasiswaController extends Controller
      * Menampilkan daftar mahasiswa, dengan opsi filter angkatan.
      */
     public function index(Request $request)
-    {
-        $angkatan = $request->query('angkatan');
-        $mahasiswas = Mahasiswa::query();
+{
+    // Ambil semua data dosen untuk dropdown filter
+    $dosens = Dosen::orderBy('nama')->get();
 
-        if ($angkatan) {
-            $mahasiswas->where('angkatan', $angkatan);
-        }
+    // 1. PERBAIKAN NAMA VARIABEL: Ubah nama variabel menjadi 'angkatans_tersedia'
+    $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
 
-        // Eager load relasi 'dospem' untuk menghindari N+1 query problem
-        $mahasiswas = $mahasiswas->with('dospem')->paginate(10);
+    // 2. PERBAIKAN LOGIKA: Ambil nilai angkatan yang sedang difilter dari request
+    $angkatan = $request->input('angkatan');
 
-        // Ambil daftar angkatan unik yang tersedia di database untuk dropdown filter
-        $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'asc')->pluck('angkatan');
+    $query = Mahasiswa::with('dospem')->latest();
 
-        return view('mahasiswa.index', compact('mahasiswas', 'angkatan', 'angkatans_tersedia'));
+    // Terapkan filter pencarian jika ada
+    if ($request->filled('search')) {
+        $query->where(function($q) use ($request) {
+            $q->where('nama', 'like', '%' . $request->search . '%')
+              ->orWhere('nim', 'like', '%' . $request->search . '%');
+        });
     }
+
+    // Terapkan filter angkatan jika ada (menggunakan variabel $angkatan)
+    if ($angkatan) {
+        $query->where('angkatan', $angkatan);
+    }
+
+    // Terapkan filter dosen pembimbing jika ada
+    if ($request->filled('dospem_id')) {
+        $query->where('id_dospem', $request->dospem_id);
+    }
+
+    $mahasiswas = $query->paginate(10);
+
+    // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view
+    return view('mahasiswa.index', compact(
+        'mahasiswas', 
+        'angkatans_tersedia', 
+        'dosens', 
+        'angkatan' // <-- kirim juga variabel $angkatan
+    ));
+}
 
     /**
      * Menampilkan form untuk membuat mahasiswa baru.

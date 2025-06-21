@@ -81,59 +81,78 @@ class AutoScheduleController extends Controller
     }
 
     /**
-     * Mendapatkan konfigurasi auto-schedule
+     * Mendapatkan konfigurasi auto-schedule dari session atau memberikan nilai default.
      *
      * @return JsonResponse
      */
     public function getConfiguration(): JsonResponse
     {
+        // 1. Definisikan nilai-nilai default di satu tempat
+        $defaults = [
+            'default_duration_minutes' => 120,
+            'working_hours' => [
+                'start' => '08:00',
+                'end' => '16:00'
+            ],
+            'working_days' => [1, 2, 3, 4, 5], // Senin-Jumat
+            'search_days_range' => 7
+        ];
+
+        // 2. Ambil konfigurasi dari session. Jika tidak ada, gunakan $defaults.
+        $config = session()->get('auto_schedule_config', $defaults);
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'default_duration_minutes' => 120,
-                'working_hours' => [
-                    'start' => '08:00',
-                    'end' => '16:00'
-                ],
-                'working_days' => [1, 2, 3, 4, 5], // Senin-Jumat
-                'search_days_range' => 7
-            ]
+            'data' => $config
         ]);
     }
 
     /**
-     * Update konfigurasi auto-schedule
+     * Update konfigurasi auto-schedule dan simpan ke session.
      *
      * @param Request $request
      * @return JsonResponse
      */
     public function updateConfiguration(Request $request): JsonResponse
     {
-        $request->validate([
+        // Validasi input
+        $validated = $request->validate([
             'duration_minutes' => 'sometimes|integer|min:30|max:480',
             'working_hours.start' => 'sometimes|date_format:H:i',
             'working_hours.end' => 'sometimes|date_format:H:i',
             'search_days_range' => 'sometimes|integer|min:1|max:30'
         ]);
 
-        // Apply configuration to service
+        // 1. Ambil konfigurasi yang ada saat ini dari session (atau default)
+        $config = session()->get('auto_schedule_config', [
+            'default_duration_minutes' => 120,
+            'working_hours' => ['start' => '08:00', 'end' => '16:00'],
+            'working_days' => [1, 2, 3, 4, 5],
+            'search_days_range' => 7
+        ]);
+
+        // 2. Timpa nilai konfigurasi dengan data baru yang sudah divalidasi
         if ($request->has('duration_minutes')) {
-            $this->autoScheduleService->setDuration($request->duration_minutes);
+            $config['default_duration_minutes'] = $validated['duration_minutes'];
+            $this->autoScheduleService->setDuration($validated['duration_minutes']);
         }
 
         if ($request->has('working_hours')) {
-            $workingHours = $request->working_hours;
-            if (isset($workingHours['start']) && isset($workingHours['end'])) {
-                $this->autoScheduleService->setWorkingHours(
-                    $workingHours['start'],
-                    $workingHours['end']
-                );
-            }
+            $config['working_hours']['start'] = $validated['working_hours']['start'];
+            $config['working_hours']['end'] = $validated['working_hours']['end'];
+            $this->autoScheduleService->setWorkingHours(
+                $validated['working_hours']['start'],
+                $validated['working_hours']['end']
+            );
         }
 
         if ($request->has('search_days_range')) {
-            $this->autoScheduleService->setSearchRange($request->search_days_range);
+            $config['search_days_range'] = $validated['search_days_range'];
+            $this->autoScheduleService->setSearchRange($validated['search_days_range']);
         }
+
+        // 3. Simpan kembali seluruh object konfigurasi yang sudah diperbarui ke dalam session
+        session(['auto_schedule_config' => $config]);
 
         return response()->json([
             'success' => true,
