@@ -86,10 +86,10 @@
                         <i class="fas fa-book fa-fw mr-3"></i> {{-- Jadwal Sidang: Book (kembali ke mr-3) --}}
                         Jadwal Sidang
                     </a>
-
-                    @if (Auth::user()->isAdmin())
-                        <a href="{{ route('auto-schedule.index') }}" class="text-gray-600 hover:text-gray-900 {{ request()->routeIs('auto-schedule.*') ? 'font-semibold' : '' }}">Auto-Schedule</a>
-                    @endif
+                    <a href="{{ route('auto-schedule.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('auto-schedule.*') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-robot fa-fw mr-3"></i> {{-- Auto-Schedule: Robot (kembali ke mr-3) --}}
+                        Auto-Schedule
+                    </a>
                 </nav>
             </div>
 

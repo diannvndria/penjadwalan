@@ -122,7 +122,7 @@
 </div>
 
 <!-- Modal for Individual Schedule Confirmation -->
-<div id="scheduleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+<div id="scheduleModal" class="fixed inset-0 bg-opacity-0 hidden flex items-start justify-center z-50 pt-20">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
             <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Konfirmasi Penjadwalan</h3>
@@ -150,6 +150,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Global variables
     let currentStudentId = null;
+    let isBatchSchedule = false;
     let configuration = {};
     
     // Load initial data
@@ -331,10 +332,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function batchSchedule() {
-        if (!confirm('Apakah Anda yakin ingin menjadwalkan semua mahasiswa yang siap sidang secara otomatis?')) {
-            return;
-        }
+        // Ganti konfirmasi bawaan dengan modal kustom
+        document.getElementById('modalTitle').textContent = 'Konfirmasi Penjadwalan Massal';
+        document.getElementById('modalMessage').textContent = 'Apakah Anda yakin ingin menjadwalkan semua mahasiswa yang siap sidang secara otomatis?';
         
+        // Atur event listener untuk tombol konfirmasi di modal
+        // Pastikan confirmScheduleBtn sekarang akan memanggil fungsi yang berbeda atau ada logika internal
+        // yang membedakan apakah itu batch atau individual.
+        // Untuk sederhana, kita akan ubah event listener langsung di sini sebelum menampilkan modal.
+        document.getElementById('confirmScheduleBtn').onclick = executeBatchSchedule;
+        
+        showModal(); // Tampilkan modal kustom
+    }
+
+        function executeBatchSchedule() {
+        hideModal(); // Sembunyikan modal setelah konfirmasi
+
         showAlert('Memproses batch scheduling...', 'info');
         
         fetch('/auto-schedule/batch-schedule', {
@@ -485,6 +498,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideModal() {
         document.getElementById('scheduleModal').classList.add('hidden');
         currentStudentId = null;
+        
+        // Reset the onclick handler for confirmScheduleBtn to its default individual schedule behavior
+        document.getElementById('confirmScheduleBtn').onclick = confirmIndividualSchedule;
     }
     
     function showAlert(message, type) {

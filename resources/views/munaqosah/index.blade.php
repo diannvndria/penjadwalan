@@ -41,8 +41,6 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penguji 1</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penguji 2</th>
-                            {{-- --- Hapus kolom Penguji Utama --- --}}
-                            {{-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penguji Utama</th> --}}
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -55,8 +53,6 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $munaqosah->penguji2->nama ?? '-' }}</td>
-                                {{-- --- Hapus data Penguji Utama --- --}}
-                                {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $munaqosah->pengujiUtama->nama ?? '-' }}</td> --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     @php
                                         $statusClass = [
@@ -72,18 +68,14 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     @if (Auth::user()->isAdmin())
                                         <a href="{{ route('munaqosah.edit', $munaqosah->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</a>
-                                        <form action="{{ route('munaqosah.destroy', $munaqosah->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus jadwal munaqosah ini? Tindakan ini tidak dapat dibatalkan.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 mr-2">Hapus</button>
-                                        </form>
+                                        {{-- Ganti form onsubmit dengan panggilan fungsi JavaScript --}}
+                                        <button type="button" onclick="showDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')" class="text-red-600 hover:text-red-900 mr-2">Hapus</button>
                                     @endif
                                     <a href="{{ route('munaqosah.histori', $munaqosah->id) }}" class="text-blue-600 hover:text-blue-900">Histori</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                {{-- Ubah colspan menjadi 8 (9 - 1 kolom yang dihapus) --}}
                                 <td colspan="8" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">Tidak ada jadwal munaqosah.</td>
                             </tr>
                         @endforelse
@@ -91,4 +83,71 @@
                 </table>
             </div>
         </div>
-    @endsection
+    </div>
+
+    <div id="deleteModal" class="fixed inset-0 bg-opacity-0 hidden flex items-start justify-center z-50 pt-20">
+        <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500" id="deleteModalMessage">
+                        Apakah Anda yakin ingin menghapus jadwal sidang untuk <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex justify-center space-x-4">
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Ya, Hapus
+                    </button>
+                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Form tersembunyi untuk submit penghapusan --}}
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
+@endsection
+
+@section('scripts')
+<script>
+    let munaqosahToDeleteId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const deleteForm = document.getElementById('deleteForm');
+
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (munaqosahToDeleteId) {
+                // Set action form dan submit
+                // Pastikan route ini sesuai dengan route delete di web.php Anda
+                deleteForm.action = `/munaqosah/${munaqosahToDeleteId}`; 
+                deleteForm.submit();
+            }
+            hideDeleteModal();
+        });
+
+        cancelDeleteBtn.addEventListener('click', function() {
+            hideDeleteModal();
+        });
+    });
+
+    function showDeleteModal(id, itemName) {
+        munaqosahToDeleteId = id;
+        document.getElementById('deleteItemName').textContent = itemName;
+        // Gunakan kelas yang persis sama dengan yang Anda berikan
+        document.getElementById('deleteModal').classList.remove('hidden'); 
+    }
+
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        munaqosahToDeleteId = null; // Reset ID setelah modal ditutup
+    }
+</script>
+@endsection
