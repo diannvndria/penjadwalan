@@ -321,10 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs">
                         Jadwalkan
                     </button>
-                    <button onclick="simulateSchedule(${student.id}, '${student.nama}')" 
-                            class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded text-xs ml-1">
-                        Simulasi
-                    </button>
                 </td>
             `;
             tbody.appendChild(row);
@@ -436,31 +432,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalMessage').textContent = 
             `Apakah Anda yakin ingin menjadwalkan mahasiswa "${studentName}" secara otomatis?`;
         showModal();
-    };
-    
-    window.simulateSchedule = function(studentId, studentName) {
-        showAlert(`Menjalankan simulasi untuk ${studentName}...`, 'info');
-        
-        fetch('/auto-schedule/simulate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({ mahasiswa_id: studentId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert(`Simulasi berhasil untuk ${studentName}: ${data.message}`, 'success');
-            } else {
-                showAlert(`Simulasi gagal untuk ${studentName}: ${data.message}`, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error in simulation:', error);
-            showAlert('Error dalam simulasi', 'error');
-        });
     };
     
     function confirmIndividualSchedule() {
