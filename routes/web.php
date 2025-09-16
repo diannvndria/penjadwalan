@@ -8,6 +8,7 @@ use App\Http\Controllers\PengujiController;
 use App\Http\Controllers\JadwalPengujiController;
 use App\Http\Controllers\MunaqosahController;
 use App\Http\Controllers\AutoScheduleController;
+use App\Http\Controllers\RuangUjianController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -38,6 +39,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Penguji: Lihat daftar penguji
     Route::get('penguji', [PengujiController::class, 'index'])->name('penguji.index');
+
+    // Ruang Ujian: Lihat daftar ruang ujian
+    Route::get('ruang-ujian', function () {
+        return view('ruang_ujian.index');
+    })->name('ruang-ujian.index');
 
     // Jadwal Penguji: Lihat daftar jadwal penguji
     Route::get('jadwal-penguji', [JadwalPengujiController::class, 'index'])->name('jadwal-penguji.index');

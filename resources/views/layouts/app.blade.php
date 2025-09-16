@@ -78,6 +78,10 @@
                         <i class="fas fa-user-tie fa-fw mr-3"></i> {{-- Daftar Penguji: User-tie (professional) (kembali ke mr-3) --}}
                         Daftar Penguji
                     </a>
+                    <a href="{{ route('ruang-ujian.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('ruang-ujian.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-door-open fa-fw mr-3"></i>
+                        Ruang Ujian
+                    </a>
                     <a href="{{ route('jadwal-penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('jadwal-penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
                         <i class="fas fa-calendar-alt fa-fw mr-3"></i> {{-- Jadwal Penguji: Calendar-alt (kembali ke mr-3) --}}
                         Jadwal Penguji
