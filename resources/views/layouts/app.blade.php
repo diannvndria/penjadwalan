@@ -72,7 +72,7 @@
                     </a>
                     <a href="{{ route('dosen.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dosen.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
                         <i class="fas fa-chalkboard-teacher fa-fw mr-3"></i> {{-- Daftar Dosen: Chalkboard-teacher (kembali ke mr-3) --}}
-                        Daftar Dosen
+                        Daftar Pembimbing
                     </a>
                     <a href="{{ route('penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
                         <i class="fas fa-user-tie fa-fw mr-3"></i> {{-- Daftar Penguji: User-tie (professional) (kembali ke mr-3) --}}
