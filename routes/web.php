@@ -41,9 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('penguji', [PengujiController::class, 'index'])->name('penguji.index');
 
     // Ruang Ujian: Lihat daftar ruang ujian
-    Route::get('ruang-ujian', function () {
-        return view('ruang_ujian.index');
-    })->name('ruang-ujian.index');
+    Route::get('ruang-ujian', [RuangUjianController::class, 'index'])->name('ruang-ujian.index');
 
     // Jadwal Penguji: Lihat daftar jadwal penguji
     Route::get('jadwal-penguji', [JadwalPengujiController::class, 'index'])->name('jadwal-penguji.index');
@@ -79,6 +77,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin bisa melakukan CRUD Jadwal Munaqosah
     Route::resource('munaqosah', MunaqosahController::class)->except(['index', 'histori']); // Kecualikan index & histori
+
+    // Admin bisa melakukan CRUD Ruang Ujian
+    Route::resource('ruang-ujian', RuangUjianController::class)->except(['index']); // Kecualikan index karena sudah di atas
 
     // === AUTO SCHEDULE ROUTES ===
     Route::prefix('auto-schedule')->name('auto-schedule.')->middleware('admin')->group(function () {
