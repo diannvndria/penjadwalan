@@ -74,7 +74,7 @@
                         <tr>
                             {{-- Atur lebar kolom menggunakan w-xx untuk kontrol lebih baik --}}
                             <th scope="col" class="w-1/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
-                            <th scope="col" class="w-2/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                            <th scope="col" class="w-40 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                             <th scope="col" class="w-1/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Angkatan</th>
                             <th scope="col" class="w-2/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dospem</th>
                             <th scope="col" class="w-3/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul Skripsi</th>
@@ -82,7 +82,7 @@
                             <th scope="col" class="w-2/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penjurusan</th>
                             <th scope="col" class="w-1/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siap Sidang</th>
                             @if (Auth::user()->isAdmin())
-                                <th scope="col" class="w-1/12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <th scope="col" class="w-40 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             @endif
                         </tr>
                     </thead>
@@ -102,13 +102,15 @@
                                     </span>
                                 </td>
                                 @if (Auth::user()->isAdmin())
-                                    <td class="px-2 py-4 text-sm font-medium text-right">
-                                        <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                                        <form action="{{ route('mahasiswa.destroy', $mahasiswa->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus mahasiswa ini? Tindakan ini tidak dapat dibatalkan.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                        </form>
+                                    <td class="px-2 py-4 text-sm">
+                                        <div class="flex space-x-3 justify-start">
+                                            <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                            <form action="{{ route('mahasiswa.destroy', $mahasiswa->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus mahasiswa ini? Tindakan ini tidak dapat dibatalkan.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 @endif
                             </tr>

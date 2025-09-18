@@ -61,6 +61,19 @@
                 </div>
 
                 <div>
+                    <label for="id_ruang_ujian" class="block text-sm font-medium text-gray-700">Ruang Uji</label>
+                    <select id="id_ruang_ujian" name="id_ruang_ujian" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        @foreach($ruangUjians as $ruang)
+                            <option value="{{ $ruang->id }}" {{ old('id_ruang_ujian', $munaqosah->id_ruang_ujian) == $ruang->id ? 'selected' : '' }}>
+                                {{ $ruang->nama }}{{ $ruang->lokasi ? ' - ' . $ruang->lokasi : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_ruang_ujian') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
                     <label for="id_penguji1" class="block text-sm font-medium text-gray-700">Penguji 1</label>
                     <select id="id_penguji1" name="id_penguji1" required
                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">

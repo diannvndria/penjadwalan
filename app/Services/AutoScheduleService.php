@@ -104,13 +104,26 @@ class AutoScheduleService
                     );
 
                     if (count($availablePengujis) >= 2) {
+                        // Cek ketersediaan ruang ujian untuk slot ini
+                        $availableRoomId = $this->findAvailableRoomId(
+                            $currentDate->toDateString(),
+                            $slotStart->toTimeString('minutes'),
+                            $slotEnd->toTimeString('minutes')
+                        );
+
+                        if (!$availableRoomId) {
+                            // Jika tidak ada ruang tersedia, lanjut ke slot berikutnya
+                            $slotStart->addMinutes($this->durationMinutes);
+                            continue;
+                        }
                         return [
                             'mahasiswa' => $mahasiswa,
                             'tanggal' => $currentDate->toDateString(),
                             'waktu_mulai' => $slotStart->format('H:i'),
                             'waktu_selesai' => $slotEnd->format('H:i'),
                             'penguji1' => $availablePengujis[0],
-                            'penguji2' => $availablePengujis[1]
+                            'penguji2' => $availablePengujis[1],
+                            'id_ruang_ujian' => $availableRoomId,
                         ];
                     }
 
@@ -213,6 +226,23 @@ class AutoScheduleService
         return !$isBusyInJadwal;
     }
 
+    private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai)
+    {
+        // Ambil semua ruang aktif
+        $rooms = \App\Models\RuangUjian::where('is_aktif', true)->get();
+        foreach ($rooms as $room) {
+            $isRoomBusy = Munaqosah::where('id_ruang_ujian', $room->id)
+                ->where('tanggal_munaqosah', $tanggal)
+                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+                ->exists();
+
+            if (!$isRoomBusy) {
+                return $room->id;
+            }
+        }
+        return null;
+    }
+
     private function createMunaqosahSchedule($scheduleData)
     {
         $munaqosah = Munaqosah::create([
@@ -222,12 +252,13 @@ class AutoScheduleService
             'waktu_selesai' => $scheduleData['waktu_selesai'],
             'id_penguji1' => $scheduleData['penguji1']->id,
             'id_penguji2' => $scheduleData['penguji2']->id,
+            'id_ruang_ujian' => $scheduleData['id_ruang_ujian'] ?? null,
             'status_konfirmasi' => 'pending'
         ]);
 
         \App\Models\HistoriMunaqosah::create([
             'id_munaqosah' => $munaqosah->id,
-            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}.",
+            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional(\App\Models\RuangUjian::find($scheduleData['id_ruang_ujian'] ?? null))->nama ?? '-') . ".",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
     }

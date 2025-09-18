@@ -16,6 +16,7 @@ class Munaqosah extends Model
         'waktu_selesai',
         'id_penguji1',
         'id_penguji2', // Hanya ini
+        'id_ruang_ujian',
         'status_konfirmasi',
     ];
 
@@ -44,5 +45,10 @@ class Munaqosah extends Model
     public function historiPerubahan()
     {
         return $this->hasMany(HistoriMunaqosah::class, 'id_munaqosah');
+    }
+
+    public function ruangUjian()
+    {
+        return $this->belongsTo(RuangUjian::class, 'id_ruang_ujian');
     }
 }

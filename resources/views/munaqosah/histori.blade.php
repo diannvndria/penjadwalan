@@ -21,6 +21,7 @@
                     <p><span class="font-semibold text-gray-900">Waktu:</span> {{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}</p>
                     <p><span class="font-semibold text-gray-900">Penguji 1:</span> {{ $munaqosah->penguji1->nama ?? 'N/A' }}</p>
                     <p><span class="font-semibold text-gray-900">Penguji 2:</span> {{ $munaqosah->penguji2->nama ?? '-' }}</p>
+                    <p><span class="font-semibold text-gray-900">Ruang Uji:</span> {{ $munaqosah->ruangUjian->nama ?? '-' }}</p>
                     <p><span class="font-semibold text-gray-900">Status Konfirmasi:</span>
                         @php
                             $statusClass = [
