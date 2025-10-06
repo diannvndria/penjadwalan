@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
+     * Redirect root URL to login page.
+     */
+    public function index()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return view('auth.login');
+    }
+
+    /**
      * Menampilkan form login.
      */
     public function showLoginForm()

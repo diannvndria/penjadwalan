@@ -18,6 +18,16 @@ class AutoScheduleController extends Controller
     }
 
     /**
+     * Display the auto-schedule index page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index()
+    {
+        return view('auto-schedule.index');
+    }
+
+    /**
      * Auto-schedule untuk satu mahasiswa
      *
      * @param Request $request
@@ -195,7 +205,7 @@ class AutoScheduleController extends Controller
             $reflection = new \ReflectionClass($this->autoScheduleService);
             $method = $reflection->getMethod('findAvailableSlot');
             $method->setAccessible(true);
-            
+
             $availableSlot = $method->invoke($this->autoScheduleService);
 
             if (!$availableSlot) {
