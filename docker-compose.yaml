@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: penjadwalan-app
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./:/app
+      # - ./php/opcache-dev.ini:/usr/local/etc/php/conf.d/opcache-dev.ini
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "8000:80"
+    env_file:
+      - .env
+
+volumes:
+  caddy_data:
+  caddy_config:
