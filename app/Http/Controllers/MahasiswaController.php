@@ -8,6 +8,7 @@ use App\Models\JadwalPenguji;
 use App\Models\Munaqosah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class MahasiswaController extends Controller
@@ -17,11 +18,15 @@ class MahasiswaController extends Controller
      */
     public function index(Request $request)
 {
-    // Ambil semua data dosen untuk dropdown filter
-    $dosens = Dosen::orderBy('nama')->get();
+    // Cache dosens list for 60 minutes (rarely changes)
+    $dosens = Cache::remember('all_dosens_ordered', 3600, function () {
+        return Dosen::orderBy('nama')->get();
+    });
 
-    // 1. PERBAIKAN NAMA VARIABEL: Ubah nama variabel menjadi 'angkatans_tersedia'
-    $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
+    // Cache available angkatans for 30 minutes
+    $angkatans_tersedia = Cache::remember('available_angkatans', 1800, function () {
+        return Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
+    });
 
     // 2. PERBAIKAN LOGIKA: Ambil nilai angkatan yang sedang difilter dari request
     $angkatan = $request->input('angkatan');
@@ -50,9 +55,9 @@ class MahasiswaController extends Controller
 
     // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view
     return view('mahasiswa.index', compact(
-        'mahasiswas', 
-        'angkatans_tersedia', 
-        'dosens', 
+        'mahasiswas',
+        'angkatans_tersedia',
+        'dosens',
         'angkatan' // <-- kirim juga variabel $angkatan
     ));
 }
@@ -62,7 +67,10 @@ class MahasiswaController extends Controller
      */
     public function create()
     {
-        $dosens = Dosen::all(); // Ambil semua dosen untuk dropdown pilihan dosen pembimbing
+        // Cache dosens list for 60 minutes
+        $dosens = Cache::remember('all_dosens', 3600, function () {
+            return Dosen::all();
+        });
         return view('mahasiswa.create', compact('dosens'));
     }
 
@@ -89,6 +97,9 @@ class MahasiswaController extends Controller
 
         Mahasiswa::create($request->all());
 
+        // Clear angkatans cache in case new angkatan was added
+        Cache::forget('available_angkatans');
+
         return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil ditambahkan.');
     }
 
@@ -97,7 +108,10 @@ class MahasiswaController extends Controller
      */
     public function edit(Mahasiswa $mahasiswa)
     {
-        $dosens = Dosen::all();
+        // Cache dosens list for 60 minutes
+        $dosens = Cache::remember('all_dosens', 3600, function () {
+            return Dosen::all();
+        });
         return view('mahasiswa.edit', compact('mahasiswa', 'dosens'));
     }
 
@@ -129,6 +143,11 @@ class MahasiswaController extends Controller
 
         DB::transaction(function () use ($request, $mahasiswa, $oldSiapSidang) {
             $mahasiswa->update($request->all());
+
+            // Clear angkatans cache if angkatan changed
+            if ($mahasiswa->wasChanged('angkatan')) {
+                Cache::forget('available_angkatans');
+            }
 
             // Logika penjadwalan otomatis (jika ada):
             // Pastikan Anda telah mengimplementasikan metode findAvailableMunaqosahSlot dan checkPengujiConflict di controller ini
@@ -193,7 +212,10 @@ class MahasiswaController extends Controller
         $startTimeLimit = '08:00';
         $endTimeLimit = '17:00';
 
-        $allPengujis = Penguji::all();
+        // Reuse cached pengujis from AutoScheduleService
+        $allPengujis = Cache::remember('all_active_pengujis', 1800, function () {
+            return Penguji::all();
+        });
         if ($allPengujis->count() < 2) {
             throw new \Exception('Tidak cukup penguji terdaftar (minimal 2) untuk menjadwalkan munaqosah otomatis.');
         }

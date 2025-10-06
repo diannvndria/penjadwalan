@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Penguji; // Pastikan model Penguji sudah diimpor
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PengujiController extends Controller
 {
@@ -34,6 +35,9 @@ class PengujiController extends Controller
 
         Penguji::create($request->all());
 
+        // Clear pengujis cache after creating new penguji
+        Cache::forget('all_active_pengujis');
+
         return redirect()->route('penguji.index')->with('success', 'Penguji berhasil ditambahkan.');
     }
 
@@ -56,6 +60,9 @@ class PengujiController extends Controller
 
         $penguji->update($request->all());
 
+        // Clear pengujis cache after updating
+        Cache::forget('all_active_pengujis');
+
         return redirect()->route('penguji.index')->with('success', 'Data penguji berhasil diperbarui.');
     }
 
@@ -66,6 +73,10 @@ class PengujiController extends Controller
     {
         try {
             $penguji->delete();
+
+            // Clear pengujis cache after deleting
+            Cache::forget('all_active_pengujis');
+
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             // Tangani jika penguji masih terhubung ke jadwal atau munaqosah (Foreign Key Constraint)

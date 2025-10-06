@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RuangUjian;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class RuangUjianController extends Controller
 {
@@ -29,6 +30,9 @@ class RuangUjianController extends Controller
 
         RuangUjian::create($request->all());
 
+        // Clear rooms cache after creating new room
+        Cache::forget('active_rooms');
+
         return redirect()->route('ruang-ujian.index')->with('success', 'Ruang ujian berhasil ditambahkan.');
     }
 
@@ -48,6 +52,9 @@ class RuangUjianController extends Controller
 
         $ruangUjian->update($request->all());
 
+        // Clear rooms cache after updating (especially important if is_aktif changed)
+        Cache::forget('active_rooms');
+
         return redirect()->route('ruang-ujian.index')->with('success', 'Data ruang ujian berhasil diperbarui.');
     }
 
@@ -55,11 +62,13 @@ class RuangUjianController extends Controller
     {
         try {
             $ruangUjian->delete();
+
+            // Clear rooms cache after deleting
+            Cache::forget('active_rooms');
+
             return redirect()->route('ruang-ujian.index')->with('success', 'Ruang ujian berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect()->route('ruang-ujian.index')->with('error', 'Tidak dapat menghapus ruang ujian karena masih digunakan dalam jadwal.');
         }
     }
 }
-
-

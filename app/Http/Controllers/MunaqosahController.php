@@ -10,6 +10,7 @@ use App\Models\HistoriMunaqosah; // Import model HistoriMunaqosah
 use App\Models\RuangUjian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;  // Untuk transaksi database (DB::transaction)
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;                  // Untuk manipulasi tanggal dan waktu
 class MunaqosahController extends Controller
 {
@@ -45,12 +46,22 @@ class MunaqosahController extends Controller
      */
     public function create()
     {
+        // Don't cache mahasiswas - changes frequently as schedules are created
         $mahasiswasSiapSidang = Mahasiswa::where('siap_sidang', true)
                                          ->doesntHave('munaqosah')
                                          ->with('dospem')
                                          ->get();
-        $pengujis = Penguji::all();
-        $ruangUjians = RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+
+        // Cache pengujis for 30 minutes (same as AutoScheduleService)
+        $pengujis = Cache::remember('all_active_pengujis', 1800, function () {
+            return Penguji::all();
+        });
+
+        // Cache active rooms for 60 minutes (same as AutoScheduleService)
+        $ruangUjians = Cache::remember('active_rooms', 3600, function () {
+            return RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+        });
+
         return view('munaqosah.create', compact('mahasiswasSiapSidang', 'pengujis', 'ruangUjians'));
     }
 
@@ -87,7 +98,7 @@ class MunaqosahController extends Controller
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai)) {
             $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
-            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);        
+            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
 
         DB::transaction(function () use ($request) {
@@ -117,12 +128,22 @@ class MunaqosahController extends Controller
      */
     public function edit(Munaqosah $munaqosah)
     {
+        // Don't cache mahasiswas - includes specific munaqosah mahasiswa
         $mahasiswasSiapSidang = Mahasiswa::where('siap_sidang', true)
                                          ->orWhere('id', $munaqosah->id_mahasiswa)
                                          ->with('dospem')
                                          ->get();
-        $pengujis = Penguji::all();
-        $ruangUjians = RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+
+        // Cache pengujis for 30 minutes
+        $pengujis = Cache::remember('all_active_pengujis', 1800, function () {
+            return Penguji::all();
+        });
+
+        // Cache active rooms for 60 minutes
+        $ruangUjians = Cache::remember('active_rooms', 3600, function () {
+            return RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+        });
+
         return view('munaqosah.edit', compact('munaqosah', 'mahasiswasSiapSidang', 'pengujis', 'ruangUjians'));
     }
 
@@ -162,7 +183,7 @@ class MunaqosahController extends Controller
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {
             $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
-            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);        
+            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
 
         DB::transaction(function () use ($request, $munaqosah, $originalData) {

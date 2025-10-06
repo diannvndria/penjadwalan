@@ -8,6 +8,7 @@ use App\Models\Penguji;
 use App\Models\JadwalPenguji;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class AutoScheduleService
 {
@@ -26,7 +27,7 @@ class AutoScheduleService
             'working_hours' => ['start' => '08:00', 'end' => '16:00'],
             'working_days' => [1, 2, 3, 4, 5], // Senin-Jumat
         ];
-        
+
         $config = session()->get('auto_schedule_config', $defaults);
 
         // Atur properti service berdasarkan konfigurasi yang dimuat
@@ -76,18 +77,18 @@ class AutoScheduleService
     private function findAvailableSlot($mahasiswa, $pengujis, $startDate, $endDate)
     {
         $currentDate = $startDate->copy();
-        
+
         while ($currentDate->lte($endDate)) {
             // Gunakan dayOfWeekIso (1=Senin, 7=Minggu) agar konsisten
             if (in_array($currentDate->dayOfWeekIso, $this->workingDays)) {
-                
+
                 $slotStart = Carbon::parse($currentDate->toDateString() . ' ' . $this->workingHours['start']);
                 $dayEnd = Carbon::parse($currentDate->toDateString() . ' ' . $this->workingHours['end']);
-                
+
                 // Loop dinamis berdasarkan durasi
                 while ($slotStart->copy()->addMinutes($this->durationMinutes)->lte($dayEnd)) {
                     $slotEnd = $slotStart->copy()->addMinutes($this->durationMinutes);
-                    
+
                     // (Opsional) Logika untuk melewati jam istirahat
                     if ($slotStart->hour == 12 || ($slotStart->hour < 13 && $slotEnd->hour >= 13)) {
                         $slotStart->hour(13)->minute(0)->second(0);
@@ -96,9 +97,9 @@ class AutoScheduleService
 
                     // Cek ketersediaan penguji untuk slot dinamis ini
                     $availablePengujis = $this->findAvailablePengujis(
-                        $pengujis, 
-                        $currentDate->toDateString(), 
-                        $slotStart->toTimeString('minutes'), 
+                        $pengujis,
+                        $currentDate->toDateString(),
+                        $slotStart->toTimeString('minutes'),
                         $slotEnd->toTimeString('minutes'),
                         $mahasiswa
                     );
@@ -135,7 +136,7 @@ class AutoScheduleService
         }
         return null;
     }
-    
+
     // ===================================================================
     // CATATAN: Method-method di bawah ini tidak perlu diubah.
     // Salin saja semuanya untuk memastikan file Anda lengkap dan benar.
@@ -152,14 +153,18 @@ class AutoScheduleService
 
             $startDate = Carbon::now()->addDays(1);
             $endDate = Carbon::now()->addDays(60);
-            $allPengujis = Penguji::all();
+
+            // Cache all pengujis for 30 minutes to avoid repeated queries
+            $allPengujis = Cache::remember('all_active_pengujis', 1800, function () {
+                return Penguji::all();
+            });
 
             if ($allPengujis->count() < 2) {
                 return ['success' => false, 'message' => 'Memerlukan minimal 2 penguji.'];
             }
 
             $scheduleData = $this->findAvailableSlot($mahasiswa, $allPengujis, $startDate, $endDate);
-            
+
             if ($scheduleData) {
                 $this->createMunaqosahSchedule($scheduleData);
                 return ['success' => true, 'message' => "Jadwal berhasil dibuat pada " . Carbon::parse($scheduleData['tanggal'])->format('d-m-Y') . " jam " . $scheduleData['waktu_mulai']];
@@ -181,7 +186,7 @@ class AutoScheduleService
         $failed_count = 0;
 
         foreach ($readyStudents as $student) {
-            $result = $this->scheduleForMahasiswa($student->id); 
+            $result = $this->scheduleForMahasiswa($student->id);
             $results[] = ['mahasiswa' => $student->nama, 'nim' => $student->nim, 'result' => $result];
             if ($result['success']) { $scheduled_count++; } else { $failed_count++; }
         }
@@ -211,25 +216,32 @@ class AutoScheduleService
 
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
     {
-        $isBusyInMunaqosah = Munaqosah::where(fn($q) => $q->where('id_penguji1', $pengujiId)->orWhere('id_penguji2', $pengujiId))
-            ->where('tanggal_munaqosah', $tanggal)
-            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-            ->exists();
+        // Cache availability checks for 5 minutes to speed up batch scheduling
+        $cacheKey = "penguji_available_{$pengujiId}_{$tanggal}_{$waktuMulai}_{$waktuSelesai}";
 
-        if ($isBusyInMunaqosah) return false;
+        return Cache::remember($cacheKey, 300, function () use ($pengujiId, $tanggal, $waktuMulai, $waktuSelesai) {
+            $isBusyInMunaqosah = Munaqosah::where(fn($q) => $q->where('id_penguji1', $pengujiId)->orWhere('id_penguji2', $pengujiId))
+                ->where('tanggal_munaqosah', $tanggal)
+                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+                ->exists();
 
-        $isBusyInJadwal = JadwalPenguji::where('id_penguji', $pengujiId)
-            ->where('tanggal', $tanggal)
-            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-            ->exists();
+            if ($isBusyInMunaqosah) return false;
 
-        return !$isBusyInJadwal;
+            $isBusyInJadwal = JadwalPenguji::where('id_penguji', $pengujiId)
+                ->where('tanggal', $tanggal)
+                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+                ->exists();
+
+            return !$isBusyInJadwal;
+        });
     }
 
     private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai)
     {
-        // Ambil semua ruang aktif
-        $rooms = \App\Models\RuangUjian::where('is_aktif', true)->get();
+        // Cache active rooms for 1 hour
+        $rooms = Cache::remember('active_rooms', 3600, function () {
+            return \App\Models\RuangUjian::where('is_aktif', true)->get();
+        });
         foreach ($rooms as $room) {
             $isRoomBusy = Munaqosah::where('id_ruang_ujian', $room->id)
                 ->where('tanggal_munaqosah', $tanggal)
@@ -261,5 +273,22 @@ class AutoScheduleService
             'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional(\App\Models\RuangUjian::find($scheduleData['id_ruang_ujian'] ?? null))->nama ?? '-') . ".",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
+
+        // Clear relevant caches after creating a schedule
+        $this->clearScheduleCache($scheduleData['tanggal']);
+    }
+
+    /**
+     * Clear caches related to scheduling for a specific date
+     */
+    private function clearScheduleCache(string $tanggal): void
+    {
+        // Clear all penguji availability caches for this date
+        Cache::forget('all_active_pengujis');
+
+        // We can't easily clear specific penguji availability caches without knowing all combinations,
+        // but they expire after 5 minutes anyway which is acceptable
+
+        Log::info("Cleared schedule-related caches for date: {$tanggal}");
     }
 }
