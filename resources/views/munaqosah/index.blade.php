@@ -84,13 +84,43 @@
                                         {{ ucfirst($munaqosah->status_konfirmasi) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    @if (Auth::user()->isAdmin())
-                                        <a href="{{ route('munaqosah.edit', $munaqosah->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</a>
-                                        {{-- Ganti form onsubmit dengan panggilan fungsi JavaScript --}}
-                                        <button type="button" onclick="showDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')" class="text-red-600 hover:text-red-900 mr-2">Hapus</button>
-                                    @endif
-                                    <a href="{{ route('munaqosah.histori', $munaqosah->id) }}" class="text-blue-600 hover:text-blue-900">Histori</a>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open" class="text-gray-500 hover:text-gray-700" title="Menu">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                            </svg>
+                                        </button>
+                                        
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50"
+                                             role="menu"
+                                             aria-orientation="vertical"
+                                             aria-labelledby="menu-button"
+                                             tabindex="-1">
+                                            <div class="py-1" role="none">
+                                                @if (Auth::user()->isAdmin())
+                                                    <a href="{{ route('munaqosah.edit', $munaqosah->id) }}" 
+                                                       class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50" 
+                                                       role="menuitem">
+                                                        Edit
+                                                    </a>
+                                                    <button type="button"
+                                                            onclick="showDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
+                                                            class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                                                            role="menuitem">
+                                                        Hapus
+                                                    </button>
+                                                @endif
+                                                <a href="{{ route('munaqosah.histori', $munaqosah->id) }}"
+                                                   class="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-50"
+                                                   role="menuitem">
+                                                    Histori
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
