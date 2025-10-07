@@ -88,6 +88,8 @@ class MahasiswaController extends Controller
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
             'id_dospem' => 'required|exists:dosens,id',
             'siap_sidang' => 'boolean',
+            'is_prioritas' => 'boolean',
+            'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
         $dosen = Dosen::find($request->id_dospem);
@@ -132,6 +134,8 @@ class MahasiswaController extends Controller
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
             'id_dospem' => 'required|exists:dosens,id',
             'siap_sidang' => 'boolean',
+            'is_prioritas' => 'boolean',
+            'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
         if ($mahasiswa->id_dospem != $request->id_dospem) {

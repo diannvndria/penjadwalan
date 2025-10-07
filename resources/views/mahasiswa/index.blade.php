@@ -90,7 +90,14 @@
                         @forelse ($mahasiswas as $mahasiswa)
                             <tr>
                                 <td class="px-2 py-4 text-sm font-medium text-gray-900 truncate">{{ $mahasiswa->nim }}</td>
-                                <td class="px-2 py-4 text-sm text-gray-900 truncate">{{ $mahasiswa->nama }}</td>
+                                <td class="px-2 py-4 text-sm text-gray-900 truncate">
+                                    {{ $mahasiswa->nama }}
+                                    @if($mahasiswa->is_prioritas)
+                                        <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800" title="{{ $mahasiswa->keterangan_prioritas }}">
+                                            ⭐ Prioritas
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-2 py-4 text-sm text-gray-900 text-center">{{ $mahasiswa->angkatan }}</td> {{-- Center align for small content --}}
                                 <td class="px-2 py-4 text-sm text-gray-900 truncate">{{ $mahasiswa->dospem->nama ?? 'N/A' }}</td>
                                 <td class="px-2 py-4 text-sm text-gray-900">{{ $mahasiswa->judul_skripsi }}</td> {{-- Removed truncate, allow wrap --}}

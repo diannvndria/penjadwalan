@@ -105,11 +105,15 @@ class AutoScheduleService
                     );
 
                     if (count($availablePengujis) >= 2) {
+                        // Cek status prioritas untuk menentukan alokasi ruang
+                        $needsPriorityRoom = $this->checkPriorityStatus($mahasiswa, array_slice($availablePengujis, 0, 2));
+
                         // Cek ketersediaan ruang ujian untuk slot ini
                         $availableRoomId = $this->findAvailableRoomId(
                             $currentDate->toDateString(),
                             $slotStart->toTimeString('minutes'),
-                            $slotEnd->toTimeString('minutes')
+                            $slotEnd->toTimeString('minutes'),
+                            $needsPriorityRoom
                         );
 
                         if (!$availableRoomId) {
@@ -125,6 +129,7 @@ class AutoScheduleService
                             'penguji1' => $availablePengujis[0],
                             'penguji2' => $availablePengujis[1],
                             'id_ruang_ujian' => $availableRoomId,
+                            'is_priority_allocation' => $needsPriorityRoom,
                         ];
                     }
 
@@ -236,19 +241,60 @@ class AutoScheduleService
         });
     }
 
-    private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai)
+    /**
+     * Cek apakah mahasiswa atau penguji berstatus prioritas
+     */
+    private function checkPriorityStatus(Mahasiswa $mahasiswa, $pengujis): bool
+    {
+        // Mahasiswa prioritas
+        if ($mahasiswa->isPrioritas()) {
+            return true;
+        }
+
+        // Salah satu penguji prioritas
+        foreach ($pengujis as $penguji) {
+            if ($penguji->isPrioritas()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Cari ruang yang tersedia dengan prioritas lantai
+     */
+    private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai, bool $needsPriorityRoom = false)
     {
         // Cache active rooms for 1 hour
         $rooms = Cache::remember('active_rooms', 3600, function () {
             return \App\Models\RuangUjian::where('is_aktif', true)->get();
         });
-        foreach ($rooms as $room) {
+
+        // Urutkan ruangan berdasarkan prioritas
+        $sortedRooms = $rooms->sortBy(function ($room) use ($needsPriorityRoom) {
+            // Jika butuh ruang prioritas, prioritaskan ruang prioritas dan lantai 1
+            if ($needsPriorityRoom) {
+                // Semakin kecil nilai, semakin prioritas
+                if ($room->is_prioritas) return 0;
+                if ($room->lantai == 1) return 1;
+                return $room->lantai + 10;
+            }
+            // Untuk non-prioritas, urutkan normal berdasarkan lantai
+            return $room->lantai;
+        });
+
+        foreach ($sortedRooms as $room) {
             $isRoomBusy = Munaqosah::where('id_ruang_ujian', $room->id)
                 ->where('tanggal_munaqosah', $tanggal)
                 ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
                 ->exists();
 
             if (!$isRoomBusy) {
+                // Log jika alokasi prioritas berhasil
+                if ($needsPriorityRoom && ($room->is_prioritas || $room->lantai == 1)) {
+                    Log::info("Priority room allocated: {$room->nama} (Lantai {$room->lantai}, Prioritas: " . ($room->is_prioritas ? 'Ya' : 'Tidak') . ")");
+                }
                 return $room->id;
             }
         }
@@ -268,9 +314,14 @@ class AutoScheduleService
             'status_konfirmasi' => 'pending'
         ]);
 
+        $ruang = \App\Models\RuangUjian::find($scheduleData['id_ruang_ujian'] ?? null);
+        $priorityNote = isset($scheduleData['is_priority_allocation']) && $scheduleData['is_priority_allocation']
+            ? ' [PRIORITAS]'
+            : '';
+
         \App\Models\HistoriMunaqosah::create([
             'id_munaqosah' => $munaqosah->id,
-            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional(\App\Models\RuangUjian::find($scheduleData['id_ruang_ujian'] ?? null))->nama ?? '-') . ".",
+            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional($ruang)->nama ?? '-') . ($ruang ? " (Lantai {$ruang->lantai})" : '') . "{$priorityNote}.",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
 

@@ -47,12 +47,39 @@
                 </div>
 
                 <div>
+                    <label for="lantai" class="block text-sm font-medium text-gray-700">Lantai</label>
+                    <select id="lantai" name="lantai" required
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        @for($i = 1; $i <= 10; $i++)
+                            <option value="{{ $i }}" {{ old('lantai', 1) == $i ? 'selected' : '' }}>Lantai {{ $i }}</option>
+                        @endfor
+                    </select>
+                    @error('lantai') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
                     <label class="flex items-center">
                         <input type="checkbox" name="is_aktif" value="1" {{ old('is_aktif', true) ? 'checked' : '' }}
                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                         <span class="ml-2 text-sm text-gray-700">Aktif (Tersedia untuk digunakan)</span>
                     </label>
                     @error('is_aktif') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                {{-- Status Prioritas Section --}}
+                <div class="mt-4 p-4 border border-yellow-300 rounded-lg bg-yellow-50">
+                    <input type="hidden" name="is_prioritas" value="0">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="is_prioritas" name="is_prioritas" value="1" {{ old('is_prioritas') ? 'checked' : '' }}
+                            class="w-4 h-4 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                        <span class="ml-2 text-sm font-medium text-gray-900">
+                            Ruang Prioritas (untuk mahasiswa/penguji prioritas)
+                        </span>
+                    </label>
+                    <p class="mt-2 text-xs text-gray-600">
+                        Ruang prioritas akan diprioritaskan untuk mahasiswa/penguji dengan status prioritas (disabilitas, kondisi khusus, dll.)
+                    </p>
+                    @error('is_prioritas') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="flex items-center justify-end">

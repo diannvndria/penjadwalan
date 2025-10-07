@@ -18,6 +18,13 @@ class Mahasiswa extends Model
         'penjurusan',     // Pastikan ini ada
         'id_dospem',
         'siap_sidang',
+        'is_prioritas',
+        'keterangan_prioritas',
+    ];
+
+    protected $casts = [
+        'siap_sidang' => 'boolean',
+        'is_prioritas' => 'boolean',
     ];
 
     public function dospem()
@@ -28,5 +35,13 @@ class Mahasiswa extends Model
     public function munaqosah()
     {
         return $this->hasOne(Munaqosah::class, 'id_mahasiswa');
+    }
+
+    /**
+     * Helper method untuk cek status prioritas
+     */
+    public function isPrioritas(): bool
+    {
+        return $this->is_prioritas;
     }
 }

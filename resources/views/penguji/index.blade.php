@@ -41,7 +41,14 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($pengujis as $penguji)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $penguji->nama }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $penguji->nama }}
+                                    @if($penguji->is_prioritas)
+                                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800" title="{{ $penguji->keterangan_prioritas }}">
+                                            ⭐ Prioritas
+                                        </span>
+                                    @endif
+                                </td>
                                 @if (Auth::user()->isAdmin()) {{-- Tombol Aksi hanya untuk Admin --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ route('penguji.edit', $penguji->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</a>

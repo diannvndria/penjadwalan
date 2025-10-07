@@ -26,6 +26,8 @@ class RuangUjianController extends Controller
             'lokasi' => 'nullable|string|max:255',
             'kapasitas' => 'required|integer|min:1',
             'is_aktif' => 'boolean',
+            'lantai' => 'required|integer|min:1|max:10',
+            'is_prioritas' => 'boolean',
         ]);
 
         RuangUjian::create($request->all());
@@ -48,6 +50,8 @@ class RuangUjianController extends Controller
             'lokasi' => 'nullable|string|max:255',
             'kapasitas' => 'required|integer|min:1',
             'is_aktif' => 'boolean',
+            'lantai' => 'required|integer|min:1|max:10',
+            'is_prioritas' => 'boolean',
         ]);
 
         $ruangUjian->update($request->all());
