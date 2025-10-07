@@ -31,6 +31,8 @@ class PengujiController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'is_prioritas' => 'boolean',
+            'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
         Penguji::create($request->all());
@@ -56,6 +58,8 @@ class PengujiController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'is_prioritas' => 'boolean',
+            'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
         $penguji->update($request->all());
