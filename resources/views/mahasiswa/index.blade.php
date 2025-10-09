@@ -131,8 +131,8 @@
                 </table>
             </div>
 
-            <div class="mt-4">
-                {{ $mahasiswas->links() }}
+            <div class="mt-4 flex justify-end">
+                {{ $mahasiswas->links('vendor.pagination.custom') }}
             </div>
 
         </div>

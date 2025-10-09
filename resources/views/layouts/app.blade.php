@@ -104,6 +104,17 @@
 
         .sidebar .icon{ transition: margin 260ms var(--ease); margin-right:0 }
         .sidebar:hover .icon, .sidebar.expanded .icon{ margin-right:12px }
+        /* Pagination theme similar to screenshot: minimal, white/gray with blue active pill */
+        .pagination-custom { display: flex; gap: 6px; align-items: center; font-weight: 500; }
+        .pagination-custom .page-item { list-style: none; }
+        .pagination-custom .page-link{
+            display:inline-flex; align-items:center; justify-content:center;
+            min-width:34px; height:34px; padding:0 10px; border-radius:8px;
+            color: #374151; background: #ffffff; border: 1px solid rgba(31,41,55,0.04); text-decoration:none;
+        }
+        .pagination-custom .page-link:hover{ background:#f8fafc }
+        .pagination-custom .page-item.disabled .page-link{ color:#cbd5e1 }
+        .pagination-custom .page-item.active .page-link{ background:#3b82f6; color:white; box-shadow: 0 4px 10px rgba(59,130,246,0.12) }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
