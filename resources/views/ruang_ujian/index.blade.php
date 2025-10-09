@@ -34,6 +34,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Ruang</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lantai</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kapasitas</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             @if (Auth::user()->isAdmin()) {{-- Kolom Aksi hanya untuk Admin --}}
@@ -44,8 +45,20 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($ruang as $r)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $r->nama }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $r->nama }}
+                                    @if($r->is_prioritas)
+                                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            ⭐ Prioritas
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $r->lokasi ?? '-' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Lantai {{ $r->lantai }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $r->kapasitas }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     @if($r->is_aktif)
@@ -67,7 +80,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ Auth::user()->isAdmin() ? '5' : '4' }}" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">Tidak ada data ruang ujian.</td>
+                                <td colspan="{{ Auth::user()->isAdmin() ? '6' : '5' }}" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">Tidak ada data ruang ujian.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -76,5 +89,3 @@
         </div>
     </div>
 @endsection
-
-
