@@ -3,7 +3,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -55,6 +58,39 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "lint": [
+            "vendor/bin/pint --repair"
+        ],
+        "db:setup": [
+            "docker compose exec app php artisan migrate:fresh --seed"
+        ],
+        "optimize": [
+            "docker compose exec app php artisan optimize"
+        ],
+        "optimize:clear": [
+            "docker compose exec app php artisan optimize:clear"
+        ],
+        "up": [
+            "docker compose up -d --remove-orphans"
+        ],
+        "up:localdb": [
+            "docker compose -f docker-compose.yaml -f docker-compose.localdb.yaml up -d --remove-orphans"
+        ],
+        "rebuild": [
+            "docker compose up -d --build"
+        ],
+        "rebuild:localdb": [
+            "docker compose -f docker-compose.yaml -f docker-compose.localdb.yaml up -d --build"
+        ],
+        "down": [
+            "docker compose down"
+        ],
+        "down:localdb": [
+            "docker compose -f docker-compose.yaml -f docker-compose.localdb.yaml down"
+        ],
+        "schedule:clear": [
+            "docker compose exec app php artisan schedule:clear --all"
         ]
     },
     "extra": {
