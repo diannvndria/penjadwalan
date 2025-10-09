@@ -8,7 +8,7 @@ services:
     tty: true
     volumes:
       - ./:/app
-      # - ./php/opcache-dev.ini:/usr/local/etc/php/conf.d/opcache-dev.ini
+      - ./php/opcache-dev.ini:/usr/local/etc/php/conf.d/opcache-dev.ini
       - caddy_data:/data
       - caddy_config:/config
     ports:

@@ -44,6 +44,66 @@
             justify-content: center; /* Untuk ikon yang sudah memiliki lebar tetap, ini membuatnya center */
             height: 1em; /* Tinggi ikon agar sejajar dengan tinggi baris teks */
         }
+        /* Smoother sidebar hover with staggered labels */
+        :root {
+            --sidebar-collapsed: 64px;
+            --sidebar-expanded: 260px;
+            --label-max-width: 400px;
+            --ease: cubic-bezier(.18,.9,.32,1);
+        }
+        .sidebar {
+            width: var(--sidebar-collapsed);
+            transition: width 360ms var(--ease), box-shadow 220ms ease;
+            overflow: visible;
+            will-change: width;
+            position: relative;
+        }
+        .sidebar:hover, .sidebar.expanded {
+            width: var(--sidebar-expanded);
+            box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+        }
+
+        /* Labels: use max-width + opacity + transform for smooth reveal
+           We'll stagger labels using nth-child delays */
+        .sidebar .label {
+            display: inline-block;
+            max-width: 0;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: max-width 320ms var(--ease), opacity 240ms ease, transform 320ms var(--ease);
+            white-space: nowrap;
+            overflow: hidden;
+            vertical-align: middle;
+        }
+        .sidebar:hover .label, .sidebar.expanded .label {
+            max-width: var(--label-max-width);
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Stagger labels: each nav-item's label has increasing delay */
+        .sidebar nav .nav-item:nth-child(1) .label{ transition-delay: 40ms; }
+        .sidebar nav .nav-item:nth-child(2) .label{ transition-delay: 80ms; }
+        .sidebar nav .nav-item:nth-child(3) .label{ transition-delay: 120ms; }
+        .sidebar nav .nav-item:nth-child(4) .label{ transition-delay: 160ms; }
+        .sidebar nav .nav-item:nth-child(5) .label{ transition-delay: 200ms; }
+        .sidebar nav .nav-item:nth-child(6) .label{ transition-delay: 240ms; }
+        .sidebar nav .nav-item:nth-child(7) .label{ transition-delay: 280ms; }
+        .sidebar nav .nav-item:nth-child(8) .label{ transition-delay: 320ms; }
+
+        /* Align icons: center when collapsed, left when expanded */
+        .sidebar .nav-item{
+            justify-content: center;
+            gap: 0.5rem;
+            transition: justify-content 260ms var(--ease), gap 260ms var(--ease);
+        }
+        .sidebar:hover .nav-item, .sidebar.expanded .nav-item{
+            justify-content: flex-start;
+            gap: 0.75rem;
+        }
+
+        .sidebar .icon{ transition: margin 260ms var(--ease); margin-right:0 }
+        .sidebar:hover .icon, .sidebar.expanded .icon{ margin-right:12px }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
@@ -51,62 +111,62 @@
     <div class="flex h-screen p-4 space-x-4">
 
         <!-- Sidebar (Panel Navigasi Kiri) -->
-        <aside class="w-64 bg-white shadow-lg py-6 flex flex-col justify-between overflow-y-auto rounded-xl">
+        <aside class="sidebar bg-white shadow-lg py-6 flex flex-col justify-between overflow-y-auto rounded-xl">
             <div>
                 <!-- Logo & Nama Aplikasi -->
-                <div class="flex items-center px-6 mb-8">
-                    <img src="{{ asset('images/logo-uin-suka.png') }}" alt="Logo UIN Sunan Kalijaga" class="h-9 w-9 mr-3">
-                    <span class="text-xl font-bold text-gray-800">SkripsiApp</span>
+                <div class="flex items-center px-4 mb-8">
+                    <img src="{{ asset('images/logo-uin-suka.png') }}" alt="Logo UIN Sunan Kalijaga" class="h-9 w-9">
+                    <span class="text-xl font-bold text-gray-800 label" style="margin-left:12px">SkripsiApp</span>
                 </div>
 
                 <!-- Main Navigation Menu -->
-                <nav class="space-y-3 px-5">
-                    <a href="{{ route('dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-home fa-fw mr-3"></i> {{-- Dashboard: Home (kembali ke mr-3) --}}
-                        Dashboard
+                <nav class="space-y-3 px-3">
+                    <a href="{{ route('dashboard') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dashboard') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-home fa-fw icon"></i> {{-- Dashboard: Home --}}
+                        <span class="label">Dashboard</span>
                     </a>
 
-                    <a href="{{ route('mahasiswa.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('mahasiswa.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-user-graduate fa-fw mr-3"></i> {{-- Data Mahasiswa: User-graduate (student) (kembali ke mr-3) --}}
-                        Data Mahasiswa
+                    <a href="{{ route('mahasiswa.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('mahasiswa.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-user-graduate fa-fw icon"></i>
+                        <span class="label">Data Mahasiswa</span>
                     </a>
-                    <a href="{{ route('dosen.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dosen.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-chalkboard-teacher fa-fw mr-3"></i> {{-- Daftar Dosen: Chalkboard-teacher (kembali ke mr-3) --}}
-                        Daftar Pembimbing
+                    <a href="{{ route('dosen.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('dosen.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-chalkboard-teacher fa-fw icon"></i>
+                        <span class="label">Daftar Pembimbing</span>
                     </a>
-                    <a href="{{ route('penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-user-tie fa-fw mr-3"></i> {{-- Daftar Penguji: User-tie (professional) (kembali ke mr-3) --}}
-                        Daftar Penguji
+                    <a href="{{ route('penguji.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-user-tie fa-fw icon"></i>
+                        <span class="label">Daftar Penguji</span>
                     </a>
-                    <a href="{{ route('ruang-ujian.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('ruang-ujian.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-door-open fa-fw mr-3"></i>
-                        Ruang Ujian
+                    <a href="{{ route('ruang-ujian.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('ruang-ujian.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-door-open fa-fw icon"></i>
+                        <span class="label">Ruang Ujian</span>
                     </a>
-                    <a href="{{ route('jadwal-penguji.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('jadwal-penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-calendar-alt fa-fw mr-3"></i> {{-- Jadwal Penguji: Calendar-alt (kembali ke mr-3) --}}
-                        Jadwal Penguji
+                    <a href="{{ route('jadwal-penguji.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('jadwal-penguji.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-calendar-alt fa-fw icon"></i>
+                        <span class="label">Jadwal Penguji</span>
                     </a>
-                    <a href="{{ route('munaqosah.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('munaqosah.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-book fa-fw mr-3"></i> {{-- Jadwal Sidang: Book (kembali ke mr-3) --}}
-                        Jadwal Sidang
+                    <a href="{{ route('munaqosah.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('munaqosah.index') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-book fa-fw icon"></i>
+                        <span class="label">Jadwal Sidang</span>
                     </a>
-                    <a href="{{ route('auto-schedule.index') }}" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('auto-schedule.*') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
-                        <i class="fas fa-robot fa-fw mr-3"></i> {{-- Auto-Schedule: Robot (kembali ke mr-3) --}}
-                        Auto-Schedule
+                    <a href="{{ route('auto-schedule.index') }}" class="flex nav-item items-center p-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('auto-schedule.*') ? 'bg-blue-100 text-blue-700 font-semibold' : '' }}">
+                        <i class="fas fa-robot fa-fw icon"></i>
+                        <span class="label">Auto-Schedule</span>
                     </a>
                 </nav>
             </div>
 
             <!-- Login/Register Links (for Guest Users) -->
-            <div class="mt-auto pt-6 border-t border-gray-200 px-6">
+            <div class="mt-auto pt-6 border-t border-gray-200 px-3">
                 @guest
-                    <a href="{{ route('login') }}" class="flex items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700">
-                        <i class="fas fa-sign-in-alt fa-fw mr-3"></i> {{-- Login: Sign-in-alt (kembali ke mr-3) --}}
-                        Login
+                    <a href="{{ route('login') }}" class="flex nav-item items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700">
+                        <i class="fas fa-sign-in-alt fa-fw icon"></i> {{-- Login: Sign-in-alt --}}
+                        <span class="label">Login</span>
                     </a>
-                    <a href="{{ route('register') }}" class="flex items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 mt-2">
-                        <i class="fas fa-user-plus fa-fw mr-3"></i> {{-- Register: User-plus (kembali ke mr-3) --}}
-                        Register
+                    <a href="{{ route('register') }}" class="flex nav-item items-center p-2.5 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 mt-2">
+                        <i class="fas fa-user-plus fa-fw icon"></i> {{-- Register: User-plus --}}
+                        <span class="label">Register</span>
                     </a>
                 @endguest
             </div>
