@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: penjadwalan-app
+    entrypoint: php artisan octane:frankenphp --workers=1 --max-requests=1 --watch
     restart: unless-stopped
     tty: true
     volumes:
@@ -12,7 +13,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     ports:
-      - "8000:80"
+      - "8000:8000"
     env_file:
       - .env
 

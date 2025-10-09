@@ -10,7 +10,8 @@
 FROM dunglas/frankenphp:php8.4-bookworm AS production
 
 RUN install-php-extensions \
-    pdo_pgsql
+    pdo_pgsql \
+    pcntl
 
 # Configure OPcache for production performance
 RUN { \
@@ -41,4 +42,6 @@ ENV SERVER_NAME=:80
 #     --prefer-dist \
 # 		--optimize-autoloader
 
-# COPY . /app
+COPY . /app
+
+ENTRYPOINT ["php", "artisan", "octane:frankenphp"]
