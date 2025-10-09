@@ -14,8 +14,8 @@ class DosenController extends Controller
     public function index()
     {
         // Mengambil semua dosen dan menghitung jumlah mahasiswa yang diampu oleh masing-masing dosen
-        $dosens = Dosen::withCount('mahasiswas')->get(); // 'mahasiswas' adalah relasi di model Dosen
-        return view('dosen.index', compact('dosens'));
+    $dosens = Dosen::withCount('mahasiswas')->orderBy('nama')->paginate(10); // paginate for consistent paging
+    return view('dosen.index', compact('dosens'));
     }
 
     /**

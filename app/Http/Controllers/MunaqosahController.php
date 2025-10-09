@@ -32,7 +32,7 @@ class MunaqosahController extends Controller
             $query->whereDate('tanggal_munaqosah', '<=', $endDate);
         }
 
-        $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->get();
+        $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->paginate(10);
 
         return view('munaqosah.index', [
             'munaqosahs' => $munaqosahs,

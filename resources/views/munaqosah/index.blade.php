@@ -134,6 +134,10 @@
         </div>
     </div>
 
+    <div class="mt-4 flex justify-end">
+        {{ $munaqosahs->links('vendor.pagination.custom') }}
+    </div>
+
     <div id="deleteModal" class="fixed inset-0 bg-opacity-0 hidden flex items-start justify-center z-50 pt-20">
         <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">

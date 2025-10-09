@@ -10,8 +10,8 @@ class RuangUjianController extends Controller
 {
     public function index()
     {
-        $ruang = RuangUjian::orderBy('nama')->get();
-        return view('ruang_ujian.index', compact('ruang'));
+    $ruang = RuangUjian::orderBy('nama')->paginate(10);
+    return view('ruang_ujian.index', compact('ruang'));
     }
 
     public function create()

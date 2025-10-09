@@ -14,8 +14,8 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function index()
     {
         // Ambil semua jadwal penguji dan eager load relasi 'penguji'
-        $jadwalPengujis = JadwalPenguji::with('penguji')->orderBy('tanggal')->orderBy('waktu_mulai')->get();
-        return view('jadwal_penguji.index', compact('jadwalPengujis'));
+    $jadwalPengujis = JadwalPenguji::with('penguji')->orderBy('tanggal')->orderBy('waktu_mulai')->paginate(10);
+    return view('jadwal_penguji.index', compact('jadwalPengujis'));
     }
 
     /**

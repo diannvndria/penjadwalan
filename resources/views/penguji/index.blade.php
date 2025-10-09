@@ -68,6 +68,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="mt-4 flex justify-end">
+                {{ $pengujis->links('vendor.pagination.custom') }}
+            </div>
         </div>
     </div>
 @endsection

@@ -86,6 +86,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="mt-4 flex justify-end">
+                {{ $ruang->links('vendor.pagination.custom') }}
+            </div>
         </div>
     </div>
 @endsection

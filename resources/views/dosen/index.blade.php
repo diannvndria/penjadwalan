@@ -76,6 +76,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="mt-4 flex justify-end">
+                {{ $dosens->links('vendor.pagination.custom') }}
+            </div>
         </div>
     </div>
 @endsection

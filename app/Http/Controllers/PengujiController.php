@@ -12,8 +12,8 @@ class PengujiController extends Controller
      */
     public function index()
     {
-        $pengujis = Penguji::all();
-        return view('penguji.index', compact('pengujis'));
+    $pengujis = Penguji::orderBy('nama')->paginate(10);
+    return view('penguji.index', compact('pengujis'));
     }
 
     /**
