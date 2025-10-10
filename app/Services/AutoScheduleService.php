@@ -9,6 +9,7 @@ use App\Models\JadwalPenguji;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class AutoScheduleService
 {
@@ -183,20 +184,116 @@ class AutoScheduleService
         }
     }
 
+    private const CHUNK_SIZE = 5; // Process 5 records at a time
+
     public function batchScheduleAll(): array
     {
-        $readyStudents = Mahasiswa::where('siap_sidang', true)->whereDoesntHave('munaqosah')->get();
-        $results = [];
-        $scheduled_count = 0;
-        $failed_count = 0;
+        try {
+            // Increase time limit for this operation
+            set_time_limit(300); // 5 minutes
+            ini_set('memory_limit', '512M');
 
-        foreach ($readyStudents as $student) {
-            $result = $this->scheduleForMahasiswa($student->id);
-            $results[] = ['mahasiswa' => $student->nama, 'nim' => $student->nim, 'result' => $result];
-            if ($result['success']) { $scheduled_count++; } else { $failed_count++; }
+            $results = [];
+            $scheduledCount = 0;
+            $failedCount = 0;
+
+            // Get all eligible students
+            $mahasiswas = Mahasiswa::where('siap_sidang', true)
+                ->whereDoesntHave('munaqosah')
+                ->select(['id', 'nim', 'nama'])
+                ->get();
+
+            // Process in chunks with transaction per chunk
+            foreach ($mahasiswas->chunk(self::CHUNK_SIZE) as $chunk) {
+                DB::beginTransaction();
+                try {
+                    foreach ($chunk as $mahasiswa) {
+                        try {
+                            $result = $this->scheduleForMahasiswa($mahasiswa->id);
+                            
+                            if ($result['success']) {
+                                $scheduledCount++;
+                            } else {
+                                $failedCount++;
+                            }
+
+                            $results[] = [
+                                'mahasiswa' => $mahasiswa->nama,
+                                'nim' => $mahasiswa->nim,
+                                'result' => $result
+                            ];
+                            
+                            // Commit each successful scheduling immediately
+                            DB::commit();
+                            DB::beginTransaction();
+                            
+                        } catch (\Exception $e) {
+                            // Log the error for this specific student
+                            Log::error("Error scheduling for student {$mahasiswa->nim}", [
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                            
+                            // Rollback only this student's transaction
+                            DB::rollBack();
+                            DB::beginTransaction();
+                            
+                            $failedCount++;
+                            $results[] = [
+                                'mahasiswa' => $mahasiswa->nama,
+                                'nim' => $mahasiswa->nim,
+                                'result' => [
+                                    'success' => false,
+                                    'message' => 'Error: ' . $e->getMessage()
+                                ]
+                            ];
+                        }
+                    }
+                    
+                    // Commit any remaining transaction
+                    if (DB::transactionLevel() > 0) {
+                        DB::commit();
+                    }
+
+                    // Add a small delay between chunks
+                    if (count($mahasiswas) > self::CHUNK_SIZE) {
+                        usleep(200000); // 200ms delay
+                    }
+                    
+                } catch (\Exception $chunkError) {
+                    // If there's an error processing the chunk, log it and continue
+                    if (DB::transactionLevel() > 0) {
+                        DB::rollBack();
+                    }
+                    Log::error("Error processing chunk", [
+                        'error' => $chunkError->getMessage(),
+                        'trace' => $chunkError->getTraceAsString()
+                    ]);
+                }
+            }
+
+            return [
+                'success' => true,
+                'message' => "Penjadwalan batch selesai: $scheduledCount berhasil, $failedCount gagal",
+                'scheduled_count' => $scheduledCount,
+                'failed_count' => $failedCount,
+                'results' => $results
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error in batch scheduling', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Terjadi kesalahan dalam batch scheduling: ' . $e->getMessage(),
+                'scheduled_count' => $scheduledCount ?? 0,
+                'failed_count' => ($mahasiswas->count() ?? 0) - ($scheduledCount ?? 0),
+                'results' => $results ?? []
+            ];
         }
-
-        return ['message' => 'Batch scheduling selesai.', 'scheduled_count' => $scheduled_count, 'failed_count' => $failed_count, 'results' => $results];
     }
 
     private function validateMahasiswa($mahasiswa)

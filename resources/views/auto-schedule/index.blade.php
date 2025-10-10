@@ -349,17 +349,35 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/auto-schedule/batch-schedule', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    return response.json().then(err => { throw err; });
+                }
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             showBatchResults(data);
             loadReadyStudents(); // Refresh the list
+            
+            // If there were any failures, show a more detailed message
+            if (data.failed_count > 0) {
+                showAlert(`Penjadwalan selesai: ${data.scheduled_count} berhasil, ${data.failed_count} gagal. Periksa detail di bawah.`, 'warning');
+            } else {
+                showAlert(`Berhasil menjadwalkan ${data.scheduled_count} mahasiswa!`, 'success');
+            }
         })
         .catch(error => {
             console.error('Error in batch scheduling:', error);
-            showAlert('Error in batch scheduling', 'error');
+            const errorMessage = error.message || 'Terjadi kesalahan dalam batch scheduling';
+            showAlert(errorMessage, 'error');
         });
     }
     

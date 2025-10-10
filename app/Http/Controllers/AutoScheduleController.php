@@ -51,9 +51,30 @@ class AutoScheduleController extends Controller
      */
     public function batchScheduleAll(): JsonResponse
     {
-        $result = $this->autoScheduleService->batchScheduleAll();
+        try {
+            // Set a longer timeout for the request
+            set_time_limit(300); // 5 minutes
+            
+            $result = $this->autoScheduleService->batchScheduleAll();
 
-        return response()->json($result);
+            if (!$result['success']) {
+                Log::error('Batch scheduling failed', $result);
+                return response()->json($result, 500);
+            }
+
+            return response()->json($result);
+            
+        } catch (\Exception $e) {
+            Log::error('Batch scheduling error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error during batch scheduling: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
