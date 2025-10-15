@@ -95,6 +95,10 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            'options' => [
+                PDO::ATTR_TIMEOUT => 60,  // Increase timeout to 60 seconds
+                PDO::ATTR_PERSISTENT => true,  // Use persistent connections
+            ],
         ],
 
         'sqlsrv' => [

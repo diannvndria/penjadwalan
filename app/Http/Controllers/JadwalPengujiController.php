@@ -13,9 +13,21 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
      */
     public function index()
     {
-        // Ambil semua jadwal penguji dan eager load relasi 'penguji'
-    $jadwalPengujis = JadwalPenguji::with('penguji')->orderBy('tanggal')->orderBy('waktu_mulai')->paginate(10);
-    return view('jadwal_penguji.index', compact('jadwalPengujis'));
+        try {
+            // Add index to improve query performance
+            $jadwalPengujis = JadwalPenguji::with(['penguji' => function($query) {
+                $query->select('id', 'nama');
+            }])
+            ->select('id', 'id_penguji', 'tanggal', 'waktu_mulai', 'waktu_selesai', 'deskripsi')
+            ->orderBy('tanggal')
+            ->orderBy('waktu_mulai')
+            ->paginate(10);
+
+            return view('jadwal_penguji.index', compact('jadwalPengujis'));
+        } catch (\Exception $e) {
+            \Log::error('Error in JadwalPengujiController@index: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat data. Silakan coba lagi.');
+        }
     }
 
     /**

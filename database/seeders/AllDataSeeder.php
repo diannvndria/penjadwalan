@@ -38,18 +38,18 @@ class AllDataSeeder extends Seeder
 
         // Create dosens
         $dosens = [];
-        for ($i = 1; $i <= 6; $i++) {
+        for ($i = 1; $i <= 8; $i++) {
             $dosens[] = Dosen::firstOrCreate(['nama' => "Dr. Dosen $i"], ['kapasitas_ampu' => 12]);
         }
 
         // Create pengujis
         $pengujis = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 12; $i++) {
             $pengujis[] = Penguji::firstOrCreate(['nama' => "Dr. Penguji $i"], ['is_prioritas' => ($i <= 2)]);
         }
 
         // Create mahasiswa (more detailed)
-        for ($i = 1; $i <= 30; $i++) {
+        for ($i = 1; $i <= 32; $i++) {
             $nim = '2020'.str_pad($i, 4, '0', STR_PAD_LEFT);
             $mahasiswa = Mahasiswa::updateOrCreate([
                 'nim' => $nim,
@@ -60,7 +60,7 @@ class AllDataSeeder extends Seeder
                 'profil_lulusan' => 'Ilmuwan',
                 'penjurusan' => 'Teknik Informatika',
                 'id_dospem' => $dosens[($i - 1) % count($dosens)]->id,
-                'siap_sidang' => $i <= 20,
+                'siap_sidang' => $i <= 22,
                 'is_prioritas' => ($i % 7 === 0),
                 'keterangan_prioritas' => ($i % 7 === 0) ? 'Prioritas beasiswa' : null,
             ]);

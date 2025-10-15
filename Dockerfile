@@ -25,6 +25,14 @@ RUN { \
     echo 'opcache.enable_file_override=1'; \
     } > /usr/local/etc/php/conf.d/opcache-production.ini
 
+# Configure PHP settings for better performance
+RUN { \
+    echo 'max_execution_time=120'; \
+    echo 'max_input_time=120'; \
+    echo 'default_socket_timeout=120'; \
+    echo 'memory_limit=256M'; \
+    } > /usr/local/etc/php/conf.d/custom-php.ini
+
 ENV SERVER_NAME=:80
 
 # COPY --from=build /app/public/build /app/public/build
