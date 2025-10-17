@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Munaqosah;       // Import model Munaqosah
-use App\Models\Mahasiswa;      // Import model Mahasiswa
-use App\Models\Penguji;        // Import model Penguji
-use App\Models\JadwalPenguji;  // Import model JadwalPenguji (untuk cek bentrok non-munaqosah)
-use App\Models\HistoriMunaqosah; // Import model HistoriMunaqosah
+use App\Models\HistoriMunaqosah;       // Import model Munaqosah
+use App\Models\JadwalPenguji;      // Import model Mahasiswa
+use App\Models\Mahasiswa;        // Import model Penguji
+use App\Models\Munaqosah;  // Import model JadwalPenguji (untuk cek bentrok non-munaqosah)
+use App\Models\Penguji; // Import model HistoriMunaqosah
 use App\Models\RuangUjian;
+use Carbon\Carbon;  // Untuk manipulasi tanggal dan waktu
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;  // Untuk transaksi database (DB::transaction)
-use Carbon\Carbon;                  // Untuk manipulasi tanggal dan waktu
+
 class MunaqosahController extends Controller
 {
     /**
@@ -46,11 +47,12 @@ class MunaqosahController extends Controller
     public function create()
     {
         $mahasiswasSiapSidang = Mahasiswa::where('siap_sidang', true)
-                                         ->doesntHave('munaqosah')
-                                         ->with('dospem')
-                                         ->get();
+            ->doesntHave('munaqosah')
+            ->with('dospem')
+            ->get();
         $pengujis = Penguji::all();
         $ruangUjians = RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+
         return view('munaqosah.create', compact('mahasiswasSiapSidang', 'pengujis', 'ruangUjians'));
     }
 
@@ -81,13 +83,15 @@ class MunaqosahController extends Controller
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)) {
                 $pengujiNama = Penguji::find($pengujiId)->nama;
+
                 return back()->withInput()->withErrors(['bentrok' => "Penguji {$pengujiNama} tidak tersedia pada tanggal dan waktu yang dipilih karena bentrok dengan jadwal lain."]);
             }
         }
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai)) {
             $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
-            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);        
+
+            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
 
         DB::transaction(function () use ($request) {
@@ -118,11 +122,12 @@ class MunaqosahController extends Controller
     public function edit(Munaqosah $munaqosah)
     {
         $mahasiswasSiapSidang = Mahasiswa::where('siap_sidang', true)
-                                         ->orWhere('id', $munaqosah->id_mahasiswa)
-                                         ->with('dospem')
-                                         ->get();
+            ->orWhere('id', $munaqosah->id_mahasiswa)
+            ->with('dospem')
+            ->get();
         $pengujis = Penguji::all();
         $ruangUjians = RuangUjian::where('is_aktif', true)->orderBy('nama')->get();
+
         return view('munaqosah.edit', compact('munaqosah', 'mahasiswasSiapSidang', 'pengujis', 'ruangUjians'));
     }
 
@@ -134,7 +139,7 @@ class MunaqosahController extends Controller
         $originalData = $munaqosah->getOriginal();
 
         $request->validate([
-            'id_mahasiswa' => 'required|exists:mahasiswas,id|unique:munaqosahs,id_mahasiswa,' . $munaqosah->id,
+            'id_mahasiswa' => 'required|exists:mahasiswas,id|unique:munaqosahs,id_mahasiswa,'.$munaqosah->id,
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
@@ -156,13 +161,15 @@ class MunaqosahController extends Controller
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {
                 $pengujiNama = Penguji::find($pengujiId)->nama;
+
                 return back()->withInput()->withErrors(['bentrok' => "Penguji {$pengujiNama} tidak tersedia pada tanggal dan waktu yang dipilih karena bentrok dengan jadwal lain."]);
             }
         }
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {
             $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
-            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);        
+
+            return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
 
         DB::transaction(function () use ($request, $munaqosah, $originalData) {
@@ -181,23 +188,26 @@ class MunaqosahController extends Controller
             foreach ($request->except('_token', '_method') as $key => $value) {
                 if (array_key_exists($key, $originalData) && $value != $originalData[$key]) {
                     if (in_array($key, ['id_mahasiswa', 'id_penguji1', 'id_penguji2', 'id_ruang_ujian'])) {
-                        $modelClass = 'App\\Models\\' . ucfirst(str_replace('id_', '', $key));
+                        // Convert snake_case to PascalCase (e.g., 'ruang_ujian' -> 'RuangUjian')
+                        // Also strip trailing numbers (e.g., 'penguji1' -> 'penguji' -> 'Penguji')
+                        $modelName = str_replace('id_', '', $key);
+                        $modelName = preg_replace('/\d+$/', '', $modelName); // Remove trailing numbers
+                        $modelClass = 'App\\Models\\'.str_replace('_', '', ucwords($modelName, '_'));
                         $oldValueName = $originalData[$key] ? ($modelClass::find($originalData[$key])->nama ?? 'N/A') : 'Kosong';
                         $newValueName = $value ? ($modelClass::find($value)->nama ?? 'N/A') : 'Kosong';
-                        $changes[] = ucfirst(str_replace('id_', '', $key)) . ": '$oldValueName' menjadi '$newValueName'";
+                        $changes[] = ucfirst(str_replace('id_', '', $key)).": '$oldValueName' menjadi '$newValueName'";
                     } elseif ($key === 'status_konfirmasi') {
-                         $changes[] = ucfirst(str_replace('_', ' ', $key)) . ": '" . ucfirst($originalData[$key]) . "' menjadi '" . ucfirst($value) . "'";
-                    }
-                    else {
-                        $changes[] = ucfirst(str_replace('_', ' ', $key)) . ": '$originalData[$key]' menjadi '$value'";
+                        $changes[] = ucfirst(str_replace('_', ' ', $key)).": '".ucfirst($originalData[$key])."' menjadi '".ucfirst($value)."'";
+                    } else {
+                        $changes[] = ucfirst(str_replace('_', ' ', $key)).": '$originalData[$key]' menjadi '$value'";
                     }
                 }
             }
 
-            if (!empty($changes)) {
+            if (! empty($changes)) {
                 HistoriMunaqosah::create([
                     'id_munaqosah' => $munaqosah->id,
-                    'perubahan' => 'Jadwal munaqosah diperbarui: ' . implode(', ', $changes),
+                    'perubahan' => 'Jadwal munaqosah diperbarui: '.implode(', ', $changes),
                     'dilakukan_oleh' => auth()->id(),
                 ]);
             }
@@ -219,10 +229,11 @@ class MunaqosahController extends Controller
 
             HistoriMunaqosah::create([
                 'id_munaqosah' => null,
-                'perubahan' => 'Jadwal munaqosah untuk mahasiswa ' . $mahasiswaNama . ' (NIM: ' . $mahasiswaNIM . ') telah dihapus.',
+                'perubahan' => 'Jadwal munaqosah untuk mahasiswa '.$mahasiswaNama.' (NIM: '.$mahasiswaNIM.') telah dihapus.',
                 'dilakukan_oleh' => auth()->id(),
             ]);
         });
+
         return redirect()->route('munaqosah.index')->with('success', 'Jadwal munaqosah berhasil dihapus.');
     }
 
@@ -232,6 +243,7 @@ class MunaqosahController extends Controller
     public function histori(Munaqosah $munaqosah)
     {
         $histories = $munaqosah->historiPerubahan()->with('user')->orderBy('created_at', 'desc')->get();
+
         return view('munaqosah.histori', compact('munaqosah', 'histories'));
     }
 
@@ -245,7 +257,7 @@ class MunaqosahController extends Controller
             ->where('tanggal', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->exists();
 
@@ -255,13 +267,13 @@ class MunaqosahController extends Controller
 
         // Cek bentrok di tabel munaqosahs (jadwal munaqosah penguji lain)
         $queryMunaqosah = Munaqosah::where(function ($query) use ($pengujiId) {
-                $query->where('id_penguji1', $pengujiId)
-                      ->orWhere('id_penguji2', $pengujiId);
-            })
+            $query->where('id_penguji1', $pengujiId)
+                ->orWhere('id_penguji2', $pengujiId);
+        })
             ->where('tanggal_munaqosah', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         if ($excludeMunaqosahId) {
@@ -281,7 +293,7 @@ class MunaqosahController extends Controller
             ->where('tanggal_munaqosah', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         if ($excludeMunaqosahId) {
