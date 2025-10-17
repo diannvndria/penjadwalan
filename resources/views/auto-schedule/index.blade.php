@@ -21,7 +21,7 @@
                         Edit Konfigurasi
                     </button>
                 </div>
-                
+
                 <div id="configDisplay" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-gray-50 p-4 rounded">
                         <h4 class="font-medium text-gray-700">Durasi Sidang</h4>
@@ -46,17 +46,17 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Durasi Sidang (menit)</label>
-                            <input type="number" id="duration" name="duration_minutes" min="30" max="480" 
+                            <input type="number" id="duration" name="duration_minutes" min="30" max="480"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
-                            <input type="time" id="startTime" name="working_hours[start]" 
+                            <input type="time" id="startTime" name="working_hours[start]"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Jam Selesai</label>
-                            <input type="time" id="endTime" name="working_hours[end]" 
+                            <input type="time" id="endTime" name="working_hours[end]"
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
@@ -77,7 +77,7 @@
             <div class="p-6 text-gray-900">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium">
-                        Mahasiswa Siap Sidang 
+                        Mahasiswa Siap Sidang
                         <span id="readyCount" class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">0</span>
                     </h3>
                     <div class="space-x-2">
@@ -89,7 +89,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="overflow-x-auto">
                     <table id="readyStudentsTable" class="min-w-full table-auto">
                         <thead class="bg-gray-50">
@@ -122,7 +122,7 @@
 </div>
 
 <!-- Modal for Individual Schedule Confirmation -->
-<div id="scheduleModal" class="fixed inset-0 bg-opacity-0 hidden flex items-start justify-center z-50 pt-20">
+<div id="scheduleModal" class="fixed inset-0 bg-opacity-0 hidden items-start justify-center z-50 pt-20">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
             <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Konfirmasi Penjadwalan</h3>
@@ -152,11 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentStudentId = null;
     let isBatchSchedule = false;
     let configuration = {};
-    
+
     // Load initial data
     loadConfiguration();
     loadReadyStudents();
-    
+
     // Event listeners
     document.getElementById('editConfigBtn').addEventListener('click', showConfigForm);
     document.getElementById('cancelConfigBtn').addEventListener('click', hideConfigForm);
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('batchScheduleBtn').addEventListener('click', batchSchedule);
     document.getElementById('confirmScheduleBtn').addEventListener('click', confirmIndividualSchedule);
     document.getElementById('cancelScheduleBtn').addEventListener('click', hideModal);
-    
+
     // Functions
     function loadConfiguration() {
         fetch('/auto-schedule/configuration')
@@ -181,31 +181,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert('Error loading configuration', 'error');
             });
     }
-    
+
     function updateConfigDisplay() {
         document.getElementById('durationDisplay').textContent = configuration.default_duration_minutes + ' menit';
-        document.getElementById('workingHoursDisplay').textContent = 
+        document.getElementById('workingHoursDisplay').textContent =
             configuration.working_hours.start + ' - ' + configuration.working_hours.end;
         document.getElementById('searchRangeDisplay').textContent = configuration.search_days_range + ' hari';
     }
-    
+
     function showConfigForm() {
         // Populate form with current values
         document.getElementById('duration').value = configuration.default_duration_minutes;
         document.getElementById('startTime').value = configuration.working_hours.start;
         document.getElementById('endTime').value = configuration.working_hours.end;
-        
+
         document.getElementById('configDisplay').classList.add('hidden');
         document.getElementById('configForm').classList.remove('hidden');
         document.getElementById('editConfigBtn').classList.add('hidden');
     }
-    
+
     function hideConfigForm() {
         document.getElementById('configDisplay').classList.remove('hidden');
         document.getElementById('configForm').classList.add('hidden');
         document.getElementById('editConfigBtn').classList.remove('hidden');
     }
-    
+
     function saveConfiguration(event) {
         // Perintah ini sudah benar, untuk mencegah refresh
         event.preventDefault();
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 start: formData.get('working_hours[start]'),
                 end: formData.get('working_hours[end]')
             }
-            
+
             // Jika Anda memiliki input untuk 'search_days_range', tambahkan di sini juga.
             // Contoh: search_days_range: parseInt(formData.get('search_range_input_name'))
         };
@@ -274,9 +274,14 @@ document.addEventListener('DOMContentLoaded', function() {
             showAlert(`Gagal menyimpan: ${errorMessage}`, 'error');
         });
     }
-    
+
     function loadReadyStudents() {
-        fetch('/auto-schedule/ready-students')
+        fetch('/auto-schedule/ready-students', {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -291,11 +296,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert('Error loading students data', 'error');
             });
     }
-    
+
     function updateStudentsTable(students) {
         const tbody = document.getElementById('studentsTableBody');
         tbody.innerHTML = '';
-        
+
         if (students.length === 0) {
             tbody.innerHTML = `
                 <tr>
@@ -306,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
-        
+
         students.forEach(student => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -317,8 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${student.dospem ? student.dospem.nama : 'Belum ditentukan'}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <button onclick="scheduleIndividual(${student.id}, '${student.nama}')" 
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs">
+                    <button onclick="scheduleIndividual(${student.id}, '${student.nama}')"
+                            id="schedule-btn-${student.id}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed">
                         Jadwalkan
                     </button>
                 </td>
@@ -326,18 +332,18 @@ document.addEventListener('DOMContentLoaded', function() {
             tbody.appendChild(row);
         });
     }
-    
+
     function batchSchedule() {
         // Ganti konfirmasi bawaan dengan modal kustom
         document.getElementById('modalTitle').textContent = 'Konfirmasi Penjadwalan Massal';
         document.getElementById('modalMessage').textContent = 'Apakah Anda yakin ingin menjadwalkan semua mahasiswa yang siap sidang secara otomatis?';
-        
+
         // Atur event listener untuk tombol konfirmasi di modal
         // Pastikan confirmScheduleBtn sekarang akan memanggil fungsi yang berbeda atau ada logika internal
         // yang membedakan apakah itu batch atau individual.
         // Untuk sederhana, kita akan ubah event listener langsung di sini sebelum menampilkan modal.
         document.getElementById('confirmScheduleBtn').onclick = executeBatchSchedule;
-        
+
         showModal(); // Tampilkan modal kustom
     }
 
@@ -345,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
         hideModal(); // Sembunyikan modal setelah konfirmasi
 
         showAlert('Memproses batch scheduling...', 'info');
-        
+
         fetch('/auto-schedule/batch-schedule', {
             method: 'POST',
             headers: {
@@ -366,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             showBatchResults(data);
             loadReadyStudents(); // Refresh the list
-            
+
             // If there were any failures, show a more detailed message
             if (data.failed_count > 0) {
                 showAlert(`Penjadwalan selesai: ${data.scheduled_count} berhasil, ${data.failed_count} gagal. Periksa detail di bawah.`, 'warning');
@@ -380,11 +386,11 @@ document.addEventListener('DOMContentLoaded', function() {
             showAlert(errorMessage, 'error');
         });
     }
-    
+
     function showBatchResults(data) {
         const resultsPanel = document.getElementById('resultsPanel');
         const resultsContent = document.getElementById('resultsContent');
-        
+
         let html = `
             <div class="mb-4">
                 <h4 class="text-md font-medium">Ringkasan Batch Scheduling</h4>
@@ -401,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
+
         if (data.results && data.results.length > 0) {
             html += `
                 <div class="overflow-x-auto">
@@ -416,11 +422,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
             `;
-            
+
             data.results.forEach(result => {
                 const statusClass = result.result.success ? 'text-green-600' : 'text-red-600';
                 const statusText = result.result.success ? '✅ Berhasil' : '❌ Gagal';
-                
+
                 html += `
                     <tr>
                         <td class="px-4 py-2 text-sm text-gray-900">${result.mahasiswa}</td>
@@ -430,47 +436,75 @@ document.addEventListener('DOMContentLoaded', function() {
                     </tr>
                 `;
             });
-            
+
             html += `
                         </tbody>
                     </table>
                 </div>
             `;
         }
-        
+
         resultsContent.innerHTML = html;
         resultsPanel.classList.remove('hidden');
-        
+
         showAlert(data.message, data.scheduled_count > 0 ? 'success' : 'warning');
     }
-    
+
     // Global functions for button clicks
     window.scheduleIndividual = function(studentId, studentName) {
+        // Disable the button immediately to prevent double-clicks
+        const button = document.getElementById(`schedule-btn-${studentId}`);
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Memproses...';
+        }
+
         currentStudentId = studentId;
-        document.getElementById('modalMessage').textContent = 
+        document.getElementById('modalMessage').textContent =
             `Apakah Anda yakin ingin menjadwalkan mahasiswa "${studentName}" secara otomatis?`;
         showModal();
     };
-    
+
     function confirmIndividualSchedule() {
         if (!currentStudentId) return;
-        
+
         fetch('/auto-schedule/schedule-student', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Cache-Control': 'no-cache' // Prevent caching
             },
             body: JSON.stringify({ mahasiswa_id: currentStudentId })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
+            // Parse JSON first before checking status
+            return response.json().then(data => {
+                return { status: response.status, data: data };
+            });
+        })
+        .then(result => {
             hideModal();
+            const { status, data } = result;
+
             if (data.success) {
                 showAlert(data.message, 'success');
-                loadReadyStudents(); // Refresh the list
+                // Add a small delay before refreshing to ensure DB commit completes
+                setTimeout(() => {
+                    loadReadyStudents();
+                }, 500); // 500ms delay
             } else {
-                showAlert(data.message, 'error');
+                // Only show error if it's not an "already scheduled" validation error
+                // This prevents showing redundant errors when refreshing the list
+                if (status === 400 && data.message && data.message.includes('sudah memiliki jadwal')) {
+                    // Student already has schedule - this is expected after successful scheduling
+                    // Silently refresh the list instead of showing error
+                    setTimeout(() => {
+                        loadReadyStudents();
+                    }, 500);
+                } else {
+                    showAlert(data.message, 'error');
+                }
             }
         })
         .catch(error => {
@@ -479,19 +513,33 @@ document.addEventListener('DOMContentLoaded', function() {
             hideModal();
         });
     }
-    
+
     function showModal() {
-        document.getElementById('scheduleModal').classList.remove('hidden');
+        const modal = document.getElementById('scheduleModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
-    
+
     function hideModal() {
-        document.getElementById('scheduleModal').classList.add('hidden');
+        const modal = document.getElementById('scheduleModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+
+        // Re-enable the button if user cancels (only if student hasn't been scheduled)
+        if (currentStudentId) {
+            const button = document.getElementById(`schedule-btn-${currentStudentId}`);
+            if (button && button.disabled) {
+                button.disabled = false;
+                button.textContent = 'Jadwalkan';
+            }
+        }
+
         currentStudentId = null;
-        
+
         // Reset the onclick handler for confirmScheduleBtn to its default individual schedule behavior
         document.getElementById('confirmScheduleBtn').onclick = confirmIndividualSchedule;
     }
-    
+
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
         const alertClass = {
@@ -500,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'warning': 'bg-yellow-100 border-yellow-500 text-yellow-700',
             'info': 'bg-blue-100 border-blue-500 text-blue-700'
         };
-        
+
         const alert = document.createElement('div');
         alert.className = `border-l-4 p-4 ${alertClass[type]} mb-4`;
         alert.innerHTML = `
@@ -525,9 +573,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
+
         alertContainer.appendChild(alert);
-        
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             if (alert.parentNode) {
