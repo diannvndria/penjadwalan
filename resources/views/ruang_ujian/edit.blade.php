@@ -59,6 +59,7 @@
                 </div>
 
                 <div>
+                    <input type="hidden" name="is_aktif" value="0">
                     <label class="flex items-center">
                         <input type="checkbox" name="is_aktif" value="1" {{ old('is_aktif', $ruangUjian->is_aktif) ? 'checked' : '' }}
                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
