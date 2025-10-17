@@ -8,7 +8,6 @@ use App\Models\Penguji;
 use App\Models\JadwalPenguji;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AutoScheduleService
@@ -159,11 +158,7 @@ class AutoScheduleService
 
             $startDate = Carbon::now()->addDays(1);
             $endDate = Carbon::now()->addDays(60);
-
-            // Cache all pengujis for 30 minutes to avoid repeated queries
-            $allPengujis = Cache::remember('all_active_pengujis', 1800, function () {
-                return Penguji::all();
-            });
+            $allPengujis = Penguji::all();
 
             if ($allPengujis->count() < 2) {
                 return ['success' => false, 'message' => 'Memerlukan minimal 2 penguji.'];
@@ -210,7 +205,7 @@ class AutoScheduleService
                     foreach ($chunk as $mahasiswa) {
                         try {
                             $result = $this->scheduleForMahasiswa($mahasiswa->id);
-                            
+
                             if ($result['success']) {
                                 $scheduledCount++;
                             } else {
@@ -222,22 +217,22 @@ class AutoScheduleService
                                 'nim' => $mahasiswa->nim,
                                 'result' => $result
                             ];
-                            
+
                             // Commit each successful scheduling immediately
                             DB::commit();
                             DB::beginTransaction();
-                            
+
                         } catch (\Exception $e) {
                             // Log the error for this specific student
                             Log::error("Error scheduling for student {$mahasiswa->nim}", [
                                 'error' => $e->getMessage(),
                                 'trace' => $e->getTraceAsString()
                             ]);
-                            
+
                             // Rollback only this student's transaction
                             DB::rollBack();
                             DB::beginTransaction();
-                            
+
                             $failedCount++;
                             $results[] = [
                                 'mahasiswa' => $mahasiswa->nama,
@@ -249,7 +244,7 @@ class AutoScheduleService
                             ];
                         }
                     }
-                    
+
                     // Commit any remaining transaction
                     if (DB::transactionLevel() > 0) {
                         DB::commit();
@@ -259,7 +254,7 @@ class AutoScheduleService
                     if (count($mahasiswas) > self::CHUNK_SIZE) {
                         usleep(200000); // 200ms delay
                     }
-                    
+
                 } catch (\Exception $chunkError) {
                     // If there's an error processing the chunk, log it and continue
                     if (DB::transactionLevel() > 0) {
@@ -318,24 +313,19 @@ class AutoScheduleService
 
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
     {
-        // Cache availability checks for 5 minutes to speed up batch scheduling
-        $cacheKey = "penguji_available_{$pengujiId}_{$tanggal}_{$waktuMulai}_{$waktuSelesai}";
+        $isBusyInMunaqosah = Munaqosah::where(fn($q) => $q->where('id_penguji1', $pengujiId)->orWhere('id_penguji2', $pengujiId))
+            ->where('tanggal_munaqosah', $tanggal)
+            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+            ->exists();
 
-        return Cache::remember($cacheKey, 300, function () use ($pengujiId, $tanggal, $waktuMulai, $waktuSelesai) {
-            $isBusyInMunaqosah = Munaqosah::where(fn($q) => $q->where('id_penguji1', $pengujiId)->orWhere('id_penguji2', $pengujiId))
-                ->where('tanggal_munaqosah', $tanggal)
-                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-                ->exists();
+        if ($isBusyInMunaqosah) return false;
 
-            if ($isBusyInMunaqosah) return false;
+        $isBusyInJadwal = JadwalPenguji::where('id_penguji', $pengujiId)
+            ->where('tanggal', $tanggal)
+            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+            ->exists();
 
-            $isBusyInJadwal = JadwalPenguji::where('id_penguji', $pengujiId)
-                ->where('tanggal', $tanggal)
-                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-                ->exists();
-
-            return !$isBusyInJadwal;
-        });
+        return !$isBusyInJadwal;
     }
 
     /**
@@ -363,10 +353,8 @@ class AutoScheduleService
      */
     private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai, bool $needsPriorityRoom = false)
     {
-        // Cache active rooms for 1 hour
-        $rooms = Cache::remember('active_rooms', 3600, function () {
-            return \App\Models\RuangUjian::where('is_aktif', true)->get();
-        });
+        // Ambil semua ruang aktif
+        $rooms = \App\Models\RuangUjian::where('is_aktif', true)->get();
 
         // Urutkan ruangan berdasarkan prioritas
         $sortedRooms = $rooms->sortBy(function ($room) use ($needsPriorityRoom) {
@@ -421,22 +409,5 @@ class AutoScheduleService
             'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional($ruang)->nama ?? '-') . ($ruang ? " (Lantai {$ruang->lantai})" : '') . "{$priorityNote}.",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
-
-        // Clear relevant caches after creating a schedule
-        $this->clearScheduleCache($scheduleData['tanggal']);
-    }
-
-    /**
-     * Clear caches related to scheduling for a specific date
-     */
-    private function clearScheduleCache(string $tanggal): void
-    {
-        // Clear all penguji availability caches for this date
-        Cache::forget('all_active_pengujis');
-
-        // We can't easily clear specific penguji availability caches without knowing all combinations,
-        // but they expire after 5 minutes anyway which is acceptable
-
-        Log::info("Cleared schedule-related caches for date: {$tanggal}");
     }
 }

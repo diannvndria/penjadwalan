@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Dosen; // Pastikan model Dosen sudah diimpor
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class DosenController extends Controller
 {
@@ -38,10 +37,6 @@ class DosenController extends Controller
 
         Dosen::create($request->all());
 
-        // Clear dosens cache after creating new dosen
-        Cache::forget('all_dosens');
-        Cache::forget('all_dosens_ordered');
-
         return redirect()->route('dosen.index')->with('success', 'Dosen berhasil ditambahkan.');
     }
 
@@ -65,10 +60,6 @@ class DosenController extends Controller
 
         $dosen->update($request->all());
 
-        // Clear dosens cache after updating
-        Cache::forget('all_dosens');
-        Cache::forget('all_dosens_ordered');
-
         return redirect()->route('dosen.index')->with('success', 'Data dosen berhasil diperbarui.');
     }
 
@@ -79,11 +70,6 @@ class DosenController extends Controller
     {
         try {
             $dosen->delete();
-
-            // Clear dosens cache after deleting
-            Cache::forget('all_dosens');
-            Cache::forget('all_dosens_ordered');
-
             return redirect()->route('dosen.index')->with('success', 'Dosen berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             // Tangani jika ada mahasiswa yang masih terhubung ke dosen ini (Foreign Key Constraint)
