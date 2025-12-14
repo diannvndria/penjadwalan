@@ -42,6 +42,39 @@ class MunaqosahController extends Controller
     }
 
     /**
+     * Download laporan jadwal sidang sebagai PDF
+     */
+    public function downloadReport(Request $request)
+    {
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        $query = Munaqosah::with('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
+
+        if ($startDate) {
+            $query->whereDate('tanggal_munaqosah', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->whereDate('tanggal_munaqosah', '<=', $endDate);
+        }
+
+        $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->get();
+        $totalJadwal = $munaqosahs->count();
+        
+        $pdf = \PDF::loadView('munaqosah.laporan', [
+            'munaqosahs' => $munaqosahs,
+            'totalJadwal' => $totalJadwal,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'generatedAt' => Carbon::now(),
+        ]);
+
+        $filename = 'Laporan_Jadwal_Sidang_' . Carbon::now()->format('d-m-Y_H-i-s') . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    /**
      * Menampilkan form untuk membuat jadwal munaqosah baru.
      */
     public function create()

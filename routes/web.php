@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
     // Jadwal Munaqosah: Lihat daftar jadwal munaqosah dan histori
     Route::get('munaqosah', [MunaqosahController::class, 'index'])->name('munaqosah.index');
     Route::get('munaqosah/{munaqosah}/histori', [MunaqosahController::class, 'histori'])->name('munaqosah.histori');
+    Route::get('munaqosah/download/report', [MunaqosahController::class, 'downloadReport'])->name('munaqosah.downloadReport');
 
     // Tambahan untuk dosen penguji melihat jadwalnya
     // Ini membutuhkan ID user (dosen penguji) yang sedang login

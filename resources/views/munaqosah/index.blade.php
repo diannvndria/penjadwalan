@@ -45,6 +45,9 @@
                     <div class="flex space-x-2">
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">Filter</button>
                         <a href="{{ route('munaqosah.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition ease-in-out duration-150">Reset</a>
+                        <a href="{{ route('munaqosah.downloadReport', ['start_date' => $startDate ?? '', 'end_date' => $endDate ?? '']) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <i class="fas fa-file-pdf mr-2"></i> Download
+                        </a>
                     </div>
                 </div>
             </form>
@@ -66,7 +69,12 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($munaqosahs as $munaqosah)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $munaqosah->mahasiswa->nama ?? 'N/A' }}
+                                    @if($munaqosah->mahasiswa && $munaqosah->mahasiswa->is_prioritas)
+                                        <span class="ml-2 inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">★ PRIORITAS</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $munaqosah->tanggal_munaqosah->format('d-m-Y') }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</td>
