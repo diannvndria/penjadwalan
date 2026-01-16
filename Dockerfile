@@ -1,17 +1,47 @@
-# FROM node:lts-alpine AS build
+ARG FRANKENPHP_VERSION=php8.4
 
-# WORKDIR /app
+FROM node:lts-alpine AS frontend
 
-# COPY package.json package-lock.json ./
-# RUN npm ci
-# COPY . .
-# RUN npm run build
+WORKDIR /app
 
-FROM dunglas/frankenphp:php8.4-bookworm AS production
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS deps
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y git unzip
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY composer.json composer.lock ./
+
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist \
+    --no-autoloader
+
+COPY . .
+COPY --from=frontend /app/public/build /app/public/build
+RUN composer dump-autoload --optimize
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS development
+
+WORKDIR /app
 
 RUN install-php-extensions \
     pdo_pgsql \
     pcntl
+
+FROM development AS production
+
+WORKDIR /app
 
 # Configure OPcache for production performance
 RUN { \
@@ -33,23 +63,13 @@ RUN { \
     echo 'memory_limit=256M'; \
     } > /usr/local/etc/php/conf.d/custom-php.ini
 
-ENV SERVER_NAME=:80
+RUN install-php-extensions \
+    pdo_pgsql \
+    pcntl
 
-# COPY --from=build /app/public/build /app/public/build
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# RUN apk add --no-cache git unzip
+COPY --from=deps /app /app
 
-# RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# COPY composer.json composer.lock /app/
-
-# RUN composer install \
-#     --no-interaction \
-#     --no-plugins \
-#     --no-scripts \
-#     --prefer-dist \
-# 		--optimize-autoloader
-
-COPY . /app
-
-ENTRYPOINT ["php", "artisan", "octane:frankenphp"]
+EXPOSE 8000
+ENTRYPOINT ["php", "artisan", "octane:frankenphp", "--workers=5", "--max-requests=250"]
