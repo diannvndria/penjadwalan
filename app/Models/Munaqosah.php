@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Munaqosah extends Model
 {
@@ -23,6 +24,30 @@ class Munaqosah extends Model
     protected $casts = [
         'tanggal_munaqosah' => 'date',
     ];
+
+    /**
+     * Boot method to clear cache when munaqosah data changes
+     */
+    protected static function booted()
+    {
+        // Clear dashboard cache when schedule is created, updated, or deleted
+        static::created(function () {
+            Cache::forget('dashboard_stats');
+        });
+
+        static::updated(function ($munaqosah) {
+            Cache::forget('dashboard_stats');
+
+            // If status changed to confirmed or rejected, update dashboard
+            if ($munaqosah->wasChanged('status_konfirmasi')) {
+                Cache::forget('dashboard_stats');
+            }
+        });
+
+        static::deleted(function () {
+            Cache::forget('dashboard_stats');
+        });
+    }
 
     public function mahasiswa()
     {

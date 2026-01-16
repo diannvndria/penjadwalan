@@ -113,16 +113,20 @@ class MunaqosahController extends Controller
             $request->id_penguji2,
         ]));
 
+        // OPTIMIZATION: Fetch all pengujis at once instead of one by one
+        $pengujis = Penguji::whereIn('id', $pengujiIds)->pluck('nama', 'id');
+
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)) {
-                $pengujiNama = Penguji::find($pengujiId)->nama;
+                $pengujiNama = $pengujis[$pengujiId] ?? 'Penguji';
 
                 return back()->withInput()->withErrors(['bentrok' => "Penguji {$pengujiNama} tidak tersedia pada tanggal dan waktu yang dipilih karena bentrok dengan jadwal lain."]);
             }
         }
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai)) {
-            $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
+            // OPTIMIZATION: Only fetch room name if there's a conflict
+            $ruangNama = RuangUjian::where('id', $request->id_ruang_ujian)->value('nama') ?? 'Ruang';
 
             return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
@@ -191,16 +195,20 @@ class MunaqosahController extends Controller
             $request->id_penguji2,
         ]));
 
+        // OPTIMIZATION: Fetch all pengujis at once instead of one by one
+        $pengujis = Penguji::whereIn('id', $pengujiIds)->pluck('nama', 'id');
+
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {
-                $pengujiNama = Penguji::find($pengujiId)->nama;
+                $pengujiNama = $pengujis[$pengujiId] ?? 'Penguji';
 
                 return back()->withInput()->withErrors(['bentrok' => "Penguji {$pengujiNama} tidak tersedia pada tanggal dan waktu yang dipilih karena bentrok dengan jadwal lain."]);
             }
         }
 
         if ($this->checkRuangConflict($request->id_ruang_ujian, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {
-            $ruangNama = RuangUjian::find($request->id_ruang_ujian)->nama ?? 'Ruang';
+            // OPTIMIZATION: Only fetch room name if there's a conflict
+            $ruangNama = RuangUjian::where('id', $request->id_ruang_ujian)->value('nama') ?? 'Ruang';
 
             return back()->withInput()->withErrors(['bentrok' => "{$ruangNama} sudah terpakai pada waktu tersebut."]);
         }
@@ -282,42 +290,38 @@ class MunaqosahController extends Controller
 
     /**
      * Metode pembantu (private) untuk mengecek bentrok jadwal penguji.
+     * OPTIMIZED: Combines both queries into a single query using UNION
      */
     private function checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai, $excludeMunaqosahId = null)
     {
-        // Cek bentrok di tabel jadwal_pengujis (jadwal non-munaqosah penguji)
-        $isBentrokJadwalPenguji = JadwalPenguji::where('id_penguji', $pengujiId)
+        // Combine both queries into a single optimized query with UNION
+        // IMPORTANT: Must select same columns in both UNION queries
+        $query = DB::table('jadwal_pengujis')
+            ->select(DB::raw('1'))
+            ->where('id_penguji', $pengujiId)
             ->where('tanggal', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
                     ->where('waktu_selesai', '>', $waktuMulai);
             })
-            ->exists();
+            ->union(
+                DB::table('munaqosahs')
+                    ->select(DB::raw('1'))
+                    ->where(function ($query) use ($pengujiId) {
+                        $query->where('id_penguji1', $pengujiId)
+                            ->orWhere('id_penguji2', $pengujiId);
+                    })
+                    ->where('tanggal_munaqosah', $tanggal)
+                    ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
+                        $query->where('waktu_mulai', '<', $waktuSelesai)
+                            ->where('waktu_selesai', '>', $waktuMulai);
+                    })
+                    ->when($excludeMunaqosahId, function ($query) use ($excludeMunaqosahId) {
+                        $query->where('id', '!=', $excludeMunaqosahId);
+                    })
+            );
 
-        if ($isBentrokJadwalPenguji) {
-            return true;
-        }
-
-        // Cek bentrok di tabel munaqosahs (jadwal munaqosah penguji lain)
-        $queryMunaqosah = Munaqosah::where(function ($query) use ($pengujiId) {
-            $query->where('id_penguji1', $pengujiId)
-                ->orWhere('id_penguji2', $pengujiId);
-        })
-            ->where('tanggal_munaqosah', $tanggal)
-            ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
-                $query->where('waktu_mulai', '<', $waktuSelesai)
-                    ->where('waktu_selesai', '>', $waktuMulai);
-            });
-
-        if ($excludeMunaqosahId) {
-            $queryMunaqosah->where('id', '!=', $excludeMunaqosahId);
-        }
-
-        if ($queryMunaqosah->exists()) {
-            return true;
-        }
-
-        return false;
+        return $query->exists();
     }
 
     private function checkRuangConflict($ruangId, $tanggal, $waktuMulai, $waktuSelesai, $excludeMunaqosahId = null)

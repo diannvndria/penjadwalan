@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Penguji extends Model
 {
@@ -18,6 +19,25 @@ class Penguji extends Model
     protected $casts = [
         'is_prioritas' => 'boolean',
     ];
+
+    /**
+     * Boot method to clear cache when penguji data changes
+     */
+    protected static function booted()
+    {
+        // Clear batch pengujis cache when penguji is created, updated, or deleted
+        static::created(function () {
+            Cache::forget('batch_schedule_pengujis');
+        });
+
+        static::updated(function () {
+            Cache::forget('batch_schedule_pengujis');
+        });
+
+        static::deleted(function () {
+            Cache::forget('batch_schedule_pengujis');
+        });
+    }
 
     public function jadwalPengujis()
     {

@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <p class="text-4xl font-extrabold text-blue-800">
-                    {{ \App\Models\Mahasiswa::count() }}
+                    {{ $total_mahasiswa }}
                 </p>
                 <div class="mt-auto text-right">
                     <a href="{{ route('mahasiswa.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">Lihat Detail &rarr;</a>
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <p class="text-4xl font-extrabold text-green-800">
-                    {{ \App\Models\Munaqosah::whereIn('status_konfirmasi', ['pending', 'dikonfirmasi'])->where('tanggal_munaqosah', '>=', \Carbon\Carbon::today())->count() }}
+                    {{ $upcoming_schedules }}
                 </p>
                 <div class="mt-auto text-right">
                     <a href="{{ route('munaqosah.index') }}" class="text-sm font-medium text-green-600 hover:text-green-800">Lihat Jadwal &rarr;</a>
@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <p class="text-4xl font-extrabold text-yellow-800">
-                    {{ \App\Models\Mahasiswa::where('siap_sidang', true)->doesntHave('munaqosah')->count() }}
+                    {{ $ready_for_defense }}
                 </p>
                 <div class="mt-auto text-right">
                     <a href="{{ route('mahasiswa.index', ['siap_sidang' => true]) }}" class="text-sm font-medium text-yellow-600 hover:text-yellow-800">Lihat Daftar &rarr;</a>

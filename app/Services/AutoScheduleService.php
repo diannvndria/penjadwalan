@@ -6,9 +6,11 @@ use App\Models\Munaqosah;
 use App\Models\Mahasiswa;
 use App\Models\Penguji;
 use App\Models\JadwalPenguji;
+use App\Models\RuangUjian;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class AutoScheduleService
 {
@@ -192,80 +194,66 @@ class AutoScheduleService
             $scheduledCount = 0;
             $failedCount = 0;
 
-            // Get all eligible students
+            // OPTIMIZATION: Eager load dospem and munaqosah to prevent N+1 queries
             $mahasiswas = Mahasiswa::where('siap_sidang', true)
                 ->whereDoesntHave('munaqosah')
-                ->select(['id', 'nim', 'nama'])
+                ->with(['dospem', 'munaqosah'])
                 ->get();
 
-            // Process in chunks with transaction per chunk
+            // OPTIMIZATION: Cache pengujis list for the entire batch operation
+            $allPengujis = Cache::remember('batch_schedule_pengujis', 60, function () {
+                return Penguji::all();
+            });
+
+            // Process in chunks but handle transactions per student
             foreach ($mahasiswas->chunk(self::CHUNK_SIZE) as $chunk) {
-                DB::beginTransaction();
-                try {
-                    foreach ($chunk as $mahasiswa) {
-                        try {
-                            $result = $this->scheduleForMahasiswa($mahasiswa->id);
+                foreach ($chunk as $mahasiswa) {
+                    try {
+                        // Use DB::transaction for atomic operation per student
+                        // This handles beginTransaction/commit/rollBack automatically
+                        $result = DB::transaction(function () use ($mahasiswa, $allPengujis) {
+                            return $this->scheduleForMahasiswaOptimized($mahasiswa, $allPengujis);
+                        });
 
-                            if ($result['success']) {
-                                $scheduledCount++;
-                            } else {
-                                $failedCount++;
-                            }
-
-                            $results[] = [
-                                'mahasiswa' => $mahasiswa->nama,
-                                'nim' => $mahasiswa->nim,
-                                'result' => $result
-                            ];
-
-                            // Commit each successful scheduling immediately
-                            DB::commit();
-                            DB::beginTransaction();
-
-                        } catch (\Exception $e) {
-                            // Log the error for this specific student
-                            Log::error("Error scheduling for student {$mahasiswa->nim}", [
-                                'error' => $e->getMessage(),
-                                'trace' => $e->getTraceAsString()
-                            ]);
-
-                            // Rollback only this student's transaction
-                            DB::rollBack();
-                            DB::beginTransaction();
-
+                        if ($result['success']) {
+                            $scheduledCount++;
+                        } else {
                             $failedCount++;
-                            $results[] = [
-                                'mahasiswa' => $mahasiswa->nama,
-                                'nim' => $mahasiswa->nim,
-                                'result' => [
-                                    'success' => false,
-                                    'message' => 'Error: ' . $e->getMessage()
-                                ]
-                            ];
                         }
-                    }
 
-                    // Commit any remaining transaction
-                    if (DB::transactionLevel() > 0) {
-                        DB::commit();
-                    }
+                        $results[] = [
+                            'mahasiswa' => $mahasiswa->nama,
+                            'nim' => $mahasiswa->nim,
+                            'result' => $result
+                        ];
 
-                    // Add a small delay between chunks
-                    if (count($mahasiswas) > self::CHUNK_SIZE) {
-                        usleep(200000); // 200ms delay
-                    }
+                    } catch (\Exception $e) {
+                        // Log the error for this specific student
+                        Log::error("Error scheduling for student ID {$mahasiswa->id}", [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
 
-                } catch (\Exception $chunkError) {
-                    // If there's an error processing the chunk, log it and continue
-                    if (DB::transactionLevel() > 0) {
-                        DB::rollBack();
+                        $failedCount++;
+                        $results[] = [
+                            'mahasiswa' => $mahasiswa->nama,
+                            'nim' => $mahasiswa->nim,
+                            'result' => [
+                                'success' => false,
+                                'message' => 'Error: ' . $e->getMessage()
+                            ]
+                        ];
                     }
-                    Log::error("Error processing chunk", [
-                        'error' => $chunkError->getMessage(),
-                        'trace' => $chunkError->getTraceAsString()
-                    ]);
+                }
+
+                // Add a small delay between chunks to be nice to the server
+                if (count($mahasiswas) > self::CHUNK_SIZE) {
+                    usleep(50000); // 50ms delay (reduced from 200ms)
                 }
             }
+
+            // Clear cache after batch operation
+            Cache::forget('batch_schedule_pengujis');
 
             return [
                 'success' => true,
@@ -291,6 +279,38 @@ class AutoScheduleService
         }
     }
 
+    /**
+     * Optimized version of scheduleForMahasiswa that accepts pre-loaded pengujis
+     */
+    private function scheduleForMahasiswaOptimized($mahasiswa, $allPengujis): array
+    {
+        try {
+            if (!$this->validateMahasiswa($mahasiswa)['success']) {
+                return ['success' => false, 'message' => 'Mahasiswa tidak valid, belum siap sidang, atau sudah memiliki jadwal.'];
+            }
+
+            if ($allPengujis->count() < 2) {
+                return ['success' => false, 'message' => 'Memerlukan minimal 2 penguji.'];
+            }
+
+            $startDate = Carbon::now()->addDays(1);
+            $endDate = Carbon::now()->addDays(60);
+
+            $scheduleData = $this->findAvailableSlot($mahasiswa, $allPengujis, $startDate, $endDate);
+
+            if ($scheduleData) {
+                $this->createMunaqosahSchedule($scheduleData);
+                return ['success' => true, 'message' => "Jadwal berhasil dibuat pada " . Carbon::parse($scheduleData['tanggal'])->format('d-m-Y') . " jam " . $scheduleData['waktu_mulai']];
+            }
+
+            return ['success' => false, 'message' => 'Tidak dapat menemukan slot waktu & kombinasi 2 penguji yang tersedia.'];
+
+        } catch (\Exception $e) {
+            Log::error("Error scheduling for student ID {$mahasiswa->id}: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return ['success' => false, 'message' => 'Terjadi kesalahan internal: ' . $e->getMessage()];
+        }
+    }
+
     private function validateMahasiswa($mahasiswa)
     {
         if (!$mahasiswa || !$mahasiswa->siap_sidang || $mahasiswa->munaqosah) {
@@ -299,13 +319,61 @@ class AutoScheduleService
         return ['success' => true];
     }
 
+    /**
+     * Get IDs of examiners who are busy at the given time slot
+     * OPTIMIZATION: Single query instead of N+1
+     */
+    private function getBusyPengujiIds($tanggal, $waktuMulai, $waktuSelesai)
+    {
+        // Query 1: Penguji 1 from munaqosah
+        $q1 = DB::table('munaqosahs')
+            ->select('id_penguji1 as id')
+            ->where('tanggal_munaqosah', $tanggal)
+            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                $q->where('waktu_mulai', '<', $waktuSelesai)
+                  ->where('waktu_selesai', '>', $waktuMulai);
+            });
+
+        // Query 2: Penguji 2 from munaqosah
+        $q2 = DB::table('munaqosahs')
+            ->select('id_penguji2 as id')
+            ->where('tanggal_munaqosah', $tanggal)
+            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                 $q->where('waktu_mulai', '<', $waktuSelesai)
+                  ->where('waktu_selesai', '>', $waktuMulai);
+            });
+
+        // Query 3: Jadwal Penguji
+        $q3 = DB::table('jadwal_pengujis')
+            ->select('id_penguji as id')
+             ->where('tanggal', $tanggal)
+            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                 $q->where('waktu_mulai', '<', $waktuSelesai)
+                  ->where('waktu_selesai', '>', $waktuMulai);
+            });
+
+        return $q1->union($q2)->union($q3)->pluck('id')->toArray();
+    }
+
     private function findAvailablePengujis($pengujis, $tanggal, $waktuMulai, $waktuSelesai, $mahasiswa)
     {
+        // OPTIMIZATION: Get all busy IDs in one go to avoid N+1 queries
+        $busyIds = $this->getBusyPengujiIds($tanggal, $waktuMulai, $waktuSelesai);
+
         $availablePengujis = [];
+        $dospemId = $mahasiswa->dospem ? $mahasiswa->dospem->id : null;
+
         foreach ($pengujis as $penguji) {
-            if (($mahasiswa->dospem && $penguji->id == $mahasiswa->dospem->id) || !$this->isPengujiAvailable($penguji->id, $tanggal, $waktuMulai, $waktuSelesai)) {
+            // Dosen pembimbing tidak boleh jadi penguji
+            if ($dospemId && $penguji->id == $dospemId) {
                 continue;
             }
+
+            // Cek apakah penguji sibuk (using in-memory check instead of DB query)
+            if (in_array($penguji->id, $busyIds)) {
+                continue;
+            }
+
             $availablePengujis[] = $penguji;
         }
         return $availablePengujis;
@@ -313,19 +381,33 @@ class AutoScheduleService
 
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
     {
-        $isBusyInMunaqosah = Munaqosah::where(fn($q) => $q->where('id_penguji1', $pengujiId)->orWhere('id_penguji2', $pengujiId))
+        // OPTIMIZATION: Combine both queries into a single optimized query
+        // Check if penguji is busy in either munaqosahs OR jadwal_pengujis tables
+        // IMPORTANT: Must select same columns in both UNION queries
+        $isBusy = DB::table('munaqosahs')
+            ->select(DB::raw('1'))
+            ->where(function($q) use ($pengujiId) {
+                $q->where('id_penguji1', $pengujiId)
+                  ->orWhere('id_penguji2', $pengujiId);
+            })
             ->where('tanggal_munaqosah', $tanggal)
-            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
+            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                $q->where('waktu_mulai', '<', $waktuSelesai)
+                  ->where('waktu_selesai', '>', $waktuMulai);
+            })
+            ->union(
+                DB::table('jadwal_pengujis')
+                    ->select(DB::raw('1'))
+                    ->where('id_penguji', $pengujiId)
+                    ->where('tanggal', $tanggal)
+                    ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                        $q->where('waktu_mulai', '<', $waktuSelesai)
+                          ->where('waktu_selesai', '>', $waktuMulai);
+                    })
+            )
             ->exists();
 
-        if ($isBusyInMunaqosah) return false;
-
-        $isBusyInJadwal = JadwalPenguji::where('id_penguji', $pengujiId)
-            ->where('tanggal', $tanggal)
-            ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-            ->exists();
-
-        return !$isBusyInJadwal;
+        return !$isBusy;
     }
 
     /**
@@ -350,40 +432,39 @@ class AutoScheduleService
 
     /**
      * Cari ruang yang tersedia dengan prioritas lantai
+     * OPTIMIZED: Uses single query with subquery instead of looping
      */
     private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai, bool $needsPriorityRoom = false)
     {
-        // Ambil semua ruang aktif
-        $rooms = \App\Models\RuangUjian::where('is_aktif', true)->get();
+        // OPTIMIZATION: Use a single query with NOT EXISTS subquery
+        $query = RuangUjian::where('is_aktif', true)
+            ->whereNotExists(function ($query) use ($tanggal, $waktuMulai, $waktuSelesai) {
+                $query->select(DB::raw(1))
+                    ->from('munaqosahs')
+                    ->whereColumn('munaqosahs.id_ruang_ujian', 'ruang_ujian.id')
+                    ->where('munaqosahs.tanggal_munaqosah', $tanggal)
+                    ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                        $q->where('munaqosahs.waktu_mulai', '<', $waktuSelesai)
+                          ->where('munaqosahs.waktu_selesai', '>', $waktuMulai);
+                    });
+            });
 
-        // Urutkan ruangan berdasarkan prioritas
-        $sortedRooms = $rooms->sortBy(function ($room) use ($needsPriorityRoom) {
-            // Jika butuh ruang prioritas, prioritaskan ruang prioritas dan lantai 1
-            if ($needsPriorityRoom) {
-                // Semakin kecil nilai, semakin prioritas
-                if ($room->is_prioritas) return 0;
-                if ($room->lantai == 1) return 1;
-                return $room->lantai + 10;
-            }
-            // Untuk non-prioritas, urutkan normal berdasarkan lantai
-            return $room->lantai;
-        });
-
-        foreach ($sortedRooms as $room) {
-            $isRoomBusy = Munaqosah::where('id_ruang_ujian', $room->id)
-                ->where('tanggal_munaqosah', $tanggal)
-                ->where(fn($q) => $q->where('waktu_mulai', '<', $waktuSelesai)->where('waktu_selesai', '>', $waktuMulai))
-                ->exists();
-
-            if (!$isRoomBusy) {
-                // Log jika alokasi prioritas berhasil
-                if ($needsPriorityRoom && ($room->is_prioritas || $room->lantai == 1)) {
-                    Log::info("Priority room allocated: {$room->nama} (Lantai {$room->lantai}, Prioritas: " . ($room->is_prioritas ? 'Ya' : 'Tidak') . ")");
-                }
-                return $room->id;
-            }
+        // Apply priority-based ordering
+        if ($needsPriorityRoom) {
+            // Prioritize rooms with is_prioritas = true, then floor 1, then other floors
+            $query->orderByRaw('CASE WHEN is_prioritas THEN 0 WHEN lantai = 1 THEN 1 ELSE lantai + 10 END');
+        } else {
+            // For non-priority, just order by floor
+            $query->orderBy('lantai');
         }
-        return null;
+
+        $room = $query->first();
+
+        if ($room && $needsPriorityRoom && ($room->is_prioritas || $room->lantai == 1)) {
+            Log::info("Priority room allocated: {$room->nama} (Lantai {$room->lantai}, Prioritas: " . ($room->is_prioritas ? 'Ya' : 'Tidak') . ")");
+        }
+
+        return $room?->id;
     }
 
     private function createMunaqosahSchedule($scheduleData)
@@ -399,14 +480,24 @@ class AutoScheduleService
             'status_konfirmasi' => 'pending'
         ]);
 
-        $ruang = \App\Models\RuangUjian::find($scheduleData['id_ruang_ujian'] ?? null);
+        // OPTIMIZATION: Only fetch room data if we need it for the history record
+        $ruangNama = '-';
+        $ruangLantai = '';
+        if ($scheduleData['id_ruang_ujian']) {
+            $ruang = RuangUjian::select('nama', 'lantai')->find($scheduleData['id_ruang_ujian']);
+            if ($ruang) {
+                $ruangNama = $ruang->nama;
+                $ruangLantai = " (Lantai {$ruang->lantai})";
+            }
+        }
+
         $priorityNote = isset($scheduleData['is_priority_allocation']) && $scheduleData['is_priority_allocation']
             ? ' [PRIORITAS]'
             : '';
 
         \App\Models\HistoriMunaqosah::create([
             'id_munaqosah' => $munaqosah->id,
-            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: " . (optional($ruang)->nama ?? '-') . ($ruang ? " (Lantai {$ruang->lantai})" : '') . "{$priorityNote}.",
+            'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: {$ruangNama}{$ruangLantai}{$priorityNote}.",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
     }

@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('configForm').addEventListener('submit', saveConfiguration);
     document.getElementById('refreshBtn').addEventListener('click', loadReadyStudents);
     document.getElementById('batchScheduleBtn').addEventListener('click', batchSchedule);
-    document.getElementById('confirmScheduleBtn').addEventListener('click', confirmIndividualSchedule);
+    document.getElementById('confirmScheduleBtn').onclick = confirmIndividualSchedule;
     document.getElementById('cancelScheduleBtn').addEventListener('click', hideModal);
 
     // Functions

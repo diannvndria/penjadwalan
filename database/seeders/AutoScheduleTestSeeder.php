@@ -9,6 +9,7 @@ use App\Models\Dosen;
 use App\Models\Penguji;
 use App\Models\Mahasiswa;
 use App\Models\JadwalPenguji;
+use App\Models\RuangUjian;
 use Carbon\Carbon;
 
 class AutoScheduleTestSeeder extends Seeder
@@ -46,6 +47,22 @@ class AutoScheduleTestSeeder extends Seeder
             );
         }
 
+        // Create exam rooms
+        $rooms = [];
+        $roomNames = ['A101', 'A102', 'B201', 'B202'];
+        foreach ($roomNames as $index => $roomName) {
+            $rooms[] = RuangUjian::firstOrCreate(
+                ['nama' => "Ruang $roomName"],
+                [
+                    'nama' => "Ruang $roomName",
+                    'lantai' => ($index < 2) ? 1 : 2,
+                    'kapasitas' => 30,
+                    'is_aktif' => true,
+                    'is_prioritas' => ($index === 0) // First room is priority room
+                ]
+            );
+        }
+
         // Create some mahasiswa yang siap sidang
         $mahasiswas = [];
         for ($i = 1; $i <= 6; $i++) {
@@ -64,7 +81,7 @@ class AutoScheduleTestSeeder extends Seeder
 
         // Create some jadwal penguji untuk simulasi konflik
         $today = Carbon::today();
-        
+
         // Penguji 1 tidak tersedia hari ini jam 10:00-12:00
         JadwalPenguji::firstOrCreate([
             'id_penguji' => $pengujis[0]->id,
@@ -90,6 +107,7 @@ class AutoScheduleTestSeeder extends Seeder
         $this->command->info("   - Admin user: admin@test.com (password: password)");
         $this->command->info("   - Dosens: " . count($dosens));
         $this->command->info("   - Pengujis: " . count($pengujis));
+        $this->command->info("   - Ruang Ujian: " . count($rooms));
         $this->command->info("   - Mahasiswas: " . count($mahasiswas));
         $this->command->info("   - Mahasiswa siap sidang: 4");
         $this->command->info("   - Jadwal penguji (conflicts): 2");
