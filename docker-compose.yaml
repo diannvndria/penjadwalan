@@ -15,6 +15,7 @@ services:
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
+      - DISABLE_LOGIN=false
 
 volumes:
   caddy_data:

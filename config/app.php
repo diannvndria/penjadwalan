@@ -43,6 +43,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Disable Login (Development Only)
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the application will bypass login and automatically
+    | authenticate as admin@test.com. This should ONLY be used in development.
+    | Set DISABLE_LOGIN=true in your .env file to enable this feature.
+    |
+    */
+
+    'disable_login' => (bool) env('DISABLE_LOGIN', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

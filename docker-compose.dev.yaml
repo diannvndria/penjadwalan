@@ -18,6 +18,7 @@ services:
       - .env
     environment:
       - APP_DEBUG=true
+      - DISABLE_LOGIN=true
 
   node:
     build:

@@ -28,6 +28,16 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard'); // Arahkan ke dashboard jika sudah login
         }
+
+        // Auto-login untuk development jika DISABLE_LOGIN diaktifkan
+        if (config('app.disable_login', false)) {
+            $user = User::where('email', 'admin@test.com')->first();
+            if ($user) {
+                Auth::login($user);
+                return redirect()->route('dashboard')->with('success', 'Auto-login (Development Mode)');
+            }
+        }
+
         return view('auth.login');
     }
 
@@ -36,6 +46,16 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Bypass login untuk development jika DISABLE_LOGIN diaktifkan
+        if (config('app.disable_login', false)) {
+            $user = User::where('email', 'admin@test.com')->first();
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+                return redirect()->intended('/dashboard')->with('success', 'Auto-login (Development Mode)');
+            }
+        }
+
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
