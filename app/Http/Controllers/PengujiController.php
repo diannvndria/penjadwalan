@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Penguji; // Pastikan model Penguji sudah diimpor
@@ -11,8 +12,9 @@ class PengujiController extends Controller
      */
     public function index()
     {
-    $pengujis = Penguji::orderBy('nama')->paginate(10);
-    return view('penguji.index', compact('pengujis'));
+        $pengujis = Penguji::orderBy('nama')->paginate(10);
+
+        return view('penguji.index', compact('pengujis'));
     }
 
     /**
@@ -70,6 +72,7 @@ class PengujiController extends Controller
     {
         try {
             $penguji->delete();
+
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             // Tangani jika penguji masih terhubung ke jadwal atau munaqosah (Foreign Key Constraint)

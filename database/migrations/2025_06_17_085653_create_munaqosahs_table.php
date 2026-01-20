@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +14,8 @@ class CreateMunaqosahsTable extends Migration
         Schema::create('munaqosahs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_mahasiswa')
-                  ->constrained('mahasiswas') // Foreign key ke tabel 'mahasiswas'
-                  ->onDelete('cascade'); // Jika mahasiswa dihapus, jadwal munaqosahnya ikut terhapus
+                ->constrained('mahasiswas') // Foreign key ke tabel 'mahasiswas'
+                ->onDelete('cascade'); // Jika mahasiswa dihapus, jadwal munaqosahnya ikut terhapus
             $table->date('tanggal_munaqosah');
             $table->time('waktu_mulai');
             $table->time('waktu_selesai');

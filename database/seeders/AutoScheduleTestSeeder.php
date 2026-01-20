@@ -2,15 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Dosen;
-use App\Models\Penguji;
-use App\Models\Mahasiswa;
 use App\Models\JadwalPenguji;
+use App\Models\Mahasiswa;
+use App\Models\Penguji;
 use App\Models\RuangUjian;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class AutoScheduleTestSeeder extends Seeder
 {
@@ -25,7 +24,7 @@ class AutoScheduleTestSeeder extends Seeder
             [
                 'name' => 'Admin Test',
                 'password' => bcrypt('password'),
-                'role' => 'admin'
+                'role' => 'admin',
             ]
         );
 
@@ -58,7 +57,7 @@ class AutoScheduleTestSeeder extends Seeder
                     'lantai' => ($index < 2) ? 1 : 2,
                     'kapasitas' => 30,
                     'is_aktif' => true,
-                    'is_prioritas' => ($index === 0) // First room is priority room
+                    'is_prioritas' => ($index === 0), // First room is priority room
                 ]
             );
         }
@@ -67,14 +66,14 @@ class AutoScheduleTestSeeder extends Seeder
         $mahasiswas = [];
         for ($i = 1; $i <= 6; $i++) {
             $mahasiswas[] = Mahasiswa::firstOrCreate(
-                ['nim' => "123456789" . $i],
+                ['nim' => '123456789'.$i],
                 [
-                    'nim' => "123456789" . $i,
+                    'nim' => '123456789'.$i,
                     'nama' => "Mahasiswa Test $i",
                     'angkatan' => 2021,
                     'judul_skripsi' => "Judul Skripsi Test $i untuk Auto Schedule",
                     'id_dospem' => $dosens[($i - 1) % 5]->id,
-                    'siap_sidang' => ($i <= 4) // 4 mahasiswa pertama siap sidang
+                    'siap_sidang' => ($i <= 4), // 4 mahasiswa pertama siap sidang
                 ]
             );
         }
@@ -89,7 +88,7 @@ class AutoScheduleTestSeeder extends Seeder
             'waktu_mulai' => '10:00:00',
             'waktu_selesai' => '12:00:00',
         ], [
-            'deskripsi' => 'Rapat Departemen'
+            'deskripsi' => 'Rapat Departemen',
         ]);
 
         // Penguji 2 tidak tersedia besok jam 09:00-11:00
@@ -99,17 +98,17 @@ class AutoScheduleTestSeeder extends Seeder
             'waktu_mulai' => '09:00:00',
             'waktu_selesai' => '11:00:00',
         ], [
-            'deskripsi' => 'Mengajar Kelas'
+            'deskripsi' => 'Mengajar Kelas',
         ]);
 
         $this->command->info('✅ Auto-schedule test data has been created successfully!');
         $this->command->info('📊 Summary:');
-        $this->command->info("   - Admin user: admin@test.com (password: password)");
-        $this->command->info("   - Dosens: " . count($dosens));
-        $this->command->info("   - Pengujis: " . count($pengujis));
-        $this->command->info("   - Ruang Ujian: " . count($rooms));
-        $this->command->info("   - Mahasiswas: " . count($mahasiswas));
-        $this->command->info("   - Mahasiswa siap sidang: 4");
-        $this->command->info("   - Jadwal penguji (conflicts): 2");
+        $this->command->info('   - Admin user: admin@test.com (password: password)');
+        $this->command->info('   - Dosens: '.count($dosens));
+        $this->command->info('   - Pengujis: '.count($pengujis));
+        $this->command->info('   - Ruang Ujian: '.count($rooms));
+        $this->command->info('   - Mahasiswas: '.count($mahasiswas));
+        $this->command->info('   - Mahasiswa siap sidang: 4');
+        $this->command->info('   - Jadwal penguji (conflicts): 2');
     }
 }

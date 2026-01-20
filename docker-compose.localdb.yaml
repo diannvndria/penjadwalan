@@ -1,31 +1,31 @@
 services:
   app:
     environment:
-      - DB_HOST=penjadwalan-db
-      - DB_PORT=5432
-      - DB_DATABASE=postgres
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=penjadwalan
+      DB_HOST: penjadwalan-db
+      DB_PORT: "5432"
+      DB_DATABASE: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: penjadwalan
     depends_on:
       db:
         condition: service_healthy
 
   db:
-    image: postgres:18.1-alpine
     container_name: penjadwalan-db
+    image: postgres:18.1-alpine
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=penjadwalan
-      - POSTGRES_DB=postgres
-    volumes:
-      - pg_data:/var/lib/postgresql
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: penjadwalan
+      POSTGRES_DB: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       start_period: 5s
       interval: 30s
       timeout: 5s
       retries: 5
+    volumes:
+      - pg_data:/var/lib/postgresql
 
 volumes:
   pg_data:

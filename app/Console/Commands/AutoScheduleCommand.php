@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\AutoScheduleService;
 use App\Models\Mahasiswa;
+use Illuminate\Console\Command;
 
 class AutoScheduleCommand extends Command
 {
@@ -45,12 +44,14 @@ class AutoScheduleCommand extends Command
         // Jika ada option student, jadwalkan satu mahasiswa
         if ($this->option('student')) {
             $this->scheduleOneStudent();
+
             return;
         }
 
         // Jika ada option batch, jadwalkan semua mahasiswa
         if ($this->option('batch')) {
             $this->batchScheduleAll();
+
             return;
         }
 
@@ -64,34 +65,38 @@ class AutoScheduleCommand extends Command
     protected function scheduleOneStudent(): void
     {
         $studentId = $this->option('student');
-        
-        if (!is_numeric($studentId)) {
+
+        if (! is_numeric($studentId)) {
             $this->error('❌ ID mahasiswa harus berupa angka');
+
             return;
         }
 
         $mahasiswa = Mahasiswa::find($studentId);
-        if (!$mahasiswa) {
+        if (! $mahasiswa) {
             $this->error("❌ Mahasiswa dengan ID {$studentId} tidak ditemukan");
+
             return;
         }
 
         $this->info("📋 Memproses mahasiswa: {$mahasiswa->nama} (NIM: {$mahasiswa->nim})");
 
-        if (!$mahasiswa->siap_sidang) {
+        if (! $mahasiswa->siap_sidang) {
             $this->warn('⚠️  Mahasiswa belum ditandai siap sidang');
+
             return;
         }
 
         if ($mahasiswa->munaqosah) {
             $this->warn('⚠️  Mahasiswa sudah memiliki jadwal munaqosah');
+
             return;
         }
 
         if ($this->option('simulate')) {
             $this->simulateSchedule($mahasiswa);
         } else {
-            $this->executeSchedule((int)$studentId);
+            $this->executeSchedule((int) $studentId);
         }
     }
 
@@ -108,9 +113,9 @@ class AutoScheduleCommand extends Command
         $this->info("✅ Berhasil dijadwalkan: {$result['scheduled_count']}");
         $this->info("❌ Gagal dijadwalkan: {$result['failed_count']}");
 
-        if ($this->option('detail') && !empty($result['results'])) {
+        if ($this->option('detail') && ! empty($result['results'])) {
             $this->info("\n📝 Detail Hasil:");
-            
+
             $headers = ['Nama', 'NIM', 'Status', 'Keterangan'];
             $rows = [];
 
@@ -119,7 +124,7 @@ class AutoScheduleCommand extends Command
                     $item['mahasiswa'],
                     $item['nim'],
                     $item['result']['success'] ? '✅ Berhasil' : '❌ Gagal',
-                    $item['result']['message']
+                    $item['result']['message'],
                 ];
             }
 
@@ -141,7 +146,7 @@ class AutoScheduleCommand extends Command
             $reflection = new \ReflectionClass($this->autoScheduleService);
             $method = $reflection->getMethod('findAvailableSlot');
             $method->setAccessible(true);
-            
+
             $availableSlot = $method->invoke($this->autoScheduleService);
 
             if ($availableSlot) {
@@ -170,7 +175,7 @@ class AutoScheduleCommand extends Command
 
         if ($result['success']) {
             $this->info('✅ Auto-schedule berhasil!');
-            
+
             if (isset($result['data']['munaqosah'])) {
                 $munaqosah = $result['data']['munaqosah'];
                 $this->info("📅 Tanggal: {$munaqosah->tanggal_munaqosah}");

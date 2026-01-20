@@ -2,20 +2,21 @@
 
 namespace App\Services;
 
-use App\Models\Munaqosah;
 use App\Models\Mahasiswa;
+use App\Models\Munaqosah;
 use App\Models\Penguji;
-use App\Models\JadwalPenguji;
 use App\Models\RuangUjian;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AutoScheduleService
 {
     private array $workingDays;
+
     private array $workingHours;
+
     private int $durationMinutes; // Akan menyimpan durasi dalam menit
 
     /**
@@ -40,8 +41,6 @@ class AutoScheduleService
 
     /**
      * Mengatur durasi sidang dalam menit untuk instance service saat ini.
-     * @param int $minutes
-     * @return void
      */
     public function setDuration(int $minutes): void
     {
@@ -50,9 +49,6 @@ class AutoScheduleService
 
     /**
      * Mengatur jam kerja untuk instance service saat ini.
-     * @param string $start
-     * @param string $end
-     * @return void
      */
     public function setWorkingHours(string $start, string $end): void
     {
@@ -63,8 +59,6 @@ class AutoScheduleService
     /**
      * Mengatur jangkauan pencarian jadwal.
      * Method ini ditambahkan kembali untuk mencegah error dari controller.
-     * @param int $days
-     * @return void
      */
     public function setSearchRange(int $days): void
     {
@@ -84,8 +78,8 @@ class AutoScheduleService
             // Gunakan dayOfWeekIso (1=Senin, 7=Minggu) agar konsisten
             if (in_array($currentDate->dayOfWeekIso, $this->workingDays)) {
 
-                $slotStart = Carbon::parse($currentDate->toDateString() . ' ' . $this->workingHours['start']);
-                $dayEnd = Carbon::parse($currentDate->toDateString() . ' ' . $this->workingHours['end']);
+                $slotStart = Carbon::parse($currentDate->toDateString().' '.$this->workingHours['start']);
+                $dayEnd = Carbon::parse($currentDate->toDateString().' '.$this->workingHours['end']);
 
                 // Loop dinamis berdasarkan durasi
                 while ($slotStart->copy()->addMinutes($this->durationMinutes)->lte($dayEnd)) {
@@ -94,6 +88,7 @@ class AutoScheduleService
                     // (Opsional) Logika untuk melewati jam istirahat
                     if ($slotStart->hour == 12 || ($slotStart->hour < 13 && $slotEnd->hour >= 13)) {
                         $slotStart->hour(13)->minute(0)->second(0);
+
                         continue; // Lanjut ke slot setelah jam 1 siang
                     }
 
@@ -118,11 +113,13 @@ class AutoScheduleService
                             $needsPriorityRoom
                         );
 
-                        if (!$availableRoomId) {
+                        if (! $availableRoomId) {
                             // Jika tidak ada ruang tersedia, lanjut ke slot berikutnya
                             $slotStart->addMinutes($this->durationMinutes);
+
                             continue;
                         }
+
                         return [
                             'mahasiswa' => $mahasiswa,
                             'tanggal' => $currentDate->toDateString(),
@@ -141,6 +138,7 @@ class AutoScheduleService
             }
             $currentDate->addDay();
         }
+
         return null;
     }
 
@@ -154,7 +152,7 @@ class AutoScheduleService
         try {
             $mahasiswa = Mahasiswa::with('dospem')->findOrFail($mahasiswaId);
 
-            if (!$this->validateMahasiswa($mahasiswa)['success']) {
+            if (! $this->validateMahasiswa($mahasiswa)['success']) {
                 return ['success' => false, 'message' => 'Mahasiswa tidak valid, belum siap sidang, atau sudah memiliki jadwal.'];
             }
 
@@ -170,14 +168,16 @@ class AutoScheduleService
 
             if ($scheduleData) {
                 $this->createMunaqosahSchedule($scheduleData);
-                return ['success' => true, 'message' => "Jadwal berhasil dibuat pada " . Carbon::parse($scheduleData['tanggal'])->format('d-m-Y') . " jam " . $scheduleData['waktu_mulai']];
+
+                return ['success' => true, 'message' => 'Jadwal berhasil dibuat pada '.Carbon::parse($scheduleData['tanggal'])->format('d-m-Y').' jam '.$scheduleData['waktu_mulai']];
             }
 
             return ['success' => false, 'message' => 'Tidak dapat menemukan slot waktu & kombinasi 2 penguji yang tersedia.'];
 
         } catch (\Exception $e) {
-            Log::error("Error scheduling for student ID {$mahasiswaId}: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return ['success' => false, 'message' => 'Terjadi kesalahan internal: ' . $e->getMessage()];
+            Log::error("Error scheduling for student ID {$mahasiswaId}: ".$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
+            return ['success' => false, 'message' => 'Terjadi kesalahan internal: '.$e->getMessage()];
         }
     }
 
@@ -224,14 +224,14 @@ class AutoScheduleService
                         $results[] = [
                             'mahasiswa' => $mahasiswa->nama,
                             'nim' => $mahasiswa->nim,
-                            'result' => $result
+                            'result' => $result,
                         ];
 
                     } catch (\Exception $e) {
                         // Log the error for this specific student
                         Log::error("Error scheduling for student ID {$mahasiswa->id}", [
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
 
                         $failedCount++;
@@ -240,8 +240,8 @@ class AutoScheduleService
                             'nim' => $mahasiswa->nim,
                             'result' => [
                                 'success' => false,
-                                'message' => 'Error: ' . $e->getMessage()
-                            ]
+                                'message' => 'Error: '.$e->getMessage(),
+                            ],
                         ];
                     }
                 }
@@ -260,21 +260,21 @@ class AutoScheduleService
                 'message' => "Penjadwalan batch selesai: $scheduledCount berhasil, $failedCount gagal",
                 'scheduled_count' => $scheduledCount,
                 'failed_count' => $failedCount,
-                'results' => $results
+                'results' => $results,
             ];
 
         } catch (\Exception $e) {
             Log::error('Error in batch scheduling', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan dalam batch scheduling: ' . $e->getMessage(),
+                'message' => 'Terjadi kesalahan dalam batch scheduling: '.$e->getMessage(),
                 'scheduled_count' => $scheduledCount ?? 0,
                 'failed_count' => ($mahasiswas->count() ?? 0) - ($scheduledCount ?? 0),
-                'results' => $results ?? []
+                'results' => $results ?? [],
             ];
         }
     }
@@ -285,7 +285,7 @@ class AutoScheduleService
     private function scheduleForMahasiswaOptimized($mahasiswa, $allPengujis): array
     {
         try {
-            if (!$this->validateMahasiswa($mahasiswa)['success']) {
+            if (! $this->validateMahasiswa($mahasiswa)['success']) {
                 return ['success' => false, 'message' => 'Mahasiswa tidak valid, belum siap sidang, atau sudah memiliki jadwal.'];
             }
 
@@ -300,22 +300,25 @@ class AutoScheduleService
 
             if ($scheduleData) {
                 $this->createMunaqosahSchedule($scheduleData);
-                return ['success' => true, 'message' => "Jadwal berhasil dibuat pada " . Carbon::parse($scheduleData['tanggal'])->format('d-m-Y') . " jam " . $scheduleData['waktu_mulai']];
+
+                return ['success' => true, 'message' => 'Jadwal berhasil dibuat pada '.Carbon::parse($scheduleData['tanggal'])->format('d-m-Y').' jam '.$scheduleData['waktu_mulai']];
             }
 
             return ['success' => false, 'message' => 'Tidak dapat menemukan slot waktu & kombinasi 2 penguji yang tersedia.'];
 
         } catch (\Exception $e) {
-            Log::error("Error scheduling for student ID {$mahasiswa->id}: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return ['success' => false, 'message' => 'Terjadi kesalahan internal: ' . $e->getMessage()];
+            Log::error("Error scheduling for student ID {$mahasiswa->id}: ".$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
+            return ['success' => false, 'message' => 'Terjadi kesalahan internal: '.$e->getMessage()];
         }
     }
 
     private function validateMahasiswa($mahasiswa)
     {
-        if (!$mahasiswa || !$mahasiswa->siap_sidang || $mahasiswa->munaqosah) {
+        if (! $mahasiswa || ! $mahasiswa->siap_sidang || $mahasiswa->munaqosah) {
             return ['success' => false];
         }
+
         return ['success' => true];
     }
 
@@ -329,27 +332,27 @@ class AutoScheduleService
         $q1 = DB::table('munaqosahs')
             ->select('id_penguji1 as id')
             ->where('tanggal_munaqosah', $tanggal)
-            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
                 $q->where('waktu_mulai', '<', $waktuSelesai)
-                  ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         // Query 2: Penguji 2 from munaqosah
         $q2 = DB::table('munaqosahs')
             ->select('id_penguji2 as id')
             ->where('tanggal_munaqosah', $tanggal)
-            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
-                 $q->where('waktu_mulai', '<', $waktuSelesai)
-                  ->where('waktu_selesai', '>', $waktuMulai);
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
+                $q->where('waktu_mulai', '<', $waktuSelesai)
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         // Query 3: Jadwal Penguji
         $q3 = DB::table('jadwal_pengujis')
             ->select('id_penguji as id')
-             ->where('tanggal', $tanggal)
-            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
-                 $q->where('waktu_mulai', '<', $waktuSelesai)
-                  ->where('waktu_selesai', '>', $waktuMulai);
+            ->where('tanggal', $tanggal)
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
+                $q->where('waktu_mulai', '<', $waktuSelesai)
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         return $q1->union($q2)->union($q3)->pluck('id')->toArray();
@@ -376,6 +379,7 @@ class AutoScheduleService
 
             $availablePengujis[] = $penguji;
         }
+
         return $availablePengujis;
     }
 
@@ -386,28 +390,28 @@ class AutoScheduleService
         // IMPORTANT: Must select same columns in both UNION queries
         $isBusy = DB::table('munaqosahs')
             ->select(DB::raw('1'))
-            ->where(function($q) use ($pengujiId) {
+            ->where(function ($q) use ($pengujiId) {
                 $q->where('id_penguji1', $pengujiId)
-                  ->orWhere('id_penguji2', $pengujiId);
+                    ->orWhere('id_penguji2', $pengujiId);
             })
             ->where('tanggal_munaqosah', $tanggal)
-            ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
                 $q->where('waktu_mulai', '<', $waktuSelesai)
-                  ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->union(
                 DB::table('jadwal_pengujis')
                     ->select(DB::raw('1'))
                     ->where('id_penguji', $pengujiId)
                     ->where('tanggal', $tanggal)
-                    ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                    ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
                         $q->where('waktu_mulai', '<', $waktuSelesai)
-                          ->where('waktu_selesai', '>', $waktuMulai);
+                            ->where('waktu_selesai', '>', $waktuMulai);
                     })
             )
             ->exists();
 
-        return !$isBusy;
+        return ! $isBusy;
     }
 
     /**
@@ -443,9 +447,9 @@ class AutoScheduleService
                     ->from('munaqosahs')
                     ->whereColumn('munaqosahs.id_ruang_ujian', 'ruang_ujian.id')
                     ->where('munaqosahs.tanggal_munaqosah', $tanggal)
-                    ->where(function($q) use ($waktuMulai, $waktuSelesai) {
+                    ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
                         $q->where('munaqosahs.waktu_mulai', '<', $waktuSelesai)
-                          ->where('munaqosahs.waktu_selesai', '>', $waktuMulai);
+                            ->where('munaqosahs.waktu_selesai', '>', $waktuMulai);
                     });
             });
 
@@ -461,7 +465,7 @@ class AutoScheduleService
         $room = $query->first();
 
         if ($room && $needsPriorityRoom && ($room->is_prioritas || $room->lantai == 1)) {
-            Log::info("Priority room allocated: {$room->nama} (Lantai {$room->lantai}, Prioritas: " . ($room->is_prioritas ? 'Ya' : 'Tidak') . ")");
+            Log::info("Priority room allocated: {$room->nama} (Lantai {$room->lantai}, Prioritas: ".($room->is_prioritas ? 'Ya' : 'Tidak').')');
         }
 
         return $room?->id;
@@ -477,7 +481,7 @@ class AutoScheduleService
             'id_penguji1' => $scheduleData['penguji1']->id,
             'id_penguji2' => $scheduleData['penguji2']->id,
             'id_ruang_ujian' => $scheduleData['id_ruang_ujian'] ?? null,
-            'status_konfirmasi' => 'pending'
+            'status_konfirmasi' => 'pending',
         ]);
 
         // OPTIMIZATION: Only fetch room data if we need it for the history record

@@ -5,17 +5,17 @@ services:
       target: production
     container_name: penjadwalan-app
     restart: unless-stopped
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-    ports:
-      - "8000:8000"
     env_file:
       - .env
     environment:
-      - APP_ENV=production
-      - APP_DEBUG=false
-      - DISABLE_LOGIN=false
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DISABLE_LOGIN: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
 
 volumes:
   caddy_data:

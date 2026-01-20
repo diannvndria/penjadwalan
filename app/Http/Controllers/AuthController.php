@@ -17,6 +17,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
+
         return view('auth.login');
     }
 
@@ -34,6 +35,7 @@ class AuthController extends Controller
             $user = User::where('email', 'admin@test.com')->first();
             if ($user) {
                 Auth::login($user);
+
                 return redirect()->route('dashboard')->with('success', 'Auto-login (Development Mode)');
             }
         }
@@ -52,6 +54,7 @@ class AuthController extends Controller
             if ($user) {
                 Auth::login($user);
                 $request->session()->regenerate();
+
                 return redirect()->intended('/dashboard')->with('success', 'Auto-login (Development Mode)');
             }
         }
@@ -87,6 +90,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
+
         return view('auth.register');
     }
 

@@ -1,14 +1,15 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Mahasiswa;
 use App\Models\Dosen;
-use App\Models\Penguji;
 use App\Models\JadwalPenguji;
+use App\Models\Mahasiswa;
 use App\Models\Munaqosah;
+use App\Models\Penguji;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class MahasiswaController extends Controller
 {
@@ -16,46 +17,46 @@ class MahasiswaController extends Controller
      * Menampilkan daftar mahasiswa, dengan opsi filter angkatan.
      */
     public function index(Request $request)
-{
-    // Ambil semua data dosen untuk dropdown filter
-    $dosens = Dosen::orderBy('nama')->get();
+    {
+        // Ambil semua data dosen untuk dropdown filter
+        $dosens = Dosen::orderBy('nama')->get();
 
-    // 1. PERBAIKAN NAMA VARIABEL: Ubah nama variabel menjadi 'angkatans_tersedia'
-    $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
+        // 1. PERBAIKAN NAMA VARIABEL: Ubah nama variabel menjadi 'angkatans_tersedia'
+        $angkatans_tersedia = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
 
-    // 2. PERBAIKAN LOGIKA: Ambil nilai angkatan yang sedang difilter dari request
-    $angkatan = $request->input('angkatan');
+        // 2. PERBAIKAN LOGIKA: Ambil nilai angkatan yang sedang difilter dari request
+        $angkatan = $request->input('angkatan');
 
-    $query = Mahasiswa::with('dospem')->latest();
+        $query = Mahasiswa::with('dospem')->latest();
 
-    // Terapkan filter pencarian jika ada
-    if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            $q->where('nama', 'like', '%' . $request->search . '%')
-              ->orWhere('nim', 'like', '%' . $request->search . '%');
-        });
+        // Terapkan filter pencarian jika ada
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama', 'like', '%'.$request->search.'%')
+                    ->orWhere('nim', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        // Terapkan filter angkatan jika ada (menggunakan variabel $angkatan)
+        if ($angkatan) {
+            $query->where('angkatan', $angkatan);
+        }
+
+        // Terapkan filter dosen pembimbing jika ada
+        if ($request->filled('dospem_id')) {
+            $query->where('id_dospem', $request->dospem_id);
+        }
+
+        $mahasiswas = $query->paginate(10);
+
+        // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view
+        return view('mahasiswa.index', compact(
+            'mahasiswas',
+            'angkatans_tersedia',
+            'dosens',
+            'angkatan' // <-- kirim juga variabel $angkatan
+        ));
     }
-
-    // Terapkan filter angkatan jika ada (menggunakan variabel $angkatan)
-    if ($angkatan) {
-        $query->where('angkatan', $angkatan);
-    }
-
-    // Terapkan filter dosen pembimbing jika ada
-    if ($request->filled('dospem_id')) {
-        $query->where('id_dospem', $request->dospem_id);
-    }
-
-    $mahasiswas = $query->paginate(10);
-
-    // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view
-    return view('mahasiswa.index', compact(
-        'mahasiswas', 
-        'angkatans_tersedia', 
-        'dosens', 
-        'angkatan' // <-- kirim juga variabel $angkatan
-    ));
-}
 
     /**
      * Menampilkan form untuk membuat mahasiswa baru.
@@ -63,6 +64,7 @@ class MahasiswaController extends Controller
     public function create()
     {
         $dosens = Dosen::all(); // Ambil semua dosen untuk dropdown pilihan dosen pembimbing
+
         return view('mahasiswa.create', compact('dosens'));
     }
 
@@ -74,7 +76,7 @@ class MahasiswaController extends Controller
         $request->validate([
             'nim' => 'required|string|max:20|unique:mahasiswas,nim',
             'nama' => 'required|string|max:255',
-            'angkatan' => 'required|integer|min:2000|max:' . date('Y'),
+            'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
             'judul_skripsi' => 'required|string',
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional', // Validasi profil lulusan
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
@@ -100,6 +102,7 @@ class MahasiswaController extends Controller
     public function edit(Mahasiswa $mahasiswa)
     {
         $dosens = Dosen::all();
+
         return view('mahasiswa.edit', compact('mahasiswa', 'dosens'));
     }
 
@@ -112,9 +115,9 @@ class MahasiswaController extends Controller
         $oldSiapSidang = $mahasiswa->siap_sidang;
 
         $request->validate([
-            'nim' => 'required|string|max:20|unique:mahasiswas,nim,' . $mahasiswa->id,
+            'nim' => 'required|string|max:20|unique:mahasiswas,nim,'.$mahasiswa->id,
             'nama' => 'required|string|max:255',
-            'angkatan' => 'required|integer|min:2000|max:' . date('Y'),
+            'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
             'judul_skripsi' => 'required|string',
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional',
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
@@ -131,7 +134,7 @@ class MahasiswaController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $mahasiswa, $oldSiapSidang) {
+        DB::transaction(function () use ($request, $mahasiswa) {
             $mahasiswa->update($request->all());
 
             // Logika penjadwalan otomatis (jika ada):
@@ -166,7 +169,7 @@ class MahasiswaController extends Controller
             */
         });
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.' . (session('info') ?? ''));
+        return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.'.(session('info') ?? ''));
     }
 
     /**
@@ -176,6 +179,7 @@ class MahasiswaController extends Controller
     {
         try {
             $mahasiswa->delete();
+
             return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect()->route('mahasiswa.index')->with('error', 'Tidak dapat menghapus mahasiswa karena masih memiliki jadwal munaqosah.');
@@ -205,8 +209,8 @@ class MahasiswaController extends Controller
         for ($i = 0; $i <= $maxDaysAhead; $i++) {
             $currentDate = Carbon::now()->addDays($i)->format('Y-m-d');
 
-            $currentTime = Carbon::parse($currentDate . ' ' . $startTimeLimit);
-            $endOfDay = Carbon::parse($currentDate . ' ' . $endTimeLimit);
+            $currentTime = Carbon::parse($currentDate.' '.$startTimeLimit);
+            $endOfDay = Carbon::parse($currentDate.' '.$endTimeLimit);
 
             while ($currentTime->addMinutes($durationInMinutes)->lessThanOrEqualTo($endOfDay)) {
                 $slotStart = $currentTime->copy()->subMinutes($durationInMinutes);
@@ -222,7 +226,7 @@ class MahasiswaController extends Controller
                         $slotEnd->format('H:i')
                     );
 
-                    if (!$isBentrok) {
+                    if (! $isBentrok) {
                         $availablePengujisForSlot->push($penguji);
                     }
                 }
@@ -241,6 +245,7 @@ class MahasiswaController extends Controller
                 }
             }
         }
+
         return null;
     }
 
@@ -254,7 +259,7 @@ class MahasiswaController extends Controller
             ->where('tanggal', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->exists();
 
@@ -264,13 +269,13 @@ class MahasiswaController extends Controller
 
         // Cek bentrok di tabel munaqosahs (jadwal munaqosah penguji lain)
         $queryMunaqosah = Munaqosah::where(function ($query) use ($pengujiId) {
-                $query->where('id_penguji1', $pengujiId)
-                      ->orWhere('id_penguji2', $pengujiId);
-            })
+            $query->where('id_penguji1', $pengujiId)
+                ->orWhere('id_penguji2', $pengujiId);
+        })
             ->where('tanggal_munaqosah', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             });
 
         if ($excludeMunaqosahId) {

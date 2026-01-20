@@ -1,15 +1,15 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\DosenController;
-use App\Http\Controllers\PengujiController;
-use App\Http\Controllers\JadwalPengujiController;
-use App\Http\Controllers\MunaqosahController;
 use App\Http\Controllers\AutoScheduleController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DosenController;
+use App\Http\Controllers\JadwalPengujiController;
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\MunaqosahController;
+use App\Http\Controllers\PengujiController;
 use App\Http\Controllers\RuangUjianController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'index']);
 
@@ -56,7 +56,6 @@ Route::middleware(['auth'])->group(function () {
     // Atau bisa buat route: Route::get('jadwal-menguji-saya', [JadwalPengujiController::class, 'mySchedules'])->name('jadwal-menguji.mine');
 
 });
-
 
 // === RUTE YANG HANYA BISA DIAKSES OLEH ADMIN ===
 Route::middleware(['auth'])->group(function () {

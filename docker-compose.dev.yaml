@@ -3,22 +3,22 @@ services:
     build:
       context: .
       target: development
-    entrypoint: php artisan octane:frankenphp --workers=5 --max-requests=100 --watch
     container_name: penjadwalan-dev
+    entrypoint: php artisan octane:frankenphp --workers=5 --max-requests=100 --watch
     restart: unless-stopped
     tty: true
+    env_file:
+      - .env
+    environment:
+      APP_DEBUG: "true"
+      DISABLE_LOGIN: "true"
+    ports:
+      - "8000:8000"
     volumes:
       - ./:/app
       - ./php/opcache-dev.ini:/usr/local/etc/php/conf.d/opcache-dev.ini
       - caddy_data:/data
       - caddy_config:/config
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    environment:
-      - APP_DEBUG=true
-      - DISABLE_LOGIN=true
 
   node:
     build:
@@ -28,15 +28,15 @@ services:
     container_name: penjadwalan-node
     command: npx vite --host
     restart: unless-stopped
-    volumes:
-      - ./resources:/app/resources
-      - ./public:/app/public
-    ports:
-      - 5173:5173
     env_file:
       - .env
     environment:
-      - NODE_ENV=development
+      NODE_ENV: development
+    ports:
+      - 5173:5173
+    volumes:
+      - ./resources:/app/resources
+      - ./public:/app/public
 
 volumes:
   caddy_data:

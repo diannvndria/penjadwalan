@@ -42,7 +42,7 @@ class RemovePengujiUtamaFromMunaqosahsTable extends Migration
         Schema::table('munaqosahs', function (Blueprint $table) {
             // Saat rollback (down), tambahkan kembali kolomnya.
             // Penting: Pastikan ini sesuai dengan definisi awal kolom Anda.
-            if (!Schema::hasColumn('munaqosahs', 'id_penguji_utama')) {
+            if (! Schema::hasColumn('munaqosahs', 'id_penguji_utama')) {
                 $table->foreignId('id_penguji_utama')->nullable()->constrained('pengujis')->onDelete('restrict');
             }
         });

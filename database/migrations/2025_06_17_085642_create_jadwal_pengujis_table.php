@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +14,8 @@ class CreateJadwalPengujisTable extends Migration
         Schema::create('jadwal_pengujis', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_penguji')
-                  ->constrained('pengujis') // Foreign key ke tabel 'pengujis'
-                  ->onDelete('cascade'); // Jika penguji dihapus, jadwalnya ikut terhapus
+                ->constrained('pengujis') // Foreign key ke tabel 'pengujis'
+                ->onDelete('cascade'); // Jika penguji dihapus, jadwalnya ikut terhapus
             $table->date('tanggal');
             $table->time('waktu_mulai');
             $table->time('waktu_selesai');

@@ -61,7 +61,7 @@ class MunaqosahController extends Controller
 
         $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->get();
         $totalJadwal = $munaqosahs->count();
-        
+
         $pdf = \PDF::loadView('munaqosah.laporan', [
             'munaqosahs' => $munaqosahs,
             'totalJadwal' => $totalJadwal,
@@ -70,7 +70,8 @@ class MunaqosahController extends Controller
             'generatedAt' => Carbon::now(),
         ]);
 
-        $filename = 'Laporan_Jadwal_Sidang_' . Carbon::now()->format('d-m-Y_H-i-s') . '.pdf';
+        $filename = 'Laporan_Jadwal_Sidang_'.Carbon::now()->format('d-m-Y_H-i-s').'.pdf';
+
         return $pdf->download($filename);
     }
 

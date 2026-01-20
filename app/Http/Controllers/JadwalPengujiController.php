@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers; // <-- Pastikan namespace ini benar!
 
 use App\Models\JadwalPenguji; // Impor model JadwalPenguji
 use App\Models\Penguji;      // Impor model Penguji
-use Illuminate\Http\Request;
-use Carbon\Carbon; // Digunakan untuk manipulasi tanggal dan waktu
+use Carbon\Carbon;
+use Illuminate\Http\Request; // Digunakan untuk manipulasi tanggal dan waktu
 
 class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini benar!
 {
@@ -15,17 +16,18 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     {
         try {
             // Add index to improve query performance
-            $jadwalPengujis = JadwalPenguji::with(['penguji' => function($query) {
+            $jadwalPengujis = JadwalPenguji::with(['penguji' => function ($query) {
                 $query->select('id', 'nama');
             }])
-            ->select('id', 'id_penguji', 'tanggal', 'waktu_mulai', 'waktu_selesai', 'deskripsi')
-            ->orderBy('tanggal')
-            ->orderBy('waktu_mulai')
-            ->paginate(10);
+                ->select('id', 'id_penguji', 'tanggal', 'waktu_mulai', 'waktu_selesai', 'deskripsi')
+                ->orderBy('tanggal')
+                ->orderBy('waktu_mulai')
+                ->paginate(10);
 
             return view('jadwal_penguji.index', compact('jadwalPengujis'));
         } catch (\Exception $e) {
-            \Log::error('Error in JadwalPengujiController@index: ' . $e->getMessage());
+            \Log::error('Error in JadwalPengujiController@index: '.$e->getMessage());
+
             return back()->with('error', 'Terjadi kesalahan saat memuat data. Silakan coba lagi.');
         }
     }
@@ -36,6 +38,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function create()
     {
         $pengujis = Penguji::all(); // Ambil semua penguji untuk dropdown
+
         return view('jadwal_penguji.create', compact('pengujis'));
     }
 
@@ -65,7 +68,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
                 // Kondisi tumpang tindih waktu:
                 // (Mulai_baru < Selesai_lama AND Selesai_baru > Mulai_lama)
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->exists();
 
@@ -84,6 +87,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function edit(JadwalPenguji $jadwalPenguji)
     {
         $pengujis = Penguji::all();
+
         return view('jadwal_penguji.edit', compact('jadwalPenguji', 'pengujis'));
     }
 
@@ -110,7 +114,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
             ->where('id', '!=', $jadwalPenguji->id) // Penting: Kecualikan jadwal ini sendiri dari pengecekan
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
-                      ->where('waktu_selesai', '>', $waktuMulai);
+                    ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->exists();
 
@@ -129,6 +133,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function destroy(JadwalPenguji $jadwalPenguji)
     {
         $jadwalPenguji->delete();
+
         return redirect()->route('jadwal-penguji.index')->with('success', 'Jadwal penguji berhasil dihapus.');
     }
 }

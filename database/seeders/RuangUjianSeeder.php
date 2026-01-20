@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\RuangUjian;
+use Illuminate\Database\Seeder;
 
 class RuangUjianSeeder extends Seeder
 {
@@ -23,5 +23,3 @@ class RuangUjianSeeder extends Seeder
         }
     }
 }
-
-

@@ -9,8 +9,9 @@ class RuangUjianController extends Controller
 {
     public function index()
     {
-    $ruang = RuangUjian::orderBy('nama')->paginate(10);
-    return view('ruang_ujian.index', compact('ruang'));
+        $ruang = RuangUjian::orderBy('nama')->paginate(10);
+
+        return view('ruang_ujian.index', compact('ruang'));
     }
 
     public function create()
@@ -59,11 +60,10 @@ class RuangUjianController extends Controller
     {
         try {
             $ruangUjian->delete();
+
             return redirect()->route('ruang-ujian.index')->with('success', 'Ruang ujian berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect()->route('ruang-ujian.index')->with('error', 'Tidak dapat menghapus ruang ujian karena masih digunakan dalam jadwal.');
         }
     }
 }
-
-

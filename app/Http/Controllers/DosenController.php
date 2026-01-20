@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Dosen; // Pastikan model Dosen sudah diimpor
@@ -13,8 +14,9 @@ class DosenController extends Controller
     public function index()
     {
         // Mengambil semua dosen dan menghitung jumlah mahasiswa yang diampu oleh masing-masing dosen
-    $dosens = Dosen::withCount('mahasiswas')->orderBy('nama')->paginate(10); // paginate for consistent paging
-    return view('dosen.index', compact('dosens'));
+        $dosens = Dosen::withCount('mahasiswas')->orderBy('nama')->paginate(10); // paginate for consistent paging
+
+        return view('dosen.index', compact('dosens'));
     }
 
     /**
@@ -70,6 +72,7 @@ class DosenController extends Controller
     {
         try {
             $dosen->delete();
+
             return redirect()->route('dosen.index')->with('success', 'Dosen berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             // Tangani jika ada mahasiswa yang masih terhubung ke dosen ini (Foreign Key Constraint)

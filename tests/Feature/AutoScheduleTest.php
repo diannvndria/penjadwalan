@@ -2,37 +2,37 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Dosen;
-use App\Models\Penguji;
+use App\Models\JadwalPenguji;
 use App\Models\Mahasiswa;
 use App\Models\Munaqosah;
-use App\Models\JadwalPenguji;
+use App\Models\Penguji;
+use App\Models\User;
 use App\Services\AutoScheduleService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AutoScheduleTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $adminUser;
+
     protected $autoScheduleService;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create admin user
         $this->adminUser = User::create([
             'name' => 'Admin Test',
             'email' => 'admin@test.com',
             'password' => bcrypt('password'),
-            'role' => 'admin'
+            'role' => 'admin',
         ]);
-        
+
         $this->autoScheduleService = app(AutoScheduleService::class);
     }
 
@@ -43,14 +43,14 @@ class AutoScheduleTest extends TestCase
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
         $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        
+
         $mahasiswa = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         // Test auto-schedule
@@ -60,10 +60,10 @@ class AutoScheduleTest extends TestCase
         $this->assertTrue($result['success']);
         $this->assertDatabaseHas('munaqosahs', [
             'id_mahasiswa' => $mahasiswa->id,
-            'status_konfirmasi' => 'pending'
+            'status_konfirmasi' => 'pending',
         ]);
         $this->assertDatabaseHas('histori_munaqosahs', [
-            'perubahan' => 'Jadwal dibuat otomatis oleh sistem'
+            'perubahan' => 'Jadwal dibuat otomatis oleh sistem',
         ]);
     }
 
@@ -72,11 +72,11 @@ class AutoScheduleTest extends TestCase
     {
         // Setup test data with all pengujis busy
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        
+
         // Create only 2 pengujis and make them both busy for the next week
         $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        
+
         $today = Carbon::today();
         for ($i = 0; $i < 7; $i++) {
             JadwalPenguji::create([
@@ -84,25 +84,25 @@ class AutoScheduleTest extends TestCase
                 'tanggal' => $today->copy()->addDays($i)->format('Y-m-d'),
                 'waktu_mulai' => '08:00:00',
                 'waktu_selesai' => '16:00:00',
-                'deskripsi' => 'Busy all day'
+                'deskripsi' => 'Busy all day',
             ]);
-            
+
             JadwalPenguji::create([
                 'id_penguji' => $penguji2->id,
                 'tanggal' => $today->copy()->addDays($i)->format('Y-m-d'),
                 'waktu_mulai' => '08:00:00',
                 'waktu_selesai' => '16:00:00',
-                'deskripsi' => 'Busy all day'
+                'deskripsi' => 'Busy all day',
             ]);
         }
-        
+
         $mahasiswa = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         // Test auto-schedule
@@ -112,7 +112,7 @@ class AutoScheduleTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Tidak ada slot', $result['message']);
         $this->assertDatabaseMissing('munaqosahs', [
-            'id_mahasiswa' => $mahasiswa->id
+            'id_mahasiswa' => $mahasiswa->id,
         ]);
     }
 
@@ -123,14 +123,14 @@ class AutoScheduleTest extends TestCase
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
         $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        
+
         $mahasiswa = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         // Create existing munaqosah
@@ -141,7 +141,7 @@ class AutoScheduleTest extends TestCase
             'waktu_selesai' => '12:00:00',
             'id_penguji1' => $penguji1->id,
             'id_penguji2' => $penguji2->id,
-            'status_konfirmasi' => 'pending'
+            'status_konfirmasi' => 'pending',
         ]);
 
         // Test auto-schedule
@@ -161,7 +161,7 @@ class AutoScheduleTest extends TestCase
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
         $penguji3 = Penguji::create(['nama' => 'Dr. Test Penguji 3']);
         $penguji4 = Penguji::create(['nama' => 'Dr. Test Penguji 4']);
-        
+
         // Create multiple students ready for defense
         $mahasiswa1 = Mahasiswa::create([
             'nim' => '123456781',
@@ -169,16 +169,16 @@ class AutoScheduleTest extends TestCase
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi 1',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
-        
+
         $mahasiswa2 = Mahasiswa::create([
             'nim' => '123456782',
             'nama' => 'Test Mahasiswa 2',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi 2',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         // Test batch auto-schedule
@@ -189,10 +189,10 @@ class AutoScheduleTest extends TestCase
         $this->assertEquals(2, $result['scheduled_count']);
         $this->assertEquals(0, $result['failed_count']);
         $this->assertDatabaseHas('munaqosahs', [
-            'id_mahasiswa' => $mahasiswa1->id
+            'id_mahasiswa' => $mahasiswa1->id,
         ]);
         $this->assertDatabaseHas('munaqosahs', [
-            'id_mahasiswa' => $mahasiswa2->id
+            'id_mahasiswa' => $mahasiswa2->id,
         ]);
     }
 
@@ -200,7 +200,7 @@ class AutoScheduleTest extends TestCase
     public function admin_can_access_auto_schedule_page()
     {
         $response = $this->actingAs($this->adminUser)
-                         ->get('/auto-schedule');
+            ->get('/auto-schedule');
 
         $response->assertStatus(200);
     }
@@ -212,11 +212,11 @@ class AutoScheduleTest extends TestCase
             'name' => 'Regular User',
             'email' => 'user@test.com',
             'password' => bcrypt('password'),
-            'role' => 'user'
+            'role' => 'user',
         ]);
 
         $response = $this->actingAs($regularUser)
-                         ->get('/auto-schedule');
+            ->get('/auto-schedule');
 
         $response->assertStatus(403);
     }
@@ -226,36 +226,36 @@ class AutoScheduleTest extends TestCase
     {
         // Setup test data
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        
+
         $readyStudent = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Ready Student',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
-        
+
         $notReadyStudent = Mahasiswa::create([
             'nim' => '123456788',
             'nama' => 'Not Ready Student',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi 2',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => false
+            'siap_sidang' => false,
         ]);
 
         $response = $this->actingAs($this->adminUser)
-                         ->getJson('/auto-schedule/ready-students');
+            ->getJson('/auto-schedule/ready-students');
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true,
-                     'count' => 1
-                 ])
-                 ->assertJsonFragment([
-                     'nama' => 'Ready Student'
-                 ]);
+            ->assertJson([
+                'success' => true,
+                'count' => 1,
+            ])
+            ->assertJsonFragment([
+                'nama' => 'Ready Student',
+            ]);
     }
 
     /** @test */
@@ -265,25 +265,25 @@ class AutoScheduleTest extends TestCase
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
         $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        
+
         $mahasiswa = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         $response = $this->actingAs($this->adminUser)
-                         ->postJson('/auto-schedule/schedule-student', [
-                             'mahasiswa_id' => $mahasiswa->id
-                         ]);
+            ->postJson('/auto-schedule/schedule-student', [
+                'mahasiswa_id' => $mahasiswa->id,
+            ]);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'success' => true
-                 ]);
+            ->assertJson([
+                'success' => true,
+            ]);
     }
 
     /** @test */
@@ -293,31 +293,31 @@ class AutoScheduleTest extends TestCase
         $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
         $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
         $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        
+
         $mahasiswa = Mahasiswa::create([
             'nim' => '123456789',
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2021,
             'judul_skripsi' => 'Test Judul Skripsi',
             'id_dospem' => $dosen->id,
-            'siap_sidang' => true
+            'siap_sidang' => true,
         ]);
 
         $response = $this->actingAs($this->adminUser)
-                         ->postJson('/auto-schedule/simulate', [
-                             'mahasiswa_id' => $mahasiswa->id
-                         ]);
+            ->postJson('/auto-schedule/simulate', [
+                'mahasiswa_id' => $mahasiswa->id,
+            ]);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'success',
-                     'message',
-                     'simulation'
-                 ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'simulation',
+            ]);
 
         // Ensure no actual munaqosah was created
         $this->assertDatabaseMissing('munaqosahs', [
-            'id_mahasiswa' => $mahasiswa->id
+            'id_mahasiswa' => $mahasiswa->id,
         ]);
     }
 }

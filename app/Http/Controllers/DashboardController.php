@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Mahasiswa;
 use App\Models\Munaqosah;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
