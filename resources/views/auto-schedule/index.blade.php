@@ -1,9 +1,7 @@
 @extends('layouts.app')
 
 @section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        Auto-Schedule Penjadwalan Sidang
-    </h2>
+    Auto-Schedule Penjadwalan Sidang
 @endsection
 
 @section('content')

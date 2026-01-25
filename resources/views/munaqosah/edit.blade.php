@@ -1,9 +1,7 @@
 @extends('layouts.app')
 
 @section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Edit Jadwal Munaqosah') }}
-    </h2>
+    {{ __('Edit Jadwal Munaqosah') }}
 @endsection
 
 @section('content')

@@ -1,9 +1,7 @@
 @extends('layouts.app')
 
 @section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Daftar Ruang Ujian') }}
-    </h2>
+    {{ __('Daftar Ruang Ujian') }}
 @endsection
 
 @section('content')

@@ -1,9 +1,7 @@
 @extends('layouts.app')
 
 @section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Jadwal Sidang') }}
-    </h2>
+    {{ __('Jadwal Sidang') }}
 @endsection
 
 @section('content')
@@ -99,8 +97,9 @@
                                                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                                             </svg>
                                         </button>
-                                        
-                                        <div x-show="open" 
+
+                                        <div x-show="open"
+                                             x-cloak
                                              @click.away="open = false"
                                              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-50"
                                              role="menu"
@@ -109,8 +108,8 @@
                                              tabindex="-1">
                                             <div class="py-1" role="none">
                                                 @if (Auth::user()->isAdmin())
-                                                    <a href="{{ route('munaqosah.edit', $munaqosah->id) }}" 
-                                                       class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50" 
+                                                    <a href="{{ route('munaqosah.edit', $munaqosah->id) }}"
+                                                       class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50"
                                                        role="menuitem">
                                                         Edit
                                                     </a>
@@ -146,7 +145,7 @@
         {{ $munaqosahs->links('vendor.pagination.custom') }}
     </div>
 
-    <div id="deleteModal" class="fixed inset-0 bg-opacity-0 hidden flex items-start justify-center z-50 pt-20">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-start justify-center z-50 pt-20">
         <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
@@ -188,7 +187,7 @@
             if (munaqosahToDeleteId) {
                 // Set action form dan submit
                 // Pastikan route ini sesuai dengan route delete di web.php Anda
-                deleteForm.action = `/munaqosah/${munaqosahToDeleteId}`; 
+                deleteForm.action = `/munaqosah/${munaqosahToDeleteId}`;
                 deleteForm.submit();
             }
             hideDeleteModal();
@@ -202,12 +201,15 @@
     function showDeleteModal(id, itemName) {
         munaqosahToDeleteId = id;
         document.getElementById('deleteItemName').textContent = itemName;
-        // Gunakan kelas yang persis sama dengan yang Anda berikan
-        document.getElementById('deleteModal').classList.remove('hidden'); 
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 
     function hideDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
         munaqosahToDeleteId = null; // Reset ID setelah modal ditutup
     }
 </script>
