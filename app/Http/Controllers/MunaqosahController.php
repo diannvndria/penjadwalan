@@ -8,6 +8,7 @@ use App\Models\Mahasiswa;        // Import model Penguji
 use App\Models\Munaqosah;  // Import model JadwalPenguji (untuk cek bentrok non-munaqosah)
 use App\Models\Penguji; // Import model HistoriMunaqosah
 use App\Models\RuangUjian;
+use PDF;
 use Carbon\Carbon;  // Untuk manipulasi tanggal dan waktu
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;  // Untuk transaksi database (DB::transaction)
@@ -62,7 +63,7 @@ class MunaqosahController extends Controller
         $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->get();
         $totalJadwal = $munaqosahs->count();
 
-        $pdf = \PDF::loadView('munaqosah.laporan', [
+        $pdf = PDF::loadView('munaqosah.laporan', [
             'munaqosahs' => $munaqosahs,
             'totalJadwal' => $totalJadwal,
             'startDate' => $startDate,
