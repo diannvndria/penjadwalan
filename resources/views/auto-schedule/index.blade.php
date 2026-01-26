@@ -11,58 +11,93 @@
         <div id="alert-container" class="mb-6"></div>
 
         <!-- Configuration Panel -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 mb-6">
             <div class="p-6 text-gray-900">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium">Konfigurasi Auto-Schedule</h3>
-                    <button id="editConfigBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-cog text-indigo-600"></i>
+                        Konfigurasi Auto-Schedule
+                    </h3>
+                    <button id="editConfigBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                        <i class="fas fa-edit mr-2"></i>
                         Edit Konfigurasi
                     </button>
                 </div>
 
                 <div id="configDisplay" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-medium text-gray-700">Durasi Sidang</h4>
-                        <p id="durationDisplay" class="text-lg">120 menit</p>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-blue-600 rounded-lg">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-700">Durasi Sidang</h4>
+                        </div>
+                        <p id="durationDisplay" class="text-2xl font-bold text-gray-800 ml-11">120 menit</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-medium text-gray-700">Jam Kerja</h4>
-                        <p id="workingHoursDisplay" class="text-lg">08:00 - 16:00</p>
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-xl border border-purple-100">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-purple-600 rounded-lg">
+                                <i class="fas fa-business-time text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-700">Jam Kerja</h4>
+                        </div>
+                        <p id="workingHoursDisplay" class="text-2xl font-bold text-gray-800 ml-11">08:00 - 16:00</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-medium text-gray-700">Hari Kerja</h4>
-                        <p class="text-lg">Senin - Jumat</p>
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-100">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-green-600 rounded-lg">
+                                <i class="fas fa-calendar-week text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-700">Hari Kerja</h4>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800 ml-11">Senin - Jumat</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded">
-                        <h4 class="font-medium text-gray-700">Range Pencarian</h4>
-                        <p id="searchRangeDisplay" class="text-lg">7 hari</p>
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-5 rounded-xl border border-orange-100">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-orange-600 rounded-lg">
+                                <i class="fas fa-search text-white"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-700">Range Pencarian</h4>
+                        </div>
+                        <p id="searchRangeDisplay" class="text-2xl font-bold text-gray-800 ml-11">7 hari</p>
                     </div>
                 </div>
 
                 <!-- Configuration Form (Hidden by default) -->
-                <form id="configForm" class="hidden mt-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form id="configForm" class="hidden mt-6 bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-xl border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Durasi Sidang (menit)</label>
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-clock text-gray-400"></i>
+                                Durasi Sidang (menit)
+                            </label>
                             <input type="number" id="duration" name="duration_minutes" min="30" max="480"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-hourglass-start text-gray-400"></i>
+                                Jam Mulai
+                            </label>
                             <input type="time" id="startTime" name="working_hours[start]"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Jam Selesai</label>
+                            <label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-hourglass-end text-gray-400"></i>
+                                Jam Selesai
+                            </label>
                             <input type="time" id="endTime" name="working_hours[end]"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                   class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
-                    <div class="mt-4 flex space-x-2">
-                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    <div class="mt-6 flex space-x-3">
+                        <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                            <i class="fas fa-save mr-2"></i>
                             Simpan Konfigurasi
                         </button>
-                        <button type="button" id="cancelConfigBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        <button type="button" id="cancelConfigBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
+                            <i class="fas fa-times mr-2"></i>
                             Batal
                         </button>
                     </div>
@@ -71,32 +106,60 @@
         </div>
 
         <!-- Ready Students Panel -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 mb-6">
             <div class="p-6 text-gray-900">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-3">
+                        <i class="fas fa-user-graduate text-indigo-600"></i>
                         Mahasiswa Siap Sidang
-                        <span id="readyCount" class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">0</span>
+                        <span id="readyCount" class="inline-flex items-center justify-center h-8 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-sm">0</span>
                     </h3>
-                    <div class="space-x-2">
-                        <button id="refreshBtn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    <div class="flex gap-3">
+                        <button id="refreshBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
+                            <i class="fas fa-sync-alt mr-2"></i>
                             Refresh
                         </button>
-                        <button id="batchScheduleBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        <button id="batchScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                            <i class="fas fa-calendar-check mr-2"></i>
                             Jadwalkan Semua
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table id="readyStudentsTable" class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Angkatan</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosen Pembimbing</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                <div class="overflow-hidden rounded-xl border border-gray-200">
+                    <table id="readyStudentsTable" class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-gray-50 to-gray-100/50">
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-hashtag text-gray-400"></i>
+                                        NIM
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                        Nama
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-graduation-cap text-gray-400"></i>
+                                        Angkatan
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-chalkboard-teacher text-gray-400"></i>
+                                        Dosen Pembimbing
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-center">
+                                    <div class="flex items-center justify-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-cogs text-gray-400"></i>
+                                        Aksi
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody" class="bg-white divide-y divide-gray-200">
@@ -108,10 +171,13 @@
         </div>
 
         <!-- Schedule Results Panel -->
-        <div id="resultsPanel" class="bg-white overflow-hidden shadow-sm sm:rounded-lg hidden">
+        <div id="resultsPanel" class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 hidden">
             <div class="p-6 text-gray-900">
-                <h3 class="text-lg font-medium mb-4">Hasil Penjadwalan</h3>
-                <div id="resultsContent">
+                <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-4">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                    Hasil Penjadwalan
+                </h3>
+                <div id="resultsContent" class="space-y-3">
                     <!-- Results will be populated here -->
                 </div>
             </div>
@@ -120,23 +186,28 @@
 </div>
 
 <!-- Modal for Individual Schedule Confirmation -->
-<div id="scheduleModal" class="fixed inset-0 bg-opacity-0 hidden items-start justify-center z-50 pt-20">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-            <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Konfirmasi Penjadwalan</h3>
-            <div class="mt-2 px-7 py-3">
-                <p class="text-sm text-gray-500" id="modalMessage">
-                    Apakah Anda yakin ingin menjadwalkan mahasiswa ini secara otomatis?
-                </p>
-            </div>
-            <div class="items-center px-4 py-3">
-                <button id="confirmScheduleBtn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-auto mr-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                    Ya, Jadwalkan
-                </button>
-                <button id="cancelScheduleBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                    Batal
-                </button>
-            </div>
+<div id="scheduleModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2" id="modalTitle">
+                <i class="fas fa-calendar-check"></i>
+                Konfirmasi Penjadwalan
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-sm leading-relaxed" id="modalMessage">
+                Apakah Anda yakin ingin menjadwalkan mahasiswa ini secara otomatis?
+            </p>
+        </div>
+        <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end">
+            <button id="cancelScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-300 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 shadow-sm transition">
+                <i class="fas fa-times mr-2"></i>
+                Batal
+            </button>
+            <button id="confirmScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition">
+                <i class="fas fa-check mr-2"></i>
+                Ya, Jadwalkan
+            </button>
         </div>
     </div>
 </div>
@@ -302,8 +373,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (students.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">
-                        Tidak ada mahasiswa yang siap sidang
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                            <p class="text-gray-500 text-lg font-medium">Tidak ada mahasiswa yang siap sidang</p>
+                            <p class="text-gray-400 text-sm mt-2">Mahasiswa akan muncul di sini ketika mereka ditandai siap untuk sidang</p>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -312,17 +387,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         students.forEach(student => {
             const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors';
+            const initial = student.nama.charAt(0).toUpperCase();
             row.innerHTML = `
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${student.nim}</td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${student.nama}</td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${student.angkatan}</td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${student.dospem ? student.dospem.nama : 'Belum ditentukan'}
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-medium text-gray-900">${student.nim}</span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm">
+                            ${initial}
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">${student.nama}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
+                        <i class="fas fa-calendar-alt mr-1.5"></i>
+                        ${student.angkatan}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
+                        ${student.dospem ? `
+                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                ${student.dospem.nama.charAt(0)}
+                            </div>
+                            <span class="text-sm text-gray-700">${student.dospem.nama}</span>
+                        ` : `
+                            <span class="text-sm text-gray-400 italic">Belum ditentukan</span>
+                        `}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
                     <button onclick="scheduleIndividual(${student.id}, '${student.nama}')"
                             id="schedule-btn-${student.id}"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-calendar-plus mr-1.5"></i>
                         Jadwalkan
                     </button>
                 </td>
@@ -390,17 +491,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const resultsContent = document.getElementById('resultsContent');
 
         let html = `
-            <div class="mb-4">
-                <h4 class="text-md font-medium">Ringkasan Batch Scheduling</h4>
-                <div class="grid grid-cols-3 gap-4 mt-2">
-                    <div class="bg-green-100 p-3 rounded">
-                        <p class="text-green-800 font-medium">Berhasil: ${data.scheduled_count}</p>
+            <div class="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-xl border border-gray-200 mb-6">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-indigo-600"></i>
+                    Ringkasan Batch Scheduling
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-green-700 mb-1">Berhasil</p>
+                                <p class="text-3xl font-bold text-green-800">${data.scheduled_count}</p>
+                            </div>
+                            <div class="p-3 bg-green-600 rounded-lg">
+                                <i class="fas fa-check text-white text-2xl"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-red-100 p-3 rounded">
-                        <p class="text-red-800 font-medium">Gagal: ${data.failed_count}</p>
+                    <div class="bg-gradient-to-br from-red-50 to-rose-50 p-5 rounded-xl border border-red-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-red-700 mb-1">Gagal</p>
+                                <p class="text-3xl font-bold text-red-800">${data.failed_count}</p>
+                            </div>
+                            <div class="p-3 bg-red-600 rounded-lg">
+                                <i class="fas fa-times text-white text-2xl"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded">
-                        <p class="text-blue-800 font-medium">Total: ${data.scheduled_count + data.failed_count}</p>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-blue-700 mb-1">Total</p>
+                                <p class="text-3xl font-bold text-blue-800">${data.scheduled_count + data.failed_count}</p>
+                            </div>
+                            <div class="p-3 bg-blue-600 rounded-lg">
+                                <i class="fas fa-users text-white text-2xl"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -408,29 +536,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (data.results && data.results.length > 0) {
             html += `
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mahasiswa</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                <div class="overflow-hidden rounded-xl border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-gray-50 to-gray-100/50">
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                        Mahasiswa
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-hashtag text-gray-400"></i>
+                                        NIM
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-info-circle text-gray-400"></i>
+                                        Status
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left">
+                                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        <i class="fas fa-comment text-gray-400"></i>
+                                        Keterangan
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
             `;
 
             data.results.forEach(result => {
-                const statusClass = result.result.success ? 'text-green-600' : 'text-red-600';
-                const statusText = result.result.success ? '✅ Berhasil' : '❌ Gagal';
+                const statusBadge = result.result.success 
+                    ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200"><i class="fas fa-check-circle mr-1"></i> Berhasil</span>'
+                    : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200"><i class="fas fa-times-circle mr-1"></i> Gagal</span>';
 
                 html += `
-                    <tr>
-                        <td class="px-4 py-2 text-sm text-gray-900">${result.mahasiswa}</td>
-                        <td class="px-4 py-2 text-sm text-gray-900">${result.nim}</td>
-                        <td class="px-4 py-2 text-sm ${statusClass}">${statusText}</td>
-                        <td class="px-4 py-2 text-sm text-gray-900">${result.result.message}</td>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${result.mahasiswa}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">${result.nim}</td>
+                        <td class="px-6 py-4">${statusBadge}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${result.result.message}</td>
                     </tr>
                 `;
             });
@@ -540,45 +689,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showAlert(message, type) {
         const alertContainer = document.getElementById('alert-container');
-        const alertClass = {
-            'success': 'bg-green-100 border-green-500 text-green-700',
-            'error': 'bg-red-100 border-red-500 text-red-700',
-            'warning': 'bg-yellow-100 border-yellow-500 text-yellow-700',
-            'info': 'bg-blue-100 border-blue-500 text-blue-700'
+        const alertConfig = {
+            'success': {
+                bg: 'bg-green-50',
+                border: 'border-green-200',
+                text: 'text-green-800',
+                icon: 'fa-check-circle text-green-600'
+            },
+            'error': {
+                bg: 'bg-red-50',
+                border: 'border-red-200',
+                text: 'text-red-800',
+                icon: 'fa-exclamation-circle text-red-600'
+            },
+            'warning': {
+                bg: 'bg-yellow-50',
+                border: 'border-yellow-200',
+                text: 'text-yellow-800',
+                icon: 'fa-exclamation-triangle text-yellow-600'
+            },
+            'info': {
+                bg: 'bg-blue-50',
+                border: 'border-blue-200',
+                text: 'text-blue-800',
+                icon: 'fa-info-circle text-blue-600'
+            }
         };
 
+        const config = alertConfig[type] || alertConfig['info'];
+        
         const alert = document.createElement('div');
-        alert.className = `border-l-4 p-4 ${alertClass[type]} mb-4`;
+        alert.className = `${config.bg} border-l-4 ${config.border} ${config.text} p-4 rounded-lg shadow-sm mb-4 flex items-start gap-3`;
         alert.innerHTML = `
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm">${message}</p>
-                </div>
-                <div class="ml-auto pl-3">
-                    <div class="-mx-1.5 -my-1.5">
-                        <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="inline-flex rounded-md p-1.5 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <span class="sr-only">Dismiss</span>
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+            <i class="fas ${config.icon} text-xl mt-0.5"></i>
+            <div class="flex-1">
+                <p class="font-medium">${message}</p>
             </div>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
         `;
 
         alertContainer.appendChild(alert);
 
-        // Auto remove after 5 seconds
         setTimeout(() => {
-            if (alert.parentNode) {
-                alert.remove();
-            }
+            alert.remove();
         }, 5000);
     }
 });
