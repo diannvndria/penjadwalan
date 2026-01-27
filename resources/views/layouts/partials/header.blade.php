@@ -45,11 +45,7 @@
                                 <div class="text-xs text-gray-500">{{ ucfirst(Auth::user()->role) }}</div>
                             </div>
 
-                            <a href="#" class="user-dropdown-item">
-                                <i class="far fa-user"></i>
-                                Profil Saya
-                            </a>
-                            <a href="#" class="user-dropdown-item">
+                            <a href="{{ route('profile.edit') }}" class="user-dropdown-item">
                                 <i class="fas fa-cog"></i>
                                 Pengaturan Akun
                             </a>

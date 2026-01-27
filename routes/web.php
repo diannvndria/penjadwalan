@@ -8,6 +8,7 @@ use App\Http\Controllers\JadwalPengujiController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MunaqosahController;
 use App\Http\Controllers\PengujiController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RuangUjianController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // === RUTE YANG HANYA BISA DIAKSES OLEH USER YANG SUDAH LOGIN (GENERAL) ===
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile / Account Settings Routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     // Rute yang bisa diakses oleh user biasa (hanya melihat)
     // Mahasiswa: Lihat daftar mahasiswa
