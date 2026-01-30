@@ -67,12 +67,16 @@ class MunaqosahController extends Controller
                   ->orderBy('waktu_mulai', 'asc');
         }
 
+        // Get all matching IDs before pagination for "Select All" functionality
+        $allIds = (clone $query)->pluck('munaqosahs.id')->map(fn($id) => (string)$id)->toArray();
+
         // Paginate and load relationships
         $munaqosahs = $query->paginate(10);
         $munaqosahs->load('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
 
         return view('munaqosah.index', [
             'munaqosahs' => $munaqosahs,
+            'allIds' => $allIds, 
             'startDate' => $startDate,
             'endDate' => $endDate,
             'sortField' => $sortField,
@@ -316,6 +320,103 @@ class MunaqosahController extends Controller
         });
 
         return redirect()->route('munaqosah.index')->with('success', 'Jadwal munaqosah berhasil dihapus.');
+    }
+
+    /**
+     * Menghapus beberapa jadwal munaqosah sekaligus (Bulk Delete).
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        DB::transaction(function () use ($ids) {
+            $munaqosahs = Munaqosah::whereIn('id', $ids)->with('mahasiswa')->get();
+
+            foreach ($munaqosahs as $munaqosah) {
+                $mahasiswaNama = $munaqosah->mahasiswa->nama ?? 'Nama tidak diketahui';
+                $mahasiswaNIM = $munaqosah->mahasiswa->nim ?? 'NIM tidak diketahui';
+
+                $munaqosah->delete();
+
+                HistoriMunaqosah::create([
+                    'id_munaqosah' => null,
+                    'perubahan' => 'Jadwal munaqosah untuk mahasiswa '.$mahasiswaNama.' (NIM: '.$mahasiswaNIM.') telah dihapus (Bulk Delete).',
+                    'dilakukan_oleh' => auth()->id(),
+                ]);
+            }
+        });
+
+        return redirect()->route('munaqosah.index')->with('success', count($ids) . ' Jadwal munaqosah berhasil dihapus.');
+    }
+
+    /**
+     * Export beberapa jadwal munaqosah ke Excel (CSV).
+     */
+    public function bulkExport(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $munaqosahs = Munaqosah::whereIn('id', $ids)
+            ->with(['mahasiswa', 'penguji1', 'penguji2', 'ruangUjian'])
+            ->orderBy('tanggal_munaqosah')
+            ->orderBy('waktu_mulai')
+            ->get();
+
+        $filename = 'Jadwal_Sidang_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($munaqosahs) {
+            $file = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM for Excel compatibility
+            fputs($file, "\xEF\xBB\xBF");
+
+            // Header Row
+            fputcsv($file, [
+                'Nama Mahasiswa', 
+                'NIM', 
+                'Tanggal', 
+                'Waktu Mulai', 
+                'Waktu Selesai', 
+                'Penguji 1', 
+                'Penguji 2', 
+                'Ruang', 
+                'Status'
+            ]);
+
+            foreach ($munaqosahs as $item) {
+                fputcsv($file, [
+                    $item->mahasiswa->nama ?? '-',
+                    $item->mahasiswa->nim ?? '-',
+                    Carbon::parse($item->tanggal_munaqosah)->format('d-m-Y'),
+                    substr($item->waktu_mulai, 0, 5),
+                    substr($item->waktu_selesai, 0, 5),
+                    $item->penguji1->nama ?? '-',
+                    $item->penguji2->nama ?? '-',
+                    $item->ruangUjian->nama ?? '-',
+                    ucfirst($item->status_konfirmasi)
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**

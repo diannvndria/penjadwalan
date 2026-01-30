@@ -53,6 +53,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('munaqosah', [MunaqosahController::class, 'index'])->name('munaqosah.index');
     Route::get('munaqosah/{munaqosah}/histori', [MunaqosahController::class, 'histori'])->name('munaqosah.histori');
     Route::get('munaqosah/download/report', [MunaqosahController::class, 'downloadReport'])->name('munaqosah.downloadReport');
+    
+    // Bulk Actions for Munaqosah
+    Route::post('munaqosah/bulk-delete', [MunaqosahController::class, 'bulkDestroy'])->name('munaqosah.bulk-delete');
+    Route::post('munaqosah/bulk-export', [MunaqosahController::class, 'bulkExport'])->name('munaqosah.bulk-export');
 
     // Tambahan untuk dosen penguji melihat jadwalnya
     // Ini membutuhkan ID user (dosen penguji) yang sedang login

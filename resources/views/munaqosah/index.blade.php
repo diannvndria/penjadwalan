@@ -5,7 +5,28 @@
 @endsection
 
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-6" x-data='{
+        selected: [],
+        items: @json($allIds),
+        get allSelected() {
+            return this.items.length > 0 && this.selected.length === this.items.length;
+        },
+        toggleAll() {
+            if (this.allSelected) {
+                this.selected = [];
+            } else {
+                this.selected = [...this.items];
+            }
+        },
+        toggle(id) {
+            id = String(id);
+            if (this.selected.includes(id)) {
+                this.selected = this.selected.filter(item => item !== id);
+            } else {
+                this.selected.push(id);
+            }
+        }
+    }'>
         @if (session('success'))
             <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-center" role="alert">
                 <i class="fas fa-check-circle text-green-500 mr-3"></i>
@@ -75,12 +96,44 @@
             </div>
         </div>
 
+        {{-- Bulk Actions --}}
+        <div x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-indigo-800">
+                <i class="fas fa-check-square"></i>
+                <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="selected = []" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
+                     Batal
+                </button>
+                <form action="{{ route('munaqosah.bulk-delete') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data yang dipilih?')">
+                    @csrf
+                    <!-- Route is defined now -->
+                    <input type="hidden" name="ids" :value="selected.join(',')">
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </form>
+                <form action="{{ route('munaqosah.bulk-export') }}" method="POST" target="_blank">
+                    @csrf
+                    <!-- Route is defined now -->
+                    <input type="hidden" name="ids" :value="selected.join(',')">
+                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                </form>
+            </div>
+        </div>
+
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100/50">
                         <tr>
+                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-10">
+                                <input type="checkbox" @change="toggleAll" :checked="allSelected" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user-graduate text-gray-400 text-sm"></i>
@@ -148,7 +201,10 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($munaqosahs as $munaqosah)
-                            <tr class="hover:bg-gray-50 transition duration-150">
+                            <tr class="hover:bg-gray-50 transition duration-150" :class="{'bg-indigo-50/50': selected.includes('{{ $munaqosah->id }}')}">
+                                <td class="px-6 py-4 text-center">
+                                    <input type="checkbox" value="{{ $munaqosah->id }}" @change="toggle('{{ $munaqosah->id }}')" :checked="selected.includes('{{ $munaqosah->id }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </td>
                                 <td class="px-6 py-4">
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</div>
