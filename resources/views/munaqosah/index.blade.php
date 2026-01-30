@@ -5,40 +5,38 @@
 @endsection
 
 @section('content')
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div class="p-8">
-
-            @if (session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg relative mb-6 flex items-center" role="alert">
-                    <i class="fas fa-check-circle mr-3 text-green-500"></i>
-                    <span>{{ session('success') }}</span>
+    <div class="space-y-6">
+        @if (session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-center" role="alert">
+                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-sm" role="alert">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <strong class="font-semibold">Oops!</strong>
+                    <span class="ml-1">Ada beberapa masalah dengan input Anda.</span>
                 </div>
-            @endif
-            @if ($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                    <div class="flex items-center mb-2">
-                        <i class="fas fa-exclamation-circle mr-2 text-red-500"></i>
-                        <strong class="font-bold">Oops!</strong>
-                        <span class="ml-1">Ada beberapa masalah dengan input Anda.</span>
-                    </div>
-                    <ul class="mt-2 ml-6 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+                <ul class="mt-2 ml-6 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-            @if (Auth::user()->isAdmin())
-                <a href="{{ route('munaqosah.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md mb-6">
-                    <i class="fas fa-plus mr-2"></i>
-                    Buat Jadwal Sidang
-                </a>
-            @endif
-
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg p-6 mb-6 border border-gray-200">
-                <form method="GET" action="{{ route('munaqosah.index') }}">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        {{-- Filter and Action Bar --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+                {{-- Filter Form --}}
+                <div class="flex-1">
+                    <form method="GET" action="{{ route('munaqosah.index') }}" class="flex flex-col sm:flex-row gap-4 items-end">
+                        {{-- Preserve sorting parameters --}}
+                        <input type="hidden" name="sort" value="{{ $sortField ?? '' }}">
+                        <input type="hidden" name="direction" value="{{ $sortDirection ?? '' }}">
+                        
                         <div>
                             <label for="start_date" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
@@ -64,31 +62,57 @@
                                 <i class="fas fa-file-pdf mr-2"></i>Download
                             </a>
                         </div>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
 
-            <div class="bg-white rounded-xl border border-gray-200 overflow-visible shadow-sm">
+                {{-- Add Button --}}
+                @if (Auth::user()->isAdmin())
+                    <a href="{{ route('munaqosah.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
+                        <i class="fas fa-plus mr-2"></i>
+                        Buat Jadwal Sidang
+                    </a>
+                @endif
+            </div>
+        </div>
+
+        {{-- Table Card --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100/50">
                         <tr>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user-graduate text-gray-400 text-sm"></i>
                                     Mahasiswa
-                                </div>
+                                    @if(($sortField ?? '') === 'mahasiswa_nama')
+                                        <i class="fas fa-sort-{{ ($sortDirection ?? 'asc') === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-calendar-day text-gray-400 text-sm"></i>
                                     Tanggal
-                                </div>
+                                    @if(($sortField ?? '') === 'tanggal_munaqosah')
+                                        <i class="fas fa-sort-{{ ($sortDirection ?? 'asc') === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-clock text-gray-400 text-sm"></i>
                                     Waktu
-                                </div>
+                                    @if(($sortField ?? '') === 'waktu_mulai')
+                                        <i class="fas fa-sort-{{ ($sortDirection ?? 'asc') === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center gap-2">
@@ -126,21 +150,16 @@
                         @forelse ($munaqosahs as $munaqosah)
                             <tr class="hover:bg-gray-50 transition duration-150">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                            {{ strtoupper(substr($munaqosah->mahasiswa->nama ?? 'N', 0, 1)) }}
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="text-sm font-semibold text-gray-900">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</div>
-                                            @if($munaqosah->mahasiswa && $munaqosah->mahasiswa->is_prioritas)
-                                                <div class="mt-1">
-                                                    <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                                        <i class="fas fa-star mr-1 text-yellow-600"></i>
-                                                        Prioritas
-                                                    </span>
-                                                </div>
-                                            @endif
-                                        </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-900">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</div>
+                                        @if($munaqosah->mahasiswa && $munaqosah->mahasiswa->is_prioritas)
+                                            <div class="mt-1">
+                                                <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                    <i class="fas fa-star mr-1 text-yellow-600"></i>
+                                                    Prioritas
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -154,21 +173,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                            {{ strtoupper(substr($munaqosah->penguji1->nama ?? 'N', 0, 1)) }}
-                                        </div>
-                                        <span class="ml-2 text-sm text-gray-900">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</span>
-                                    </div>
+                                    <span class="text-sm text-gray-900">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($munaqosah->penguji2)
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                                                {{ strtoupper(substr($munaqosah->penguji2->nama, 0, 1)) }}
-                                            </div>
-                                            <span class="ml-2 text-sm text-gray-900">{{ $munaqosah->penguji2->nama }}</span>
-                                        </div>
+                                        <span class="text-sm text-gray-900">{{ $munaqosah->penguji2->nama }}</span>
                                     @else
                                         <span class="text-sm text-gray-400 italic">-</span>
                                     @endif
@@ -243,10 +252,11 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    <div class="mt-4 flex justify-end">
-        {{ $munaqosahs->links('vendor.pagination.custom') }}
+        {{-- Pagination --}}
+        <div class="mt-6 flex justify-end">
+            {{ $munaqosahs->appends(['sort' => $sortField ?? '', 'direction' => $sortDirection ?? '', 'start_date' => $startDate, 'end_date' => $endDate])->links('vendor.pagination.custom') }}
+        </div>
     </div>
 
     <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-start justify-center z-50 pt-20">

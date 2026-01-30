@@ -394,12 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="text-sm font-medium text-gray-900">${student.nim}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm">
-                            ${initial}
-                        </div>
-                        <span class="text-sm font-medium text-gray-900">${student.nama}</span>
-                    </div>
+                    <span class="text-sm font-medium text-gray-900">${student.nama}</span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
@@ -408,16 +403,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-2">
-                        ${student.dospem ? `
-                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                                ${student.dospem.nama.charAt(0)}
-                            </div>
-                            <span class="text-sm text-gray-700">${student.dospem.nama}</span>
-                        ` : `
-                            <span class="text-sm text-gray-400 italic">Belum ditentukan</span>
-                        `}
-                    </div>
+                    ${student.dospem ? `
+                        <span class="text-sm text-gray-700">${student.dospem.nama}</span>
+                    ` : `
+                        <span class="text-sm text-gray-400 italic">Belum ditentukan</span>
+                    `}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
                     <button onclick="scheduleIndividual(${student.id}, '${student.nama}')"
@@ -603,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const button = document.getElementById(`schedule-btn-${studentId}`);
         if (button) {
             button.disabled = true;
-            button.textContent = 'Memproses...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>Memproses...';
         }
 
         currentStudentId = studentId;
@@ -631,10 +621,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         })
         .then(result => {
-            hideModal();
             const { status, data } = result;
 
             if (data.success) {
+                hideModal();
                 showAlert(data.message, 'success');
                 // Add a small delay before refreshing to ensure DB commit completes
                 setTimeout(() => {
@@ -646,18 +636,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (status === 400 && data.message && data.message.includes('sudah memiliki jadwal')) {
                     // Student already has schedule - this is expected after successful scheduling
                     // Silently refresh the list instead of showing error
+                    hideModal();
                     setTimeout(() => {
                         loadReadyStudents();
                     }, 500);
                 } else {
+                    // Re-enable the button before hiding modal for failed schedules
+                    const button = document.getElementById(`schedule-btn-${currentStudentId}`);
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-calendar-plus mr-1.5"></i>Jadwalkan';
+                    }
+                    hideModal();
                     showAlert(data.message, 'error');
                 }
             }
         })
         .catch(error => {
             console.error('Error in scheduling:', error);
-            showAlert('Error dalam penjadwalan', 'error');
+            // Re-enable the button on error
+            const button = document.getElementById(`schedule-btn-${currentStudentId}`);
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-calendar-plus mr-1.5"></i>Jadwalkan';
+            }
             hideModal();
+            showAlert('Error dalam penjadwalan', 'error');
         });
     }
 
@@ -677,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const button = document.getElementById(`schedule-btn-${currentStudentId}`);
             if (button && button.disabled) {
                 button.disabled = false;
-                button.textContent = 'Jadwalkan';
+                button.innerHTML = '<i class="fas fa-calendar-plus mr-1.5"></i>Jadwalkan';
             }
         }
 

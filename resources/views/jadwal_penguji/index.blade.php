@@ -95,14 +95,7 @@
                         @forelse ($jadwalPengujis as $jadwal)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                            {{ strtoupper(substr($jadwal->penguji->nama, 0, 1)) }}
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-semibold text-gray-900">{{ $jadwal->penguji->nama }}</p>
-                                        </div>
-                                    </div>
+                                    <p class="text-sm font-semibold text-gray-900">{{ $jadwal->penguji->nama }}</p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">

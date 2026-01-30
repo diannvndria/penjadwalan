@@ -80,26 +80,6 @@
                 @enderror
             </div>
 
-            {{-- Role --}}
-            <div>
-                <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">
-                    <i class="fas fa-user-tag text-gray-400 mr-2"></i>Role
-                </label>
-                <select id="role" 
-                        name="role" 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all bg-white @error('role') border-red-300 @enderror">
-                    <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>
-                        🛡️ Admin
-                    </option>
-                    <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>
-                        👤 User
-                    </option>
-                </select>
-                @error('role')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
             {{-- Submit Button --}}
             <div class="flex justify-between items-center pt-4">
                 <a href="{{ route('dashboard') }}" class="px-5 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all flex items-center space-x-2">

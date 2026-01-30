@@ -88,14 +88,7 @@
                         @forelse ($dosens as $dosen)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                            {{ strtoupper(substr($dosen->nama, 0, 1)) }}
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-semibold text-gray-900">{{ $dosen->nama }}</p>
-                                        </div>
-                                    </div>
+                                    <p class="text-sm font-semibold text-gray-900">{{ $dosen->nama }}</p>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">

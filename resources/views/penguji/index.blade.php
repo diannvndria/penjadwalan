@@ -70,26 +70,21 @@
                         @forelse ($pengujis as $penguji)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                                            {{ strtoupper(substr($penguji->nama, 0, 1)) }}
-                                        </div>
-                                        <div class="ml-3">
-                                            <div class="flex items-center gap-2">
-                                                <div class="text-sm font-semibold text-gray-900">{{ $penguji->nama }}</div>
-                                                @if($penguji->is_prioritas)
-                                                    <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200" title="{{ $penguji->keterangan_prioritas }}">
-                                                        <i class="fas fa-star mr-1 text-yellow-600"></i>
-                                                        Prioritas
-                                                    </span>
-                                                @endif
-                                            </div>
-                                            @if($penguji->is_prioritas && $penguji->keterangan_prioritas)
-                                                <div class="text-xs text-gray-500 mt-1">
-                                                    <i class="fas fa-info-circle mr-1"></i>{{ $penguji->keterangan_prioritas }}
-                                                </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="text-sm font-semibold text-gray-900">{{ $penguji->nama }}</div>
+                                            @if($penguji->is_prioritas)
+                                                <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200" title="{{ $penguji->keterangan_prioritas }}">
+                                                    <i class="fas fa-star mr-1 text-yellow-600"></i>
+                                                    Prioritas
+                                                </span>
                                             @endif
                                         </div>
+                                        @if($penguji->is_prioritas && $penguji->keterangan_prioritas)
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-info-circle mr-1"></i>{{ $penguji->keterangan_prioritas }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                                 @if (Auth::user()->isAdmin())

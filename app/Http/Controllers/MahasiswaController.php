@@ -27,7 +27,23 @@ class MahasiswaController extends Controller
         // 2. PERBAIKAN LOGIKA: Ambil nilai angkatan yang sedang difilter dari request
         $angkatan = $request->input('angkatan');
 
-        $query = Mahasiswa::with('dospem')->latest();
+        // Sorting parameters
+        $sortField = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('direction', 'desc');
+
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['nim', 'nama', 'angkatan', 'created_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+        }
+
+        // Validate sort direction
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
+
+        $query = Mahasiswa::with('dospem');
+
+        // Apply sorting
+        $query->orderBy($sortField, $sortDirection);
 
         // Terapkan filter pencarian jika ada
         if ($request->filled('search')) {
@@ -54,7 +70,9 @@ class MahasiswaController extends Controller
             'mahasiswas',
             'angkatans_tersedia',
             'dosens',
-            'angkatan' // <-- kirim juga variabel $angkatan
+            'angkatan',
+            'sortField',
+            'sortDirection'
         ));
     }
 

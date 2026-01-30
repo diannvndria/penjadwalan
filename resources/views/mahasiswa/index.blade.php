@@ -102,22 +102,37 @@
                     <thead>
                         <tr class="bg-gray-50/50">
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'nim', 'direction' => $sortField === 'nim' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-id-card text-gray-400 text-sm"></i>
                                     NIM
-                                </div>
+                                    @if($sortField === 'nim')
+                                        <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'nama', 'direction' => $sortField === 'nama' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user text-gray-400 text-sm"></i>
                                     Nama
-                                </div>
+                                    @if($sortField === 'nama')
+                                        <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'angkatan', 'direction' => $sortField === 'angkatan' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center justify-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-calendar text-gray-400 text-sm"></i>
                                     Angkatan
-                                </div>
+                                    @if($sortField === 'angkatan')
+                                        <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }} text-blue-600 text-xs"></i>
+                                    @else
+                                        <i class="fas fa-sort text-gray-300 text-xs"></i>
+                                    @endif
+                                </a>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center gap-2">
@@ -167,10 +182,7 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                                            {{ strtoupper(substr($mahasiswa->nama, 0, 1)) }}
-                                        </div>
-                                        <div class="ml-3">
+                                        <div>
                                             <p class="text-sm font-medium text-gray-900">{{ $mahasiswa->nama }}</p>
                                             @if($mahasiswa->is_prioritas)
                                                 <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200" title="{{ $mahasiswa->keterangan_prioritas }}">
@@ -259,7 +271,7 @@
             {{-- Pagination --}}
             @if($mahasiswas->hasPages())
                 <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex justify-end">
-                    {{ $mahasiswas->links('vendor.pagination.custom') }}
+                    {{ $mahasiswas->appends(['sort' => $sortField, 'direction' => $sortDirection, 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')])->links('vendor.pagination.custom') }}
                 </div>
             @endif
         </div>

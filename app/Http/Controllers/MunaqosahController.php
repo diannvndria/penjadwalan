@@ -20,11 +20,26 @@ class MunaqosahController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Munaqosah::with('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
-
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
 
+        // Sorting parameters
+        $sortField = $request->input('sort');
+        $sortDirection = $request->input('direction', 'asc');
+
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['mahasiswa_nama', 'tanggal_munaqosah', 'waktu_mulai'];
+        if ($sortField && !in_array($sortField, $allowedSortFields)) {
+            $sortField = null;
+        }
+
+        // Validate sort direction
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+
+        // Build query with proper join for sorting
+        $query = Munaqosah::query();
+
+        // Apply date filters
         if ($startDate) {
             $query->whereDate('tanggal_munaqosah', '>=', $startDate);
         }
@@ -33,12 +48,35 @@ class MunaqosahController extends Controller
             $query->whereDate('tanggal_munaqosah', '<=', $endDate);
         }
 
-        $munaqosahs = $query->orderBy('tanggal_munaqosah')->orderBy('waktu_mulai')->paginate(10);
+        // Apply sorting with join if needed
+        if ($sortField === 'mahasiswa_nama') {
+            $query->leftJoin('mahasiswas', 'munaqosahs.id_mahasiswa', '=', 'mahasiswas.id')
+                  ->select('munaqosahs.*')
+                  ->orderBy('mahasiswas.nama', $sortDirection)
+                  ->orderBy('munaqosahs.tanggal_munaqosah', 'asc')
+                  ->orderBy('munaqosahs.waktu_mulai', 'asc');
+        } elseif ($sortField === 'tanggal_munaqosah') {
+            $query->orderBy('tanggal_munaqosah', $sortDirection)
+                  ->orderBy('waktu_mulai', 'asc');
+        } elseif ($sortField === 'waktu_mulai') {
+            $query->orderBy('waktu_mulai', $sortDirection)
+                  ->orderBy('tanggal_munaqosah', 'asc');
+        } else {
+            // Default ordering when no sort is applied
+            $query->orderBy('tanggal_munaqosah', 'asc')
+                  ->orderBy('waktu_mulai', 'asc');
+        }
+
+        // Paginate and load relationships
+        $munaqosahs = $query->paginate(10);
+        $munaqosahs->load('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
 
         return view('munaqosah.index', [
             'munaqosahs' => $munaqosahs,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'sortField' => $sortField,
+            'sortDirection' => $sortDirection,
         ]);
     }
 
