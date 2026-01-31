@@ -315,8 +315,8 @@
         </div>
     </div>
 
-    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-start justify-center z-50 pt-20">
-        <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
                 <div class="mt-2 px-7 py-3">

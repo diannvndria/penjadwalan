@@ -186,7 +186,7 @@
 </div>
 
 <!-- Modal for Individual Schedule Confirmation -->
-<div id="scheduleModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+<div id="scheduleModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
             <h3 class="text-xl font-bold text-white flex items-center gap-2" id="modalTitle">
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function batchSchedule() {
         // Ganti konfirmasi bawaan dengan modal kustom
-        document.getElementById('modalTitle').textContent = 'Konfirmasi Penjadwalan Massal';
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-calendar-check"></i> Konfirmasi Penjadwalan Massal';
         document.getElementById('modalMessage').textContent = 'Apakah Anda yakin ingin menjadwalkan semua mahasiswa yang siap sidang secara otomatis?';
 
         // Atur event listener untuk tombol konfirmasi di modal
@@ -597,6 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         currentStudentId = studentId;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-calendar-check"></i> Konfirmasi Penjadwalan';
         document.getElementById('modalMessage').textContent =
             `Apakah Anda yakin ingin menjadwalkan mahasiswa "${studentName}" secara otomatis?`;
         showModal();

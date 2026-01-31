@@ -136,14 +136,12 @@
                                                 <i class="fas fa-edit mr-1.5"></i>
                                                 Edit
                                             </a>
-                                            <form action="{{ route('ruang-ujian.destroy', $r->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus ruang ujian ini? Tindakan ini tidak dapat dibatalkan.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors duration-150 border border-red-200">
-                                                    <i class="fas fa-trash-alt mr-1.5"></i>
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                            <button type="button" 
+                                                onclick="showDeleteModal({{ $r->id }}, '{{ $r->nama }}')"
+                                                class="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors duration-150 border border-red-200">
+                                                <i class="fas fa-trash-alt mr-1.5"></i>
+                                                Hapus
+                                            </button>
                                         </div>
                                     </td>
                                 @endif
@@ -173,4 +171,71 @@
             @endif
         </div>
     </div>
+
+    {{-- Delete Modal --}}
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500" id="deleteModalMessage">
+                        Apakah Anda yakin ingin menghapus ruang ujian <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex justify-center space-x-4">
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Ya, Hapus
+                    </button>
+                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Hidden Form --}}
+    <form id="deleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+@endsection
+
+@section('scripts')
+<script>
+    let ruangToDeleteId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const deleteForm = document.getElementById('deleteForm');
+
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (ruangToDeleteId) {
+                deleteForm.action = `/ruang-ujian/${ruangToDeleteId}`;
+                deleteForm.submit();
+            }
+            hideDeleteModal();
+        });
+
+        cancelDeleteBtn.addEventListener('click', function() {
+            hideDeleteModal();
+        });
+    });
+
+    function showDeleteModal(id, itemName) {
+        ruangToDeleteId = id;
+        document.getElementById('deleteItemName').textContent = itemName;
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function hideDeleteModal() {
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        ruangToDeleteId = null;
+    }
+</script>
 @endsection
