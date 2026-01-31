@@ -10,6 +10,8 @@ class Munaqosah extends Model
 {
     use HasFactory;
 
+    protected $table = 'munaqosah';
+
     protected $fillable = [
         'id_mahasiswa',
         'tanggal_munaqosah',

@@ -58,11 +58,11 @@ class AutoScheduleTest extends TestCase
 
         // Assertions
         $this->assertTrue($result['success']);
-        $this->assertDatabaseHas('munaqosahs', [
+        $this->assertDatabaseHas('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
             'status_konfirmasi' => 'pending',
         ]);
-        $this->assertDatabaseHas('histori_munaqosahs', [
+        $this->assertDatabaseHas('histori_munaqosah', [
             'perubahan' => 'Jadwal dibuat otomatis oleh sistem',
         ]);
     }
@@ -111,7 +111,7 @@ class AutoScheduleTest extends TestCase
         // Assertions
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Tidak ada slot', $result['message']);
-        $this->assertDatabaseMissing('munaqosahs', [
+        $this->assertDatabaseMissing('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
         ]);
     }
@@ -188,10 +188,10 @@ class AutoScheduleTest extends TestCase
         $this->assertTrue($result['success']);
         $this->assertEquals(2, $result['scheduled_count']);
         $this->assertEquals(0, $result['failed_count']);
-        $this->assertDatabaseHas('munaqosahs', [
+        $this->assertDatabaseHas('munaqosah', [
             'id_mahasiswa' => $mahasiswa1->id,
         ]);
-        $this->assertDatabaseHas('munaqosahs', [
+        $this->assertDatabaseHas('munaqosah', [
             'id_mahasiswa' => $mahasiswa2->id,
         ]);
     }
@@ -316,7 +316,7 @@ class AutoScheduleTest extends TestCase
             ]);
 
         // Ensure no actual munaqosah was created
-        $this->assertDatabaseMissing('munaqosahs', [
+        $this->assertDatabaseMissing('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
         ]);
     }

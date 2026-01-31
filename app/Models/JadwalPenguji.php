@@ -9,6 +9,8 @@ class JadwalPenguji extends Model
 {
     use HasFactory;
 
+    protected $table = 'jadwal_penguji';
+
     protected $fillable = [
         'id_penguji',
         'tanggal',

@@ -33,7 +33,7 @@ class AutoScheduleController extends Controller
     public function scheduleStudent(Request $request): JsonResponse
     {
         $request->validate([
-            'mahasiswa_id' => 'required|integer|exists:mahasiswas,id',
+            'mahasiswa_id' => 'required|integer|exists:mahasiswa,id',
         ]);
 
         $result = $this->autoScheduleService->scheduleForMahasiswa($request->mahasiswa_id);
@@ -186,7 +186,7 @@ class AutoScheduleController extends Controller
     public function simulateSchedule(Request $request): JsonResponse
     {
         $request->validate([
-            'mahasiswa_id' => 'required|integer|exists:mahasiswas,id',
+            'mahasiswa_id' => 'required|integer|exists:mahasiswa,id',
         ]);
 
         try {

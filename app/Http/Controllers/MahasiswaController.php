@@ -33,7 +33,7 @@ class MahasiswaController extends Controller
 
         // Validate sort field to prevent SQL injection
         $allowedSortFields = ['nim', 'nama', 'angkatan', 'created_at'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'created_at';
         }
 
@@ -92,13 +92,13 @@ class MahasiswaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nim' => 'required|string|max:20|unique:mahasiswas,nim',
+            'nim' => 'required|string|max:20|unique:mahasiswa,nim',
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
             'judul_skripsi' => 'required|string',
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional', // Validasi profil lulusan
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
-            'id_dospem' => 'required|exists:dosens,id',
+            'id_dospem' => 'required|exists:dosen,id',
             'siap_sidang' => 'boolean',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',
@@ -133,13 +133,13 @@ class MahasiswaController extends Controller
         $oldSiapSidang = $mahasiswa->siap_sidang;
 
         $request->validate([
-            'nim' => 'required|string|max:20|unique:mahasiswas,nim,'.$mahasiswa->id,
+            'nim' => 'required|string|max:20|unique:mahasiswa,nim,'.$mahasiswa->id,
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
             'judul_skripsi' => 'required|string',
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional',
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
-            'id_dospem' => 'required|exists:dosens,id',
+            'id_dospem' => 'required|exists:dosen,id',
             'siap_sidang' => 'boolean',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',

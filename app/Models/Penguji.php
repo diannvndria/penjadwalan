@@ -10,6 +10,8 @@ class Penguji extends Model
 {
     use HasFactory;
 
+    protected $table = 'penguji';
+
     protected $fillable = [
         'nama',
         'is_prioritas',

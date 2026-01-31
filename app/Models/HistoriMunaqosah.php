@@ -9,6 +9,8 @@ class HistoriMunaqosah extends Model
 {
     use HasFactory;
 
+    protected $table = 'histori_munaqosah';
+
     // Disable updated_at, hanya gunakan created_at
     const UPDATED_AT = null;
 

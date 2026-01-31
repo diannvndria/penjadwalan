@@ -329,7 +329,7 @@ class AutoScheduleService
     private function getBusyPengujiIds($tanggal, $waktuMulai, $waktuSelesai)
     {
         // Query 1: Penguji 1 from munaqosah
-        $q1 = DB::table('munaqosahs')
+        $q1 = DB::table('munaqosah')
             ->select('id_penguji1 as id')
             ->where('tanggal_munaqosah', $tanggal)
             ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
@@ -338,7 +338,7 @@ class AutoScheduleService
             });
 
         // Query 2: Penguji 2 from munaqosah
-        $q2 = DB::table('munaqosahs')
+        $q2 = DB::table('munaqosah')
             ->select('id_penguji2 as id')
             ->where('tanggal_munaqosah', $tanggal)
             ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
@@ -347,7 +347,7 @@ class AutoScheduleService
             });
 
         // Query 3: Jadwal Penguji
-        $q3 = DB::table('jadwal_pengujis')
+        $q3 = DB::table('jadwal_penguji')
             ->select('id_penguji as id')
             ->where('tanggal', $tanggal)
             ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
@@ -386,9 +386,9 @@ class AutoScheduleService
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
     {
         // OPTIMIZATION: Combine both queries into a single optimized query
-        // Check if penguji is busy in either munaqosahs OR jadwal_pengujis tables
+        // Check if penguji is busy in either munaqosah OR jadwal_penguji tables
         // IMPORTANT: Must select same columns in both UNION queries
-        $isBusy = DB::table('munaqosahs')
+        $isBusy = DB::table('munaqosah')
             ->select(DB::raw('1'))
             ->where(function ($q) use ($pengujiId) {
                 $q->where('id_penguji1', $pengujiId)
@@ -400,7 +400,7 @@ class AutoScheduleService
                     ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->union(
-                DB::table('jadwal_pengujis')
+                DB::table('jadwal_penguji')
                     ->select(DB::raw('1'))
                     ->where('id_penguji', $pengujiId)
                     ->where('tanggal', $tanggal)
@@ -444,12 +444,12 @@ class AutoScheduleService
         $query = RuangUjian::where('is_aktif', true)
             ->whereNotExists(function ($query) use ($tanggal, $waktuMulai, $waktuSelesai) {
                 $query->select(DB::raw(1))
-                    ->from('munaqosahs')
-                    ->whereColumn('munaqosahs.id_ruang_ujian', 'ruang_ujian.id')
-                    ->where('munaqosahs.tanggal_munaqosah', $tanggal)
+                    ->from('munaqosah')
+                    ->whereColumn('munaqosah.id_ruang_ujian', 'ruang_ujian.id')
+                    ->where('munaqosah.tanggal_munaqosah', $tanggal)
                     ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
-                        $q->where('munaqosahs.waktu_mulai', '<', $waktuSelesai)
-                            ->where('munaqosahs.waktu_selesai', '>', $waktuMulai);
+                        $q->where('munaqosah.waktu_mulai', '<', $waktuSelesai)
+                            ->where('munaqosah.waktu_selesai', '>', $waktuMulai);
                     });
             });
 

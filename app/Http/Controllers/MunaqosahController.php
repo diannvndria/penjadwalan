@@ -8,10 +8,10 @@ use App\Models\Mahasiswa;        // Import model Penguji
 use App\Models\Munaqosah;  // Import model JadwalPenguji (untuk cek bentrok non-munaqosah)
 use App\Models\Penguji; // Import model HistoriMunaqosah
 use App\Models\RuangUjian;
-use PDF;
-use Carbon\Carbon;  // Untuk manipulasi tanggal dan waktu
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;  // Untuk transaksi database (DB::transaction)
+use Carbon\Carbon;
+use Illuminate\Http\Request;  // Untuk manipulasi tanggal dan waktu
+use Illuminate\Support\Facades\DB;
+use PDF;  // Untuk transaksi database (DB::transaction)
 
 class MunaqosahController extends Controller
 {
@@ -30,7 +30,7 @@ class MunaqosahController extends Controller
 
         // Validate sort field to prevent SQL injection
         $allowedSortFields = ['mahasiswa_nama', 'tanggal_munaqosah', 'waktu_mulai'];
-        if ($sortField && !in_array($sortField, $allowedSortFields)) {
+        if ($sortField && ! in_array($sortField, $allowedSortFields)) {
             $sortField = null;
         }
 
@@ -55,25 +55,25 @@ class MunaqosahController extends Controller
 
         // Apply sorting with join if needed
         if ($sortField === 'mahasiswa_nama') {
-            $query->leftJoin('mahasiswas', 'munaqosahs.id_mahasiswa', '=', 'mahasiswas.id')
-                  ->select('munaqosahs.*')
-                  ->orderBy('mahasiswas.nama', $sortDirection)
-                  ->orderBy('munaqosahs.tanggal_munaqosah', 'asc')
-                  ->orderBy('munaqosahs.waktu_mulai', 'asc');
+            $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.id')
+                ->select('munaqosah.*')
+                ->orderBy('mahasiswa.nama', $sortDirection)
+                ->orderBy('munaqosah.tanggal_munaqosah', 'asc')
+                ->orderBy('munaqosah.waktu_mulai', 'asc');
         } elseif ($sortField === 'tanggal_munaqosah') {
             $query->orderBy('tanggal_munaqosah', $sortDirection)
-                  ->orderBy('waktu_mulai', 'asc');
+                ->orderBy('waktu_mulai', 'asc');
         } elseif ($sortField === 'waktu_mulai') {
             $query->orderBy('waktu_mulai', $sortDirection)
-                  ->orderBy('tanggal_munaqosah', 'asc');
+                ->orderBy('tanggal_munaqosah', 'asc');
         } else {
             // Default ordering when no sort is applied
             $query->orderBy('tanggal_munaqosah', 'asc')
-                  ->orderBy('waktu_mulai', 'asc');
+                ->orderBy('waktu_mulai', 'asc');
         }
 
         // Get all matching IDs before pagination for "Select All" functionality
-        $allIds = (clone $query)->pluck('munaqosahs.id')->map(fn($id) => (string)$id)->toArray();
+        $allIds = (clone $query)->pluck('munaqosah.id')->map(fn ($id) => (string) $id)->toArray();
 
         // Paginate and load relationships
         $munaqosahs = $query->paginate(10);
@@ -81,7 +81,7 @@ class MunaqosahController extends Controller
 
         return view('munaqosah.index', [
             'munaqosahs' => $munaqosahs,
-            'allIds' => $allIds, 
+            'allIds' => $allIds,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'status' => $status,
@@ -145,12 +145,12 @@ class MunaqosahController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_mahasiswa' => 'required|exists:mahasiswas,id|unique:munaqosahs,id_mahasiswa',
+            'id_mahasiswa' => 'required|exists:mahasiswa,id|unique:munaqosah,id_mahasiswa',
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
-            'id_penguji1' => 'required|exists:pengujis,id',
-            'id_penguji2' => 'nullable|exists:pengujis,id|different:id_penguji1',
+            'id_penguji1' => 'required|exists:penguji,id',
+            'id_penguji2' => 'nullable|exists:penguji,id|different:id_penguji1',
             'id_ruang_ujian' => 'required|exists:ruang_ujian,id',
         ]);
 
@@ -226,12 +226,12 @@ class MunaqosahController extends Controller
         $originalData = $munaqosah->getOriginal();
 
         $request->validate([
-            'id_mahasiswa' => 'required|exists:mahasiswas,id|unique:munaqosahs,id_mahasiswa,'.$munaqosah->id,
+            'id_mahasiswa' => 'required|exists:mahasiswa,id|unique:munaqosah,id_mahasiswa,'.$munaqosah->id,
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
-            'id_penguji1' => 'required|exists:pengujis,id',
-            'id_penguji2' => 'nullable|exists:pengujis,id|different:id_penguji1',
+            'id_penguji1' => 'required|exists:penguji,id',
+            'id_penguji2' => 'nullable|exists:penguji,id|different:id_penguji1',
             'id_ruang_ujian' => 'required|exists:ruang_ujian,id',
             'status_konfirmasi' => 'required|in:pending,dikonfirmasi,ditolak',
         ]);
@@ -356,7 +356,7 @@ class MunaqosahController extends Controller
             }
         });
 
-        return redirect()->route('munaqosah.index')->with('success', count($ids) . ' Jadwal munaqosah berhasil dihapus.');
+        return redirect()->route('munaqosah.index')->with('success', count($ids).' Jadwal munaqosah berhasil dihapus.');
     }
 
     /**
@@ -376,8 +376,8 @@ class MunaqosahController extends Controller
             ->orderBy('waktu_mulai')
             ->get();
 
-        $filename = 'Jadwal_Sidang_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
-        
+        $filename = 'Jadwal_Sidang_'.Carbon::now()->format('Y-m-d_H-i-s').'.csv';
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -388,21 +388,21 @@ class MunaqosahController extends Controller
 
         $callback = function () use ($munaqosahs) {
             $file = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM for Excel compatibility
-            fputs($file, "\xEF\xBB\xBF");
+            fwrite($file, "\xEF\xBB\xBF");
 
             // Header Row
             fputcsv($file, [
-                'Nama Mahasiswa', 
-                'NIM', 
-                'Tanggal', 
-                'Waktu Mulai', 
-                'Waktu Selesai', 
-                'Penguji 1', 
-                'Penguji 2', 
-                'Ruang', 
-                'Status'
+                'Nama Mahasiswa',
+                'NIM',
+                'Tanggal',
+                'Waktu Mulai',
+                'Waktu Selesai',
+                'Penguji 1',
+                'Penguji 2',
+                'Ruang',
+                'Status',
             ]);
 
             foreach ($munaqosahs as $item) {
@@ -415,7 +415,7 @@ class MunaqosahController extends Controller
                     $item->penguji1->nama ?? '-',
                     $item->penguji2->nama ?? '-',
                     $item->ruangUjian->nama ?? '-',
-                    ucfirst($item->status_konfirmasi)
+                    ucfirst($item->status_konfirmasi),
                 ]);
             }
 
@@ -443,7 +443,7 @@ class MunaqosahController extends Controller
     {
         // Combine both queries into a single optimized query with UNION
         // IMPORTANT: Must select same columns in both UNION queries
-        $query = DB::table('jadwal_pengujis')
+        $query = DB::table('jadwal_penguji')
             ->select(DB::raw('1'))
             ->where('id_penguji', $pengujiId)
             ->where('tanggal', $tanggal)
@@ -452,7 +452,7 @@ class MunaqosahController extends Controller
                     ->where('waktu_selesai', '>', $waktuMulai);
             })
             ->union(
-                DB::table('munaqosahs')
+                DB::table('munaqosah')
                     ->select(DB::raw('1'))
                     ->where(function ($query) use ($pengujiId) {
                         $query->where('id_penguji1', $pengujiId)

@@ -9,6 +9,8 @@ class Dosen extends Model
 {
     use HasFactory;
 
+    protected $table = 'dosen';
+
     // Kolom yang bisa diisi secara massal (mass assignable)
     protected $fillable = [
         'nama',

@@ -48,7 +48,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function store(Request $request)
     {
         $request->validate([
-            'id_penguji' => 'required|exists:pengujis,id',
+            'id_penguji' => 'required|exists:penguji,id',
             'tanggal' => 'required|date|after_or_equal:today', // Tanggal tidak bisa di masa lalu
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai', // Waktu selesai harus setelah waktu mulai
@@ -97,7 +97,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function update(Request $request, JadwalPenguji $jadwalPenguji)
     {
         $request->validate([
-            'id_penguji' => 'required|exists:pengujis,id',
+            'id_penguji' => 'required|exists:penguji,id',
             'tanggal' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
