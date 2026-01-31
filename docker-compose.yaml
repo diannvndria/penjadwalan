@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      target: production
+    image: ghcr.io/diannvndria/penjadwalan:latest
     container_name: penjadwalan-app
     restart: unless-stopped
     env_file:

@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
+COPY resources ./resources
+COPY vite.config.js .
 RUN npm run build
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS deps
@@ -37,9 +38,10 @@ WORKDIR /app
 
 RUN install-php-extensions \
     pdo_pgsql \
-    pcntl
+    pcntl \
+    intl
 
-FROM development AS production
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION} AS production
 
 WORKDIR /app
 
