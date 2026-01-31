@@ -22,6 +22,7 @@ class MunaqosahController extends Controller
     {
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
+        $status = $request->query('status');
 
         // Sorting parameters
         $sortField = $request->input('sort');
@@ -39,13 +40,17 @@ class MunaqosahController extends Controller
         // Build query with proper join for sorting
         $query = Munaqosah::query();
 
-        // Apply date filters
+        // Apply filters
         if ($startDate) {
             $query->whereDate('tanggal_munaqosah', '>=', $startDate);
         }
 
         if ($endDate) {
             $query->whereDate('tanggal_munaqosah', '<=', $endDate);
+        }
+
+        if ($status) {
+            $query->where('status_konfirmasi', $status);
         }
 
         // Apply sorting with join if needed
@@ -79,6 +84,7 @@ class MunaqosahController extends Controller
             'allIds' => $allIds, 
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'status' => $status,
             'sortField' => $sortField,
             'sortDirection' => $sortDirection,
         ]);

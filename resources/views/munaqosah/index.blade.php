@@ -72,6 +72,18 @@
                             </label>
                             <input type="date" id="end_date" name="end_date" value="{{ $endDate ?? '' }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
                         </div>
+                        <div>
+                            <label for="status" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-info-circle mr-2 text-indigo-600"></i>
+                                Status
+                            </label>
+                            <select id="status" name="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                                <option value="">Semua Status</option>
+                                <option value="pending" {{ ($status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="dikonfirmasi" {{ ($status ?? '') == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                <option value="ditolak" {{ ($status ?? '') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            </select>
+                        </div>
                         <div class="flex space-x-2">
                             <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
                                 <i class="fas fa-filter mr-2"></i>Filter
@@ -135,7 +147,7 @@
                                 <input type="checkbox" @change="toggleAll" :checked="allSelected" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user-graduate text-gray-400 text-sm"></i>
                                     Mahasiswa
                                     @if(($sortField ?? '') === 'mahasiswa_nama')
@@ -146,7 +158,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-calendar-day text-gray-400 text-sm"></i>
                                     Tanggal
                                     @if(($sortField ?? '') === 'tanggal_munaqosah')
@@ -157,7 +169,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-clock text-gray-400 text-sm"></i>
                                     Waktu
                                     @if(($sortField ?? '') === 'waktu_mulai')
@@ -311,7 +323,7 @@
 
         {{-- Pagination --}}
         <div class="mt-6 flex justify-end">
-            {{ $munaqosahs->appends(['sort' => $sortField ?? '', 'direction' => $sortDirection ?? '', 'start_date' => $startDate, 'end_date' => $endDate])->links('vendor.pagination.custom') }}
+            {{ $munaqosahs->appends(['sort' => $sortField ?? '', 'direction' => $sortDirection ?? '', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status])->links('vendor.pagination.custom') }}
         </div>
     </div>
 
