@@ -50,33 +50,39 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
+                                    <i class="fas fa-id-card text-gray-400 text-sm"></i>
+                                    NIP
+                                </div>
+                            </th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
                                     <i class="fas fa-user-tie text-gray-400 text-sm"></i>
                                     Nama Dosen
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-users text-gray-400 text-sm"></i>
                                     Jumlah Diampu
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-layer-group text-gray-400 text-sm"></i>
-                                    Kapasitas Ampuan
+                                    Kapasitas
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-info-circle text-gray-400 text-sm"></i>
                                     Status
                                 </div>
                             </th>
                             @if (Auth::user()->isAdmin())
-                                <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    <div class="flex items-center justify-center gap-2">
+                                <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    <div class="flex items-center justify-center gap-1">
                                         <i class="fas fa-cog text-gray-400 text-sm"></i>
                                         Aksi
                                     </div>
@@ -87,15 +93,18 @@
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($dosens as $dosen)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4">
+                                <td class="px-3 py-4">
+                                    <p class="text-sm font-semibold text-gray-900">{{ $dosen->nip ?? '-' }}</p>
+                                </td>
+                                <td class="px-3 py-4">
                                     <p class="text-sm font-semibold text-gray-900">{{ $dosen->nama }}</p>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                                         {{ $dosen->jumlah_diampu_sekarang }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="text-sm font-medium text-gray-700">
                                         {{ $dosen->kapasitas_ampu > 0 ? $dosen->kapasitas_ampu : '∞' }}
                                     </span>
@@ -103,36 +112,36 @@
                                         <span class="block text-xs text-gray-500">Tidak Terbatas</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
                                     @if ($dosen->kapasitas_ampu > 0 && $dosen->jumlah_diampu_sekarang >= $dosen->kapasitas_ampu)
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
                                             <i class="fas fa-times-circle mr-1"></i>
                                             Full
                                         </span>
                                     @else
                                         <div class="flex flex-col items-center gap-1">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
                                                 <i class="fas fa-check-circle mr-1"></i>
                                                 Tersedia
                                             </span>
                                             @if ($dosen->kapasitas_ampu > 0)
-                                                <span class="text-xs text-gray-500">(Sisa: {{ $dosen->kapasitas_ampu - $dosen->jumlah_diampu_sekarang }})</span>
+                                                <span class="text-xs text-gray-500">({{ $dosen->kapasitas_ampu - $dosen->jumlah_diampu_sekarang }})</span>
                                             @endif
                                         </div>
                                     @endif
                                 </td>
                                 @if (Auth::user()->isAdmin())
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <div class="flex items-center justify-center gap-2">
+                                    <td class="px-3 py-4 whitespace-nowrap text-center">
+                                        <div class="flex items-center justify-center gap-1">
                                             <a href="{{ route('dosen.edit', $dosen->id) }}" 
-                                               class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors duration-150"
+                                               class="inline-flex items-center px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium transition-colors duration-150"
                                                title="Edit">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Edit
                                             </a>
                                             <button type="button" 
                                                     onclick="showDeleteModal({{ $dosen->id }}, '{{ $dosen->nama }}')"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors duration-150"
+                                                    class="inline-flex items-center px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded text-xs font-medium transition-colors duration-150"
                                                     title="Hapus">
                                                 <i class="fas fa-trash-alt mr-1"></i>
                                                 Hapus
@@ -143,7 +152,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ Auth::user()->isAdmin() ? '5' : '4' }}" class="px-6 py-12 text-center">
+                                <td colspan="{{ Auth::user()->isAdmin() ? '6' : '5' }}" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
                                         <p class="text-gray-500 font-medium">Tidak ada data dosen</p>

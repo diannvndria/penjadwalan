@@ -13,6 +13,7 @@ class Dosen extends Model
 
     // Kolom yang bisa diisi secara massal (mass assignable)
     protected $fillable = [
+        'nip',
         'nama',
         'kapasitas_ampu',
     ];

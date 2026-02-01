@@ -143,11 +143,11 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100/50">
                         <tr>
-                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-10">
+                            <th scope="col" class="px-2 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-10">
                                 <input type="checkbox" @change="toggleAll" :checked="allSelected" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'mahasiswa_nama', 'direction' => (($sortField ?? '') === 'mahasiswa_nama' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-1 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user-graduate text-gray-400 text-sm"></i>
                                     Mahasiswa
                                     @if(($sortField ?? '') === 'mahasiswa_nama')
@@ -157,8 +157,8 @@
                                     @endif
                                 </a>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-1 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-calendar-day text-gray-400 text-sm"></i>
                                     Tanggal
                                     @if(($sortField ?? '') === 'tanggal_munaqosah')
@@ -168,8 +168,8 @@
                                     @endif
                                 </a>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status]) }}" class="flex items-center gap-1 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-clock text-gray-400 text-sm"></i>
                                     Waktu
                                     @if(($sortField ?? '') === 'waktu_mulai')
@@ -179,32 +179,38 @@
                                     @endif
                                 </a>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
+                                    <i class="fas fa-user-tie text-gray-400 text-sm"></i>
+                                    Dospem
+                                </div>
+                            </th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
                                     <i class="fas fa-chalkboard-teacher text-gray-400 text-sm"></i>
                                     Penguji 1
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-user-tie text-gray-400 text-sm"></i>
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
+                                    <i class="fas fa-user-check text-gray-400 text-sm"></i>
                                     Penguji 2
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
                                     <i class="fas fa-door-open text-gray-400 text-sm"></i>
                                     Ruang
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center gap-1">
                                     <i class="fas fa-info-circle text-gray-400 text-sm"></i>
                                     Status
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
+                            <th scope="col" class="px-2 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-cog text-gray-400 text-sm"></i>
                                     Aksi
                                 </div>
@@ -214,10 +220,10 @@
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($munaqosahs as $munaqosah)
                             <tr class="hover:bg-gray-50 transition duration-150" :class="{'bg-indigo-50/50': selected.includes('{{ $munaqosah->id }}')}">
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-2 py-4 text-center">
                                     <input type="checkbox" value="{{ $munaqosah->id }}" @change="toggle('{{ $munaqosah->id }}')" :checked="selected.includes('{{ $munaqosah->id }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-3 py-4">
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</div>
                                         @if($munaqosah->mahasiswa && $munaqosah->mahasiswa->is_prioritas)
@@ -230,30 +236,33 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
-                                        <i class="fas fa-calendar-day mr-1.5"></i>{{ $munaqosah->tanggal_munaqosah->format('d-m-Y') }}
+                                <td class="px-3 py-4">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
+                                        <i class="fas fa-calendar-day mr-1"></i>{{ $munaqosah->tanggal_munaqosah->format('d-m-Y') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-800 border border-green-200">
-                                        <i class="fas fa-clock mr-1.5"></i>{{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}
+                                <td class="px-3 py-4">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-800 border border-green-200">
+                                        <i class="fas fa-clock mr-1"></i>{{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-4 whitespace-nowrap">
+                                    <span class="text-sm text-gray-900">{{ $munaqosah->mahasiswa->dospem->nama ?? '-' }}</span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-900">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     @if($munaqosah->penguji2)
                                         <span class="text-sm text-gray-900">{{ $munaqosah->penguji2->nama }}</span>
                                     @else
                                         <span class="text-sm text-gray-400 italic">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-900">{{ $munaqosah->ruangUjian->nama ?? '-' }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     @php
                                         $statusConfig = [
                                             'pending' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'border' => 'border-yellow-200', 'icon' => 'fa-hourglass-half'],
@@ -265,7 +274,7 @@
                                         <i class="fas {{ $statusConfig['icon'] }} mr-2"></i>{{ ucfirst($munaqosah->status_konfirmasi) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-2 py-4 text-center">
                                     <div class="relative" x-data="{ open: false, dropUp: false }" x-init="$watch('open', value => { if(value) { const rect = $el.getBoundingClientRect(); dropUp = (window.innerHeight - rect.bottom) < 200; } })">
                                         <button @click="open = !open" class="inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="Menu">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -308,7 +317,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center">
+                                <td colspan="10" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center text-gray-400">
                                         <i class="fas fa-calendar-times text-5xl mb-3"></i>
                                         <p class="text-sm font-medium">Tidak ada jadwal sidang.</p>

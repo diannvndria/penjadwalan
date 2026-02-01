@@ -13,6 +13,7 @@ class Penguji extends Model
     protected $table = 'penguji';
 
     protected $fillable = [
+        'nip',
         'nama',
         'is_prioritas',
         'keterangan_prioritas',
