@@ -17,7 +17,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
         try {
             // Add index to improve query performance
             $jadwalPengujis = JadwalPenguji::with(['penguji' => function ($query) {
-                $query->select('id', 'nama');
+                $query->select('id', 'nip', 'nama');
             }])
                 ->select('id', 'id_penguji', 'tanggal', 'waktu_mulai', 'waktu_selesai', 'deskripsi')
                 ->orderBy('tanggal')

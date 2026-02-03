@@ -118,14 +118,9 @@
                 <button type="button" @click="selected = []" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
                      Batal
                 </button>
-                <form action="{{ route('munaqosah.bulk-delete') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data yang dipilih?')">
-                    @csrf
-                    <!-- Route is defined now -->
-                    <input type="hidden" name="ids" :value="selected.join(',')">
-                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </form>
+                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
                 <form action="{{ route('munaqosah.bulk-export') }}" method="POST" target="_blank">
                     @csrf
                     <!-- Route is defined now -->
@@ -357,10 +352,38 @@
         </div>
     </div>
 
+    {{-- Modal untuk Bulk Delete --}}
+    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Apakah Anda yakin ingin menghapus <span id="bulkDeleteCount" class="font-semibold"></span> jadwal sidang yang dipilih? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex justify-center space-x-4">
+                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Ya, Hapus
+                    </button>
+                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Form tersembunyi untuk submit penghapusan --}}
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
+    </form>
+
+    {{-- Form tersembunyi untuk bulk delete --}}
+    <form id="bulkDeleteForm" action="{{ route('munaqosah.bulk-delete') }}" method="POST" style="display: none;">
+        @csrf
+        <input type="hidden" name="ids" id="bulkDeleteIdsInput" value="">
     </form>
 
 @endsection
@@ -368,12 +391,14 @@
 @section('scripts')
 <script>
     let munaqosahToDeleteId = null;
+    let bulkDeleteIds = [];
 
     document.addEventListener('DOMContentLoaded', function() {
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const deleteForm = document.getElementById('deleteForm');
 
+        // Single delete handlers
         confirmDeleteBtn.addEventListener('click', function() {
             if (munaqosahToDeleteId) {
                 // Set action form dan submit
@@ -386,6 +411,23 @@
 
         cancelDeleteBtn.addEventListener('click', function() {
             hideDeleteModal();
+        });
+
+        // Bulk delete handlers
+        const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
+        const cancelBulkDeleteBtn = document.getElementById('cancelBulkDeleteBtn');
+
+        confirmBulkDeleteBtn.addEventListener('click', function() {
+            if (bulkDeleteIds.length > 0) {
+                const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+                document.getElementById('bulkDeleteIdsInput').value = bulkDeleteIds.join(',');
+                bulkDeleteForm.submit();
+            }
+            hideBulkDeleteModal();
+        });
+
+        cancelBulkDeleteBtn.addEventListener('click', function() {
+            hideBulkDeleteModal();
         });
     });
 
@@ -402,6 +444,21 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         munaqosahToDeleteId = null; // Reset ID setelah modal ditutup
+    }
+
+    function showBulkDeleteModal(selectedIds) {
+        bulkDeleteIds = [...selectedIds];
+        document.getElementById('bulkDeleteCount').textContent = bulkDeleteIds.length;
+        const modal = document.getElementById('bulkDeleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function hideBulkDeleteModal() {
+        const modal = document.getElementById('bulkDeleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        bulkDeleteIds = [];
     }
 </script>
 @endsection
