@@ -363,6 +363,9 @@ class AutoScheduleService
         // OPTIMIZATION: Get all busy IDs in one go to avoid N+1 queries
         $busyIds = $this->getBusyPengujiIds($tanggal, $waktuMulai, $waktuSelesai);
 
+        // Get current workload for each penguji (for load balancing)
+        $workloadCounts = $this->getPengujiWorkloadCounts();
+
         $availablePengujis = [];
         $dospemId = $mahasiswa->dospem ? $mahasiswa->dospem->id : null;
 
@@ -377,10 +380,50 @@ class AutoScheduleService
                 continue;
             }
 
+            // Attach workload count for sorting
+            $penguji->current_workload = $workloadCounts[$penguji->id] ?? 0;
             $availablePengujis[] = $penguji;
         }
 
+        // LOAD BALANCING: Sort by current workload (least busy first)
+        usort($availablePengujis, function ($a, $b) {
+            return $a->current_workload <=> $b->current_workload;
+        });
+
         return $availablePengujis;
+    }
+
+    /**
+     * Get workload counts for all penguji (for load balancing)
+     * Returns array with penguji_id => total_assignments
+     */
+    private function getPengujiWorkloadCounts(): array
+    {
+        // Cache the workload counts during batch operations
+        static $cachedCounts = null;
+        static $cacheTime = null;
+
+        // Invalidate cache after 5 seconds (to handle real-time updates during batch)
+        if ($cachedCounts !== null && $cacheTime !== null && (time() - $cacheTime) < 5) {
+            return $cachedCounts;
+        }
+
+        $result = DB::select("
+            SELECT p.id,
+                   COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.id), 0) +
+                   COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.id), 0) as total
+            FROM penguji p
+        ");
+
+        $counts = [];
+        foreach ($result as $row) {
+            $counts[$row->id] = (int) $row->total;
+        }
+
+        $cachedCounts = $counts;
+        $cacheTime = time();
+
+        return $counts;
     }
 
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
