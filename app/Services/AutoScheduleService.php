@@ -26,6 +26,18 @@ class AutoScheduleService
     private ?array $workloadTracker = null;
 
     /**
+     * In-memory tracker for room bookings during batch operations
+     * Format: ['date|start|end' => [room_id1, room_id2, ...]]
+     */
+    private array $roomBookings = [];
+
+    /**
+     * In-memory tracker for examiner bookings during batch operations
+     * Format: ['date|start|end' => [penguji_id1, penguji_id2, ...]]
+     */
+    private array $examinerBookings = [];
+
+    /**
      * Constructor: Dijalankan setiap kali service ini dibuat.
      * Kita akan memuat konfigurasi dari session di sini.
      */
@@ -195,6 +207,10 @@ class AutoScheduleService
             // Increase time limit for this operation
             set_time_limit(300); // 5 minutes
             ini_set('memory_limit', '512M');
+
+            // Reset all in-memory trackers at the start of batch operation
+            // This ensures fresh state for room bookings, examiner bookings, and workload
+            $this->resetAllTrackers();
 
             $results = [];
             $scheduledCount = 0;
@@ -369,6 +385,11 @@ class AutoScheduleService
         // OPTIMIZATION: Get all busy IDs in one go to avoid N+1 queries
         $busyIds = $this->getBusyPengujiIds($tanggal, $waktuMulai, $waktuSelesai);
 
+        // Also get examiners booked in-memory during this batch
+        $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
+        $inMemoryBookedExaminers = $this->examinerBookings[$slotKey] ?? [];
+        $busyIds = array_unique(array_merge($busyIds, $inMemoryBookedExaminers));
+
         // Get current workload for each penguji (for load balancing)
         $workloadCounts = $this->getPengujiWorkloadCounts();
 
@@ -437,6 +458,41 @@ class AutoScheduleService
     }
 
     /**
+     * Track a room booking in-memory for the current batch
+     */
+    private function trackRoomBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, int $roomId): void
+    {
+        $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
+        if (!isset($this->roomBookings[$slotKey])) {
+            $this->roomBookings[$slotKey] = [];
+        }
+        $this->roomBookings[$slotKey][] = $roomId;
+    }
+
+    /**
+     * Track examiner bookings in-memory for the current batch
+     */
+    private function trackExaminerBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, int $penguji1Id, int $penguji2Id): void
+    {
+        $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
+        if (!isset($this->examinerBookings[$slotKey])) {
+            $this->examinerBookings[$slotKey] = [];
+        }
+        $this->examinerBookings[$slotKey][] = $penguji1Id;
+        $this->examinerBookings[$slotKey][] = $penguji2Id;
+    }
+
+    /**
+     * Reset all in-memory trackers (call before starting a new batch)
+     */
+    public function resetAllTrackers(): void
+    {
+        $this->workloadTracker = null;
+        $this->roomBookings = [];
+        $this->examinerBookings = [];
+    }
+
+    /**
      * Reset workload tracker (call this to force fresh data from database)
      */
     public function resetWorkloadTracker(): void
@@ -498,9 +554,14 @@ class AutoScheduleService
     /**
      * Cari ruang yang tersedia dengan prioritas lantai
      * OPTIMIZED: Uses single query with subquery instead of looping
+     * Also checks in-memory bookings for batch operations
      */
     private function findAvailableRoomId($tanggal, $waktuMulai, $waktuSelesai, bool $needsPriorityRoom = false)
     {
+        // Get rooms already booked in-memory during this batch
+        $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
+        $inMemoryBookedRooms = $this->roomBookings[$slotKey] ?? [];
+
         // OPTIMIZATION: Use a single query with NOT EXISTS subquery
         $query = RuangUjian::where('is_aktif', true)
             ->whereNotExists(function ($query) use ($tanggal, $waktuMulai, $waktuSelesai) {
@@ -513,6 +574,11 @@ class AutoScheduleService
                             ->where('munaqosah.waktu_selesai', '>', $waktuMulai);
                     });
             });
+
+        // Exclude rooms already booked in-memory during this batch
+        if (!empty($inMemoryBookedRooms)) {
+            $query->whereNotIn('id', $inMemoryBookedRooms);
+        }
 
         // Apply priority-based ordering
         if ($needsPriorityRoom) {
@@ -568,5 +634,23 @@ class AutoScheduleService
 
         // Update in-memory workload tracker for load balancing during batch operations
         $this->incrementPengujiWorkload($scheduleData['penguji1']->id, $scheduleData['penguji2']->id);
+
+        // Track room and examiner bookings for this time slot to prevent double-booking in batch
+        if ($scheduleData['id_ruang_ujian']) {
+            $this->trackRoomBooking(
+                $scheduleData['tanggal'],
+                $scheduleData['waktu_mulai'],
+                $scheduleData['waktu_selesai'],
+                $scheduleData['id_ruang_ujian']
+            );
+        }
+
+        $this->trackExaminerBooking(
+            $scheduleData['tanggal'],
+            $scheduleData['waktu_mulai'],
+            $scheduleData['waktu_selesai'],
+            $scheduleData['penguji1']->id,
+            $scheduleData['penguji2']->id
+        );
     }
 }
