@@ -20,6 +20,12 @@ class AutoScheduleService
     private int $durationMinutes; // Akan menyimpan durasi dalam menit
 
     /**
+     * In-memory workload tracker for load balancing during batch operations
+     * This gets updated after each successful schedule to ensure even distribution
+     */
+    private ?array $workloadTracker = null;
+
+    /**
      * Constructor: Dijalankan setiap kali service ini dibuat.
      * Kita akan memuat konfigurasi dari session di sini.
      */
@@ -396,34 +402,46 @@ class AutoScheduleService
     /**
      * Get workload counts for all penguji (for load balancing)
      * Returns array with penguji_id => total_assignments
+     * Uses instance-based tracking that persists during batch operations
      */
     private function getPengujiWorkloadCounts(): array
     {
-        // Cache the workload counts during batch operations
-        static $cachedCounts = null;
-        static $cacheTime = null;
+        // Initialize workload tracker from database if not yet loaded
+        if ($this->workloadTracker === null) {
+            $result = DB::select("
+                SELECT p.id,
+                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.id), 0) +
+                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.id), 0) as total
+                FROM penguji p
+            ");
 
-        // Invalidate cache after 5 seconds (to handle real-time updates during batch)
-        if ($cachedCounts !== null && $cacheTime !== null && (time() - $cacheTime) < 5) {
-            return $cachedCounts;
+            $this->workloadTracker = [];
+            foreach ($result as $row) {
+                $this->workloadTracker[$row->id] = (int) $row->total;
+            }
         }
 
-        $result = DB::select("
-            SELECT p.id,
-                   COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.id), 0) +
-                   COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.id), 0) as total
-            FROM penguji p
-        ");
+        return $this->workloadTracker;
+    }
 
-        $counts = [];
-        foreach ($result as $row) {
-            $counts[$row->id] = (int) $row->total;
+    /**
+     * Update workload tracker after a schedule is created
+     * This ensures even distribution during batch operations
+     */
+    private function incrementPengujiWorkload(int $penguji1Id, int $penguji2Id): void
+    {
+        if ($this->workloadTracker !== null) {
+            $this->workloadTracker[$penguji1Id] = ($this->workloadTracker[$penguji1Id] ?? 0) + 1;
+            $this->workloadTracker[$penguji2Id] = ($this->workloadTracker[$penguji2Id] ?? 0) + 1;
         }
+    }
 
-        $cachedCounts = $counts;
-        $cacheTime = time();
-
-        return $counts;
+    /**
+     * Reset workload tracker (call this to force fresh data from database)
+     */
+    public function resetWorkloadTracker(): void
+    {
+        $this->workloadTracker = null;
     }
 
     private function isPengujiAvailable($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)
@@ -547,5 +565,8 @@ class AutoScheduleService
             'perubahan' => "Jadwal dibuat otomatis dengan 2 penguji: {$scheduleData['penguji1']->nama} dan {$scheduleData['penguji2']->nama}. Ruang: {$ruangNama}{$ruangLantai}{$priorityNote}.",
             'dilakukan_oleh' => auth()->id() ?? null,
         ]);
+
+        // Update in-memory workload tracker for load balancing during batch operations
+        $this->incrementPengujiWorkload($scheduleData['penguji1']->id, $scheduleData['penguji2']->id);
     }
 }
