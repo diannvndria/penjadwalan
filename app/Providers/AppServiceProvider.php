@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Mahasiswa;
-use App\Observers\MahasiswaObserver;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,7 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register observers
-        Mahasiswa::observe(MahasiswaObserver::class);
+        //
     }
 }
