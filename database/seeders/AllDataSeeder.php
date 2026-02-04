@@ -3,113 +3,114 @@
 namespace Database\Seeders;
 
 use App\Models\Dosen;
-use App\Models\HistoriMunaqosah;
 use App\Models\JadwalPenguji;
 use App\Models\Mahasiswa;
-use App\Models\Munaqosah;
 use App\Models\Penguji;
 use App\Models\User;
-use Carbon\Carbon;
+use Database\Factories\MahasiswaFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class AllDataSeeder extends Seeder
 {
+    public int $studentCount = 32;
+
+    public int $prioritasCount = 10;
+
+    public int $siapSidangCount = 22;
+
+    public array $angkatanYears = [2020, 2021, 2022, 2023, 2024, 2025];
+
     public function run(): void
     {
-        // Users
-        User::firstOrCreate([
-            'email' => 'admin@test.com',
-        ], [
-            'name' => 'Admin Test',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-        ]);
+        // 0. Cleanup existing data to avoid duplicates when running seeds multiple times
+        Schema::disableForeignKeyConstraints();
+        JadwalPenguji::truncate();
+        Mahasiswa::truncate();
+        Penguji::truncate();
+        Dosen::truncate();
+        Schema::enableForeignKeyConstraints();
 
-        User::firstOrCreate([
-            'email' => 'user@test.com',
-        ], [
-            'name' => 'Regular User',
-            'password' => bcrypt('password'),
-            'role' => 'user',
-        ]);
+        // Reset NIM counters for fresh sequential generation
+        MahasiswaFactory::resetNimCounters();
 
-        // Ruang Ujian (reuse existing seeder logic if present)
-        $this->call(RuangUjianSeeder::class);
+        // 1. Users
+        User::updateOrCreate(
+            ['email' => 'admin@test.com'],
+            [
+                'name' => 'Admin Test',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
 
-        // Create dosens
-        $dosens = [];
-        for ($i = 1; $i <= 8; $i++) {
-            $dosens[] = Dosen::firstOrCreate(['nama' => "Dr. Dosen $i"], ['kapasitas_ampu' => 12]);
-        }
+        User::updateOrCreate(
+            ['email' => 'user@test.com'],
+            [
+                'name' => 'Regular User',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+            ]
+        );
 
-        // Create pengujis
-        $pengujis = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $pengujis[] = Penguji::firstOrCreate(['nama' => "Dr. Penguji $i"], ['is_prioritas' => ($i <= 2)]);
-        }
+        // 2. Dosens
+        $dosens = Dosen::factory()
+            ->count(8)
+            ->withCapacity(12)
+            ->create();
 
-        // Create mahasiswa (more detailed)
-        for ($i = 1; $i <= 32; $i++) {
-            $nim = '2020'.str_pad($i, 4, '0', STR_PAD_LEFT);
-            $mahasiswa = Mahasiswa::updateOrCreate([
-                'nim' => $nim,
-            ], [
-                'nama' => "Mahasiswa Full $i",
-                'angkatan' => 2020 + ($i % 3),
-                'judul_skripsi' => "Studi Kasus $i",
-                'profil_lulusan' => 'Ilmuwan',
-                'penjurusan' => 'Teknik Informatika',
-                'id_dospem' => $dosens[($i - 1) % count($dosens)]->id,
-                'siap_sidang' => $i <= 22,
-                'is_prioritas' => ($i % 7 === 0),
-                'keterangan_prioritas' => ($i % 7 === 0) ? 'Prioritas beasiswa' : null,
+        // 3. Pengujis (Synced with Dosens)
+        $dosens->each(function ($dosen, $index) {
+            Penguji::factory()->create([
+                'nama' => $dosen->nama,
+                'nip' => $dosen->nip,
+                'is_prioritas' => $index < 2,
             ]);
+        });
 
-            // if ($mahasiswa->siap_sidang) {
-            //     $tanggal = Carbon::today()->addDays(rand(1, 60))->format('Y-m-d');
-            //     $waktu_mulai = sprintf('%02d:00:00', rand(8, 14));
-            //     $waktu_selesai = sprintf('%02d:00:00', intval(explode(':', $waktu_mulai)[0]) + 2);
+        Penguji::factory()->count(4)->create();
+        $allPengujis = Penguji::all();
 
-            //     $muna = Munaqosah::updateOrCreate([
-            //         'id_mahasiswa' => $mahasiswa->id
-            //     ], [
-            //         'tanggal_munaqosah' => $tanggal,
-            //         'waktu_mulai' => $waktu_mulai,
-            //         'waktu_selesai' => $waktu_selesai,
-            //         'id_penguji1' => $pengujis[($i - 1) % count($pengujis)]->id,
-            //         'id_penguji2' => $pengujis[($i) % count($pengujis)]->id,
-            //         'id_ruang_ujian' => null,
-            //         'status_konfirmasi' => 'pending',
-            //     ]);
+        // 4. Mahasiswa with realistic sequential NIMs per angkatan
+        // Pre-select random indices for prioritas and siap_sidang students
+        $allIndices = collect(range(0, $this->studentCount - 1))->shuffle();
 
-            //     HistoriMunaqosah::firstOrCreate([
-            //         'id_munaqosah' => $muna->id,
-            //         'perubahan' => 'Jadwal awal dibuat',
-            //         'dilakukan_oleh' => null,
-            //         'created_at' => Carbon::now(),
-            //     ]);
-            // }
-        }
+        $prioritasIndices = $allIndices->take($this->prioritasCount)->flip()->all();
+        $siapSidangIndices = $allIndices->take($this->siapSidangCount)->flip()->all();
 
-        // Jadwal penguji blocks
-        $today = Carbon::today();
-        foreach ($pengujis as $idx => $p) {
-            for ($j = 0; $j < 2; $j++) {
-                $tanggal = $today->copy()->addDays(rand(0, 90))->format('Y-m-d');
-                $start = sprintf('%02d:00:00', rand(8, 15));
-                $end = sprintf('%02d:00:00', intval(explode(':', $start)[0]) + 2);
+        $studentsPerYear = (int) floor($this->studentCount / count($this->angkatanYears));
+        $totalStudents = 0;
+        $createdCount = 0;
 
-                JadwalPenguji::firstOrCreate([
-                    'id_penguji' => $p->id,
-                    'tanggal' => $tanggal,
-                    'waktu_mulai' => $start,
-                    'waktu_selesai' => $end,
-                ], [
-                    'deskripsi' => 'Kegiatan seeder',
-                ]);
+        foreach ($this->angkatanYears as $index => $year) {
+            // Last year gets remaining students
+            $count = ($index === count($this->angkatanYears) - 1)
+                ? ($this->studentCount - $totalStudents)
+                : $studentsPerYear;
+
+            for ($i = 0; $i < $count; $i++) {
+                $isPrioritas = isset($prioritasIndices[$createdCount]);
+                $isSiapSidang = isset($siapSidangIndices[$createdCount]);
+
+                Mahasiswa::factory()
+                    ->angkatan($year)
+                    ->when($isPrioritas, fn ($f) => $f->prioritas())
+                    ->create([
+                        'id_dospem' => $dosens->random()->id,
+                        'siap_sidang' => $isSiapSidang,
+                    ]);
+
+                $createdCount++;
             }
+
+            $totalStudents += $count;
         }
 
-        $this->command->info('✅ Full dataset seeded: users, dosens, pengujis, mahasiswa, munaqosah, jadwal penguji, ruang ujian.');
+        // 5. Jadwal Penguji
+        foreach ($allPengujis as $p) {
+            JadwalPenguji::factory()->count(2)->create([
+                'id_penguji' => $p->id,
+            ]);
+        }
     }
 }
