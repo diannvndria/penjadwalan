@@ -208,12 +208,32 @@ class AutoScheduleController extends Controller
                 ], 400);
             }
 
-            // Simulate finding available slot using reflection to access protected method
+            // Get all pengujis
+            $allPengujis = \App\Models\Penguji::all();
+
+            if ($allPengujis->count() < 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Memerlukan minimal 2 penguji untuk simulasi',
+                    'simulation' => true,
+                ]);
+            }
+
+            // Simulate finding available slot using reflection to access private method
             $reflection = new \ReflectionClass($this->autoScheduleService);
             $method = $reflection->getMethod('findAvailableSlot');
             $method->setAccessible(true);
 
-            $availableSlot = $method->invoke($this->autoScheduleService);
+            $startDate = \Carbon\Carbon::now()->addDays(1);
+            $endDate = \Carbon\Carbon::now()->addDays(60);
+
+            $availableSlot = $method->invoke(
+                $this->autoScheduleService,
+                $mahasiswa,
+                $allPengujis,
+                $startDate,
+                $endDate
+            );
 
             if (! $availableSlot) {
                 return response()->json([
@@ -229,7 +249,13 @@ class AutoScheduleController extends Controller
                 'simulation' => true,
                 'data' => [
                     'mahasiswa' => $mahasiswa,
-                    'available_slot' => $availableSlot,
+                    'available_slot' => [
+                        'tanggal' => $availableSlot['tanggal'],
+                        'waktu_mulai' => $availableSlot['waktu_mulai'],
+                        'waktu_selesai' => $availableSlot['waktu_selesai'],
+                        'penguji1' => $availableSlot['penguji1']->nama,
+                        'penguji2' => $availableSlot['penguji2']->nama,
+                    ],
                 ],
             ]);
 

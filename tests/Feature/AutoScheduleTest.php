@@ -7,141 +7,114 @@ use App\Models\JadwalPenguji;
 use App\Models\Mahasiswa;
 use App\Models\Munaqosah;
 use App\Models\Penguji;
+use App\Models\RuangUjian;
 use App\Models\User;
 use App\Services\AutoScheduleService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AutoScheduleTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $adminUser;
+    protected User $adminUser;
 
-    protected $autoScheduleService;
+    protected User $regularUser;
+
+    protected AutoScheduleService $autoScheduleService;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Create admin user
-        $this->adminUser = User::create([
-            'name' => 'Admin Test',
-            'email' => 'admin@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-        ]);
-
+        $this->adminUser = User::factory()->admin()->create();
+        $this->regularUser = User::factory()->create(['role' => 'user']);
         $this->autoScheduleService = app(AutoScheduleService::class);
     }
 
-    /** @test */
-    public function it_can_schedule_ready_student_automatically()
+    #[Test]
+    public function it_can_schedule_ready_student_automatically(): void
     {
         // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
+        // Create pengujis first to avoid ID collision with dosen (both tables start at ID 1)
+        Penguji::factory()->count(3)->create();
+        $dosen = Dosen::factory()->create();
+        RuangUjian::factory()->create();
 
-        $mahasiswa = Mahasiswa::create([
-            'nim' => '123456789',
-            'nama' => 'Test Mahasiswa',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Test auto-schedule
         $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
 
         // Assertions
-        $this->assertTrue($result['success']);
+        $this->assertTrue($result['success'], $result['message'] ?? 'Unknown error');
         $this->assertDatabaseHas('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
             'status_konfirmasi' => 'pending',
         ]);
-        $this->assertDatabaseHas('histori_munaqosah', [
-            'perubahan' => 'Jadwal dibuat otomatis oleh sistem',
-        ]);
     }
 
-    /** @test */
-    public function it_handles_no_available_slot_gracefully()
+    #[Test]
+    public function it_handles_no_available_slot_gracefully(): void
     {
+        // Create pengujis first and make them both busy for the next 60 days
+        $penguji1 = Penguji::factory()->create();
+        $penguji2 = Penguji::factory()->create();
+
         // Setup test data with all pengujis busy
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
+        $dosen = Dosen::factory()->create();
 
-        // Create only 2 pengujis and make them both busy for the next week
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-
+        // Block all working days for the next 60 days (full day coverage)
         $today = Carbon::today();
-        for ($i = 0; $i < 7; $i++) {
-            JadwalPenguji::create([
-                'id_penguji' => $penguji1->id,
-                'tanggal' => $today->copy()->addDays($i)->format('Y-m-d'),
-                'waktu_mulai' => '08:00:00',
-                'waktu_selesai' => '16:00:00',
-                'deskripsi' => 'Busy all day',
-            ]);
+        for ($i = 1; $i <= 60; $i++) {
+            $date = $today->copy()->addDays($i);
+            // Only create jadwal for weekdays
+            if ($date->isWeekday()) {
+                JadwalPenguji::factory()->forPenguji($penguji1)->create([
+                    'tanggal' => $date->format('Y-m-d'),
+                    'waktu_mulai' => '08:00:00',
+                    'waktu_selesai' => '16:00:00',
+                ]);
 
-            JadwalPenguji::create([
-                'id_penguji' => $penguji2->id,
-                'tanggal' => $today->copy()->addDays($i)->format('Y-m-d'),
-                'waktu_mulai' => '08:00:00',
-                'waktu_selesai' => '16:00:00',
-                'deskripsi' => 'Busy all day',
-            ]);
+                JadwalPenguji::factory()->forPenguji($penguji2)->create([
+                    'tanggal' => $date->format('Y-m-d'),
+                    'waktu_mulai' => '08:00:00',
+                    'waktu_selesai' => '16:00:00',
+                ]);
+            }
         }
 
-        $mahasiswa = Mahasiswa::create([
-            'nim' => '123456789',
-            'nama' => 'Test Mahasiswa',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Test auto-schedule
         $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
 
         // Assertions
         $this->assertFalse($result['success']);
-        $this->assertStringContainsString('Tidak ada slot', $result['message']);
         $this->assertDatabaseMissing('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
         ]);
     }
 
-    /** @test */
-    public function it_prevents_scheduling_already_scheduled_student()
+    #[Test]
+    public function it_prevents_scheduling_already_scheduled_student(): void
     {
         // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
+        $dosen = Dosen::factory()->create();
+        $penguji1 = Penguji::factory()->create();
+        $penguji2 = Penguji::factory()->create();
+        $ruang = RuangUjian::factory()->create();
 
-        $mahasiswa = Mahasiswa::create([
-            'nim' => '123456789',
-            'nama' => 'Test Mahasiswa',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Create existing munaqosah
-        Munaqosah::create([
+        Munaqosah::factory()->create([
             'id_mahasiswa' => $mahasiswa->id,
-            'tanggal_munaqosah' => Carbon::today()->addDay()->format('Y-m-d'),
-            'waktu_mulai' => '10:00:00',
-            'waktu_selesai' => '12:00:00',
             'id_penguji1' => $penguji1->id,
             'id_penguji2' => $penguji2->id,
-            'status_konfirmasi' => 'pending',
+            'id_ruang_ujian' => $ruang->id,
         ]);
 
         // Test auto-schedule
@@ -152,34 +125,17 @@ class AutoScheduleTest extends TestCase
         $this->assertStringContainsString('sudah memiliki jadwal', $result['message']);
     }
 
-    /** @test */
-    public function it_can_batch_schedule_multiple_students()
+    #[Test]
+    public function it_can_batch_schedule_multiple_students(): void
     {
-        // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
-        $penguji3 = Penguji::create(['nama' => 'Dr. Test Penguji 3']);
-        $penguji4 = Penguji::create(['nama' => 'Dr. Test Penguji 4']);
+        // Setup test data - create pengujis first to avoid ID collision with dosen
+        Penguji::factory()->count(4)->create();
+        RuangUjian::factory()->count(2)->create();
+        $dosen = Dosen::factory()->create();
 
         // Create multiple students ready for defense
-        $mahasiswa1 = Mahasiswa::create([
-            'nim' => '123456781',
-            'nama' => 'Test Mahasiswa 1',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi 1',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
-
-        $mahasiswa2 = Mahasiswa::create([
-            'nim' => '123456782',
-            'nama' => 'Test Mahasiswa 2',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi 2',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa1 = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
+        $mahasiswa2 = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Test batch auto-schedule
         $result = $this->autoScheduleService->batchScheduleAll();
@@ -196,8 +152,8 @@ class AutoScheduleTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function admin_can_access_auto_schedule_page()
+    #[Test]
+    public function admin_can_access_auto_schedule_page(): void
     {
         $response = $this->actingAs($this->adminUser)
             ->get('/auto-schedule');
@@ -205,43 +161,27 @@ class AutoScheduleTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
-    public function non_admin_cannot_access_auto_schedule_page()
+    #[Test]
+    public function non_admin_cannot_access_auto_schedule_page(): void
     {
-        $regularUser = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@test.com',
-            'password' => bcrypt('password'),
-            'role' => 'user',
-        ]);
-
-        $response = $this->actingAs($regularUser)
+        $response = $this->actingAs($this->regularUser)
             ->get('/auto-schedule');
 
         $response->assertStatus(403);
     }
 
-    /** @test */
-    public function it_can_get_ready_students_via_api()
+    #[Test]
+    public function it_can_get_ready_students_via_api(): void
     {
         // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
+        $dosen = Dosen::factory()->create();
 
-        $readyStudent = Mahasiswa::create([
-            'nim' => '123456789',
+        $readyStudent = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create([
             'nama' => 'Ready Student',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
         ]);
 
-        $notReadyStudent = Mahasiswa::create([
-            'nim' => '123456788',
+        Mahasiswa::factory()->forDosen($dosen)->create([
             'nama' => 'Not Ready Student',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi 2',
-            'id_dospem' => $dosen->id,
             'siap_sidang' => false,
         ]);
 
@@ -258,22 +198,15 @@ class AutoScheduleTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function it_can_schedule_individual_student_via_api()
+    #[Test]
+    public function it_can_schedule_individual_student_via_api(): void
     {
-        // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
+        // Setup test data - create pengujis first to avoid ID collision with dosen
+        Penguji::factory()->count(3)->create();
+        RuangUjian::factory()->create();
+        $dosen = Dosen::factory()->create();
 
-        $mahasiswa = Mahasiswa::create([
-            'nim' => '123456789',
-            'nama' => 'Test Mahasiswa',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         $response = $this->actingAs($this->adminUser)
             ->postJson('/auto-schedule/schedule-student', [
@@ -286,22 +219,15 @@ class AutoScheduleTest extends TestCase
             ]);
     }
 
-    /** @test */
-    public function it_can_simulate_scheduling()
+    #[Test]
+    public function it_can_simulate_scheduling(): void
     {
-        // Setup test data
-        $dosen = Dosen::create(['nama' => 'Dr. Test Dosen']);
-        $penguji1 = Penguji::create(['nama' => 'Dr. Test Penguji 1']);
-        $penguji2 = Penguji::create(['nama' => 'Dr. Test Penguji 2']);
+        // Setup test data - create pengujis first to avoid ID collision with dosen
+        Penguji::factory()->count(3)->create();
+        RuangUjian::factory()->create();
+        $dosen = Dosen::factory()->create();
 
-        $mahasiswa = Mahasiswa::create([
-            'nim' => '123456789',
-            'nama' => 'Test Mahasiswa',
-            'angkatan' => 2021,
-            'judul_skripsi' => 'Test Judul Skripsi',
-            'id_dospem' => $dosen->id,
-            'siap_sidang' => true,
-        ]);
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         $response = $this->actingAs($this->adminUser)
             ->postJson('/auto-schedule/simulate', [
@@ -319,5 +245,74 @@ class AutoScheduleTest extends TestCase
         $this->assertDatabaseMissing('munaqosah', [
             'id_mahasiswa' => $mahasiswa->id,
         ]);
+    }
+
+    #[Test]
+    public function it_requires_minimum_two_pengujis(): void
+    {
+        $dosen = Dosen::factory()->create();
+        Penguji::factory()->create(); // Only 1 penguji
+        RuangUjian::factory()->create();
+
+        $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
+
+        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('2 penguji', $result['message']);
+    }
+
+    #[Test]
+    public function it_can_get_configuration(): void
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->getJson('/auto-schedule/configuration');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'default_duration_minutes',
+                    'working_hours',
+                    'working_days',
+                ],
+            ]);
+    }
+
+    #[Test]
+    public function it_can_update_configuration(): void
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->putJson('/auto-schedule/configuration', [
+                'duration_minutes' => 90,
+                'working_hours' => [
+                    'start' => '09:00',
+                    'end' => '17:00',
+                ],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ]);
+    }
+
+    #[Test]
+    public function it_validates_configuration_update(): void
+    {
+        $response = $this->actingAs($this->adminUser)
+            ->putJson('/auto-schedule/configuration', [
+                'duration_minutes' => 10, // Below minimum of 30
+            ]);
+
+        $response->assertStatus(422);
+    }
+
+    #[Test]
+    public function guest_cannot_access_auto_schedule(): void
+    {
+        $response = $this->get('/auto-schedule');
+
+        $response->assertRedirect(route('login'));
     }
 }

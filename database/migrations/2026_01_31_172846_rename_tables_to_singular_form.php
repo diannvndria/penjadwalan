@@ -19,25 +19,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Step 1: Drop all foreign key constraints first
+        // Step 1: Drop all foreign key constraints first (database-agnostic approach)
         Schema::table('histori_munaqosahs', function (Blueprint $table) {
-            $table->dropForeign('histori_munaqosahs_id_munaqosah_foreign');
-            $table->dropForeign('histori_munaqosahs_dilakukan_oleh_foreign');
+            $table->dropForeign(['id_munaqosah']);
+            $table->dropForeign(['dilakukan_oleh']);
         });
 
         Schema::table('munaqosahs', function (Blueprint $table) {
-            $table->dropForeign('munaqosahs_id_mahasiswa_foreign');
-            $table->dropForeign('munaqosahs_id_penguji1_foreign');
-            $table->dropForeign('munaqosahs_id_penguji2_foreign');
-            $table->dropForeign('munaqosahs_id_ruang_ujian_foreign');
+            $table->dropForeign(['id_mahasiswa']);
+            $table->dropForeign(['id_penguji1']);
+            $table->dropForeign(['id_penguji2']);
+            $table->dropForeign(['id_ruang_ujian']);
         });
 
         Schema::table('jadwal_pengujis', function (Blueprint $table) {
-            $table->dropForeign('jadwal_pengujis_id_penguji_foreign');
+            $table->dropForeign(['id_penguji']);
         });
 
         Schema::table('mahasiswas', function (Blueprint $table) {
-            $table->dropForeign('mahasiswas_id_dospem_foreign');
+            $table->dropForeign(['id_dospem']);
         });
 
         // Step 2: Rename tables (order matters - child tables first, then parent tables)
@@ -93,13 +93,15 @@ return new class extends Migration
                 ->onDelete('set null');
         });
 
-        // Step 4: Rename sequences for PostgreSQL to match new table names
-        DB::statement('ALTER SEQUENCE IF EXISTS dosens_id_seq RENAME TO dosen_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS pengujis_id_seq RENAME TO penguji_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS mahasiswas_id_seq RENAME TO mahasiswa_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS jadwal_pengujis_id_seq RENAME TO jadwal_penguji_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS munaqosahs_id_seq RENAME TO munaqosah_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS histori_munaqosahs_id_seq RENAME TO histori_munaqosah_id_seq');
+        // Step 4: Rename sequences for PostgreSQL only (SQLite doesn't use sequences)
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER SEQUENCE IF EXISTS dosens_id_seq RENAME TO dosen_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS pengujis_id_seq RENAME TO penguji_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS mahasiswas_id_seq RENAME TO mahasiswa_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS jadwal_pengujis_id_seq RENAME TO jadwal_penguji_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS munaqosahs_id_seq RENAME TO munaqosah_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS histori_munaqosahs_id_seq RENAME TO histori_munaqosah_id_seq');
+        }
     }
 
     /**
@@ -181,12 +183,14 @@ return new class extends Migration
                 ->onDelete('set null');
         });
 
-        // Step 4: Rename sequences back
-        DB::statement('ALTER SEQUENCE IF EXISTS dosen_id_seq RENAME TO dosens_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS penguji_id_seq RENAME TO pengujis_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS mahasiswa_id_seq RENAME TO mahasiswas_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS jadwal_penguji_id_seq RENAME TO jadwal_pengujis_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS munaqosah_id_seq RENAME TO munaqosahs_id_seq');
-        DB::statement('ALTER SEQUENCE IF EXISTS histori_munaqosah_id_seq RENAME TO histori_munaqosahs_id_seq');
+        // Step 4: Rename sequences back (PostgreSQL only)
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER SEQUENCE IF EXISTS dosen_id_seq RENAME TO dosens_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS penguji_id_seq RENAME TO pengujis_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS mahasiswa_id_seq RENAME TO mahasiswas_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS jadwal_penguji_id_seq RENAME TO jadwal_pengujis_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS munaqosah_id_seq RENAME TO munaqosahs_id_seq');
+            DB::statement('ALTER SEQUENCE IF EXISTS histori_munaqosah_id_seq RENAME TO histori_munaqosahs_id_seq');
+        }
     }
 };

@@ -59,11 +59,10 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
         $waktuMulai = $request->waktu_mulai;
         $waktuSelesai = $request->waktu_selesai;
 
-        // Logika untuk mengecek bentrok jadwal penguji untuk penguji yang sama
         // Cek apakah ada jadwal lain untuk penguji yang sama pada tanggal yang sama
         // dan rentang waktunya tumpang tindih
         $isBentrok = JadwalPenguji::where('id_penguji', $request->id_penguji)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 // Kondisi tumpang tindih waktu:
                 // (Mulai_baru < Selesai_lama AND Selesai_baru > Mulai_lama)
@@ -110,7 +109,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
 
         // Cek bentrok saat update, kecualikan jadwal yang sedang diedit (berdasarkan ID-nya)
         $isBentrok = JadwalPenguji::where('id_penguji', $request->id_penguji)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->where('id', '!=', $jadwalPenguji->id) // Penting: Kecualikan jadwal ini sendiri dari pengecekan
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)

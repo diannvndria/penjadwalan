@@ -446,7 +446,7 @@ class MunaqosahController extends Controller
         $query = DB::table('jadwal_penguji')
             ->select(DB::raw('1'))
             ->where('id_penguji', $pengujiId)
-            ->where('tanggal', $tanggal)
+            ->whereDate('tanggal', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
                     ->where('waktu_selesai', '>', $waktuMulai);
@@ -458,7 +458,7 @@ class MunaqosahController extends Controller
                         $query->where('id_penguji1', $pengujiId)
                             ->orWhere('id_penguji2', $pengujiId);
                     })
-                    ->where('tanggal_munaqosah', $tanggal)
+                    ->whereDate('tanggal_munaqosah', $tanggal)
                     ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                         $query->where('waktu_mulai', '<', $waktuSelesai)
                             ->where('waktu_selesai', '>', $waktuMulai);
@@ -474,7 +474,7 @@ class MunaqosahController extends Controller
     private function checkRuangConflict($ruangId, $tanggal, $waktuMulai, $waktuSelesai, $excludeMunaqosahId = null)
     {
         $query = Munaqosah::where('id_ruang_ujian', $ruangId)
-            ->where('tanggal_munaqosah', $tanggal)
+            ->whereDate('tanggal_munaqosah', $tanggal)
             ->where(function ($query) use ($waktuMulai, $waktuSelesai) {
                 $query->where('waktu_mulai', '<', $waktuSelesai)
                     ->where('waktu_selesai', '>', $waktuMulai);
