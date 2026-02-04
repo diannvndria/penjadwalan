@@ -91,7 +91,7 @@ class MahasiswaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nim' => 'required|string|max:20|unique:mahasiswa,nim',
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
@@ -104,12 +104,16 @@ class MahasiswaController extends Controller
             'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
+        // Pastikan nilai boolean selalu terisi meskipun checkbox tidak dicentang
+        $validated['siap_sidang'] = $request->boolean('siap_sidang');
+        $validated['is_prioritas'] = $request->boolean('is_prioritas');
+
         $dosen = Dosen::find($request->id_dospem);
         if ($dosen->kapasitas_ampu > 0 && $dosen->mahasiswas()->count() >= $dosen->kapasitas_ampu) {
             return back()->withInput()->withErrors(['id_dospem' => 'Dosen pembimbing ini sudah mencapai kapasitas maksimal. Pilih dosen lain atau perbarui kapasitas dosen.']);
         }
 
-        Mahasiswa::create($request->all());
+        Mahasiswa::create($validated);
 
         return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil ditambahkan.');
     }
@@ -132,7 +136,7 @@ class MahasiswaController extends Controller
     {
         $oldSiapSidang = $mahasiswa->siap_sidang;
 
-        $request->validate([
+        $validated = $request->validate([
             'nim' => 'required|string|max:20|unique:mahasiswa,nim,'.$mahasiswa->id,
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
@@ -145,6 +149,10 @@ class MahasiswaController extends Controller
             'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
+        // Pastikan nilai boolean selalu terisi meskipun checkbox tidak dicentang
+        $validated['siap_sidang'] = $request->boolean('siap_sidang');
+        $validated['is_prioritas'] = $request->boolean('is_prioritas');
+
         if ($mahasiswa->id_dospem != $request->id_dospem) {
             $newDospem = Dosen::find($request->id_dospem);
             if ($newDospem->kapasitas_ampu > 0 && $newDospem->mahasiswas()->count() >= $newDospem->kapasitas_ampu) {
@@ -152,8 +160,8 @@ class MahasiswaController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $mahasiswa) {
-            $mahasiswa->update($request->all());
+        DB::transaction(function () use ($validated, $mahasiswa) {
+            $mahasiswa->update($validated);
 
             // Logika penjadwalan otomatis (jika ada):
             // Pastikan Anda telah mengimplementasikan metode findAvailableMunaqosahSlot dan checkPengujiConflict di controller ini

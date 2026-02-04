@@ -140,6 +140,7 @@
                 {{-- Siap Sidang Checkbox --}}
                 <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div class="flex items-center">
+                        <input type="hidden" name="siap_sidang" value="0">
                         <input type="checkbox" id="siap_sidang" name="siap_sidang" value="1" {{ old('siap_sidang') ? 'checked' : '' }}
                             class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2">
                         <label for="siap_sidang" class="ml-3 flex items-center text-sm font-medium text-gray-900">
