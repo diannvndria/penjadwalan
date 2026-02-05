@@ -63,6 +63,12 @@ class MahasiswaController extends Controller
             $query->where('id_dospem', $request->dospem_id);
         }
 
+        // Terapkan filter status sidang jika ada (siap_sidang is boolean: 1=Siap, 0=Belum)
+        if ($request->filled('status_sidang')) {
+            $siapSidang = $request->status_sidang === 'Siap' ? true : false;
+            $query->where('siap_sidang', $siapSidang);
+        }
+
         $mahasiswas = $query->paginate(10);
 
         // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view

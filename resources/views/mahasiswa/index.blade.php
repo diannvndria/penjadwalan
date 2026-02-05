@@ -69,6 +69,17 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clipboard-check text-gray-400"></i>
+                        <label for="status_sidang" class="text-sm font-medium text-gray-700 whitespace-nowrap">Status Sidang:</label>
+                        <select name="status_sidang" id="status_sidang" onchange="this.form.submit()"
+                            class="block w-40 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
+                            <option value="">Semua</option>
+                            <option value="Belum" {{ request('status_sidang') == 'Belum' ? 'selected' : '' }}>Belum</option>
+                            <option value="Siap" {{ request('status_sidang') == 'Siap' ? 'selected' : '' }}>Siap</option>
+                        </select>
+                    </div>
                 </form>
 
                 {{-- Add Button --}}
@@ -102,7 +113,7 @@
                     <thead>
                         <tr class="bg-gray-50/50">
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('mahasiswa.index', ['sort' => 'nim', 'direction' => $sortField === 'nim' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'nim', 'direction' => $sortField === 'nim' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id'), 'status_sidang' => request('status_sidang'), 'search' => request('search')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-id-card text-gray-400 text-sm"></i>
                                     NIM
                                     @if($sortField === 'nim')
@@ -113,7 +124,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('mahasiswa.index', ['sort' => 'nama', 'direction' => $sortField === 'nama' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'nama', 'direction' => $sortField === 'nama' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id'), 'status_sidang' => request('status_sidang'), 'search' => request('search')]) }}" class="flex items-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-user text-gray-400 text-sm"></i>
                                     Nama
                                     @if($sortField === 'nama')
@@ -124,7 +135,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <a href="{{ route('mahasiswa.index', ['sort' => 'angkatan', 'direction' => $sortField === 'angkatan' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')]) }}" class="flex items-center justify-center gap-2 hover:text-blue-600 transition-colors">
+                                <a href="{{ route('mahasiswa.index', ['sort' => 'angkatan', 'direction' => $sortField === 'angkatan' && $sortDirection === 'asc' ? 'desc' : 'asc', 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id'), 'status_sidang' => request('status_sidang'), 'search' => request('search')]) }}" class="flex items-center justify-center gap-2 hover:text-blue-600 transition-colors">
                                     <i class="fas fa-calendar text-gray-400 text-sm"></i>
                                     Angkatan
                                     @if($sortField === 'angkatan')
@@ -266,7 +277,7 @@
             {{-- Pagination --}}
             @if($mahasiswas->hasPages())
                 <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex justify-end">
-                    {{ $mahasiswas->appends(['sort' => $sortField, 'direction' => $sortDirection, 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id')])->links('vendor.pagination.custom') }}
+                    {{ $mahasiswas->appends(['sort' => $sortField, 'direction' => $sortDirection, 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id'), 'status_sidang' => request('status_sidang'), 'search' => request('search')])->links('vendor.pagination.custom') }}
                 </div>
             @endif
         </div>
