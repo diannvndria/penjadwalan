@@ -4,6 +4,29 @@
     {{ __('Data Mahasiswa') }}
 @endsection
 
+@section('styles')
+<style>
+    /* Limit penjurusan column width and apply ellipsis */
+    table th:nth-child(7),
+    table td:nth-child(7) {
+        max-width: 150px !important;
+        min-width: 150px !important;
+        width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    
+    .truncate-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        width: 100%;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="space-y-6">
         {{-- Alert Messages --}}
@@ -223,8 +246,8 @@
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-600">{{ $mahasiswa->profil_lulusan ?? '-' }}</span>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="text-sm text-gray-600">{{ $mahasiswa->penjurusan ?? '-' }}</span>
+                                <td class="px-4 py-4">
+                                    <span class="text-sm text-gray-600 truncate-text" title="{{ $mahasiswa->penjurusan ?? '-' }}">{{ $mahasiswa->penjurusan ?? '-' }}</span>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap text-center">
                                     @if($mahasiswa->siap_sidang)
