@@ -28,13 +28,13 @@
         }
     }'>
         @if (session('success'))
-            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-center" role="alert">
+            <div id="successAlert" class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-center transition-all duration-300" role="alert">
                 <i class="fas fa-check-circle text-green-500 mr-3"></i>
                 <span>{{ session('success') }}</span>
             </div>
         @endif
         @if ($errors->any())
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-sm" role="alert">
+            <div id="errorAlert" class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-sm transition-all duration-300" role="alert">
                 <div class="flex items-center mb-2">
                     <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
                     <strong class="font-semibold">Oops!</strong>
@@ -460,5 +460,29 @@
         modal.classList.remove('flex');
         bulkDeleteIds = [];
     }
+
+    // Auto-dismiss notifications after 2 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        
+        if (successAlert) {
+            setTimeout(function() {
+                successAlert.style.opacity = '0';
+                setTimeout(function() {
+                    successAlert.remove();
+                }, 300);
+            }, 2000);
+        }
+        
+        if (errorAlert) {
+            setTimeout(function() {
+                errorAlert.style.opacity = '0';
+                setTimeout(function() {
+                    errorAlert.remove();
+                }, 300);
+            }, 2000);
+        }
+    });
 </script>
 @endsection
