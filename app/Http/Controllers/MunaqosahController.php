@@ -329,6 +329,34 @@ class MunaqosahController extends Controller
     }
 
     /**
+     * Menghapus jadwal munaqosah yang sudah terkonfirmasi secara permanen dari database.
+     */
+    public function permanentDelete(Munaqosah $munaqosah)
+    {
+        // Validasi: hanya jadwal yang sudah dikonfirmasi yang bisa dihapus permanen
+        if (strtolower($munaqosah->status_konfirmasi) !== 'dikonfirmasi') {
+            return redirect()->route('munaqosah.index')->with('error', 'Hanya jadwal yang sudah dikonfirmasi yang dapat dihapus permanen.');
+        }
+
+        DB::transaction(function () use ($munaqosah) {
+            $mahasiswaNama = $munaqosah->mahasiswa->nama ?? 'Nama tidak diketahui';
+            $mahasiswaNIM = $munaqosah->mahasiswa->nim ?? 'NIM tidak diketahui';
+
+            // Simpan histori sebelum menghapus permanen
+            HistoriMunaqosah::create([
+                'id_munaqosah' => null,
+                'perubahan' => 'Jadwal munaqosah untuk mahasiswa '.$mahasiswaNama.' (NIM: '.$mahasiswaNIM.') telah DIHAPUS PERMANEN dari sistem.',
+                'dilakukan_oleh' => auth()->id(),
+            ]);
+
+            // Hapus permanen (force delete)
+            $munaqosah->forceDelete();
+        });
+
+        return redirect()->route('munaqosah.index')->with('success', 'Jadwal sidang berhasil dihapus PERMANEN dari sistem.');
+    }
+
+    /**
      * Menghapus beberapa jadwal munaqosah sekaligus (Bulk Delete).
      */
     public function bulkDestroy(Request $request)

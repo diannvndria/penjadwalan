@@ -82,8 +82,11 @@ Route::middleware(['auth'])->group(function () {
     // Admin bisa melakukan CRUD Jadwal Penguji
     Route::resource('jadwal-penguji', JadwalPengujiController::class)->except(['index']); // Kecualikan index
 
+    // Permanent Delete for Confirmed Schedules (using POST to avoid method spoofing issues)
+    Route::post('munaqosah-permanent-delete/{munaqosah}', [MunaqosahController::class, 'permanentDelete'])->name('munaqosah.permanent')->middleware('admin');
+
     // Admin bisa melakukan CRUD Jadwal Munaqosah
-    Route::resource('munaqosah', MunaqosahController::class)->except(['index', 'histori']); // Kecualikan index & histori
+    Route::resource('munaqosah', MunaqosahController::class)->except(['index', 'histori']); // Kecualikan index &histori
 
     // Admin bisa melakukan CRUD Ruang Ujian
     Route::resource('ruang-ujian', RuangUjianController::class)->except(['index']); // Kecualikan index karena sudah di atas

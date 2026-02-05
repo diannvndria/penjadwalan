@@ -304,6 +304,14 @@
                                                             role="menuitem">
                                                         <i class="fas fa-trash mr-3 w-4"></i>Hapus
                                                     </button>
+                                                    @if(strtolower($munaqosah->status_konfirmasi) === 'dikonfirmasi')
+                                                        <button type="button"
+                                                                onclick="showPermanentDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
+                                                                class="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-100 transition border-t border-gray-100"
+                                                                role="menuitem">
+                                                            <i class="fas fa-trash-alt mr-3 w-4"></i>Hapus Permanen
+                                                        </button>
+                                                    @endif
                                                 @endif
                                             </div>
                                         </div>
@@ -374,10 +382,43 @@
         </div>
     </div>
 
+    {{-- Modal untuk Permanent Delete --}}
+    <div id="permanentDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-4" id="permanentDeleteModalTitle">Hapus Data Permanen</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500" id="permanentDeleteModalMessage">
+                        Apakah Anda yakin ingin menghapus PERMANEN jadwal sidang untuk <span id="permanentDeleteItemName" class="font-semibold"></span>?
+                    </p>
+                    <p class="text-sm text-red-600 mt-3 font-medium">
+                        <i class="fas fa-exclamation-circle mr-1"></i>Data yang terkonfirmasi akan dihapus selamanya dan tidak dapat dikembalikan!
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex justify-center space-x-4">
+                    <button id="confirmPermanentDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Ya, Hapus Permanen
+                    </button>
+                    <button id="cancelPermanentDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Form tersembunyi untuk submit penghapusan --}}
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
+    </form>
+
+    {{-- Form tersembunyi untuk permanent delete --}}
+    <form id="permanentDeleteForm" method="POST" style="display: none;">
+        @csrf
     </form>
 
     {{-- Form tersembunyi untuk bulk delete --}}
@@ -391,6 +432,7 @@
 @section('scripts')
 <script>
     let munaqosahToDeleteId = null;
+    let munaqosahToPermanentDeleteId = null;
     let bulkDeleteIds = [];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -411,6 +453,23 @@
 
         cancelDeleteBtn.addEventListener('click', function() {
             hideDeleteModal();
+        });
+
+        // Permanent delete handlers
+        const confirmPermanentDeleteBtn = document.getElementById('confirmPermanentDeleteBtn');
+        const cancelPermanentDeleteBtn = document.getElementById('cancelPermanentDeleteBtn');
+        const permanentDeleteForm = document.getElementById('permanentDeleteForm');
+
+        confirmPermanentDeleteBtn.addEventListener('click', function() {
+            if (munaqosahToPermanentDeleteId) {
+                permanentDeleteForm.action = `/munaqosah-permanent-delete/${munaqosahToPermanentDeleteId}`;
+                permanentDeleteForm.submit();
+            }
+            hidePermanentDeleteModal();
+        });
+
+        cancelPermanentDeleteBtn.addEventListener('click', function() {
+            hidePermanentDeleteModal();
         });
 
         // Bulk delete handlers
@@ -444,6 +503,21 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         munaqosahToDeleteId = null; // Reset ID setelah modal ditutup
+    }
+
+    function showPermanentDeleteModal(id, itemName) {
+        munaqosahToPermanentDeleteId = id;
+        document.getElementById('permanentDeleteItemName').textContent = itemName;
+        const modal = document.getElementById('permanentDeleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function hidePermanentDeleteModal() {
+        const modal = document.getElementById('permanentDeleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        munaqosahToPermanentDeleteId = null;
     }
 
     function showBulkDeleteModal(selectedIds) {
