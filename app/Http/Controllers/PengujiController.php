@@ -12,7 +12,12 @@ class PengujiController extends Controller
      */
     public function index()
     {
-        $pengujis = Penguji::orderBy('nama')->paginate(10);
+        $pengujis = Penguji::withCount([
+            'munaqosahsAsPenguji1',
+            'munaqosahsAsPenguji2'
+        ])
+        ->orderBy('nama')
+        ->paginate(10);
 
         return view('penguji.index', compact('pengujis'));
     }

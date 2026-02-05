@@ -62,6 +62,12 @@
                                     Nama Penguji
                                 </div>
                             </th>
+                            <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
+                                    <i class="fas fa-clipboard-check text-gray-400 text-sm"></i>
+                                    Jumlah Menguji
+                                </div>
+                            </th>
                             @if (Auth::user()->isAdmin())
                                 <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     <div class="flex items-center justify-center gap-1">
@@ -96,6 +102,13 @@
                                         @endif
                                     </div>
                                 </td>
+                                <td class="px-4 py-4 text-center">
+                                    <div class="inline-flex items-center justify-center">
+                                        <span class="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg border border-blue-200">
+                                            {{ ($penguji->munaqosahs_as_penguji1_count ?? 0) + ($penguji->munaqosahs_as_penguji2_count ?? 0) }}
+                                        </span>
+                                    </div>
+                                </td>
                                 @if (Auth::user()->isAdmin())
                                     <td class="px-4 py-4 text-center">
                                         <div class="flex items-center justify-center gap-2">
@@ -115,7 +128,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ Auth::user()->isAdmin() ? '3' : '2' }}" class="px-6 py-12 text-center">
+                                <td colspan="{{ Auth::user()->isAdmin() ? '4' : '3' }}" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center text-gray-400">
                                         <i class="fas fa-inbox text-4xl mb-3"></i>
                                         <p class="text-sm font-medium">Tidak ada data penguji</p>
