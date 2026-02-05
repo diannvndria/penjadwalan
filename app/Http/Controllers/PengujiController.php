@@ -13,8 +13,12 @@ class PengujiController extends Controller
     public function index()
     {
         $pengujis = Penguji::withCount([
-            'munaqosahsAsPenguji1',
-            'munaqosahsAsPenguji2'
+            'munaqosahsAsPenguji1 as munaqosahs_as_penguji1_count' => function ($query) {
+                $query->where('status_konfirmasi', 'dikonfirmasi');
+            },
+            'munaqosahsAsPenguji2 as munaqosahs_as_penguji2_count' => function ($query) {
+                $query->where('status_konfirmasi', 'dikonfirmasi');
+            }
         ])
         ->orderBy('nama')
         ->paginate(10);
