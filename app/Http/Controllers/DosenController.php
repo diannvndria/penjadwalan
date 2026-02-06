@@ -13,8 +13,16 @@ class DosenController extends Controller
      */
     public function index()
     {
-        // Mengambil semua dosen dan menghitung jumlah mahasiswa yang diampu oleh masing-masing dosen
-        $dosens = Dosen::withCount('mahasiswas')->orderBy('nama')->paginate(10); // paginate for consistent paging
+        // Mengambil semua dosen dan menghitung jumlah mahasiswa yang diampu
+        // serta menghitung riwayat ketua sidang (munaqosah yang dikonfirmasi)
+        $dosens = Dosen::withCount('mahasiswas')
+            ->withCount([
+                'munaqosahs as munaqosahs_count' => function ($query) {
+                    $query->where('status_konfirmasi', 'dikonfirmasi');
+                }
+            ])
+            ->orderBy('nama')
+            ->paginate(10);
 
         return view('dosen.index', compact('dosens'));
     }

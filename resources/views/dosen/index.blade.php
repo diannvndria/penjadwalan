@@ -70,6 +70,12 @@
                             </th>
                             <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center justify-center gap-1">
+                                    <i class="fas fa-gavel text-gray-400 text-sm"></i>
+                                    Riwayat Ketua Sidang
+                                </div>
+                            </th>
+                            <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-layer-group text-gray-400 text-sm"></i>
                                     Kapasitas
                                 </div>
@@ -102,6 +108,11 @@
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                                         {{ $dosen->jumlah_diampu_sekarang }}
+                                    </span>
+                                </td>
+                                <td class="px-3 py-4 whitespace-nowrap text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                        {{ $dosen->munaqosahs_count ?? 0 }}
                                     </span>
                                 </td>
                                 <td class="px-3 py-4 whitespace-nowrap text-center">
@@ -152,7 +163,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ Auth::user()->isAdmin() ? '6' : '5' }}" class="px-6 py-12 text-center">
+                                <td colspan="{{ Auth::user()->isAdmin() ? '7' : '6' }}" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
                                         <p class="text-gray-500 font-medium">Tidak ada data dosen</p>

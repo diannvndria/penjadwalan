@@ -27,6 +27,15 @@ class Dosen extends Model
     }
 
     /**
+     * Relasi: Dosen bisa mengakses Munaqosah melalui Mahasiswa yang dibimbing.
+     * Ini digunakan untuk menghitung "Riwayat Ketua Sidang".
+     */
+    public function munaqosahs()
+    {
+        return $this->hasManyThrough(Munaqosah::class, Mahasiswa::class, 'id_dospem', 'id_mahasiswa');
+    }
+
+    /**
      * Accessor: Menghitung jumlah mahasiswa yang sedang diampu.
      * Bisa diakses sebagai $dosen->jumlah_diampu_sekarang
      */
