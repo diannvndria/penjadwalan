@@ -64,8 +64,14 @@
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center justify-center gap-1">
-                                    <i class="fas fa-clipboard-check text-gray-400 text-sm"></i>
-                                    Jumlah Menguji
+                                    <i class="fas fa-user-check text-gray-400 text-sm"></i>
+                                    Penguji 1
+                                </div>
+                            </th>
+                            <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div class="flex items-center justify-center gap-1">
+                                    <i class="fas fa-user-check text-gray-400 text-sm"></i>
+                                    Penguji 2
                                 </div>
                             </th>
                             @if (Auth::user()->isAdmin())
@@ -104,8 +110,15 @@
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <div class="inline-flex items-center justify-center">
-                                        <span class="px-3 py-1.5 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg border border-blue-200">
-                                            {{ ($penguji->munaqosahs_as_penguji1_count ?? 0) + ($penguji->munaqosahs_as_penguji2_count ?? 0) }}
+                                        <span class="px-3 py-1.5 bg-green-50 text-green-700 text-sm font-semibold rounded-lg border border-green-200">
+                                            {{ $penguji->munaqosahs_as_penguji1_count ?? 0 }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <div class="inline-flex items-center justify-center">
+                                        <span class="px-3 py-1.5 bg-purple-50 text-purple-700 text-sm font-semibold rounded-lg border border-purple-200">
+                                            {{ $penguji->munaqosahs_as_penguji2_count ?? 0 }}
                                         </span>
                                     </div>
                                 </td>
