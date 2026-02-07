@@ -70,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
 // === RUTE YANG HANYA BISA DIAKSES OLEH ADMIN ===
 Route::middleware(['auth'])->group(function () {
 
+    // Bulk operations for Mahasiswa (MUST be before resource routes to avoid route conflict)
+    Route::delete('mahasiswa/bulk-delete', [MahasiswaController::class, 'bulkDelete'])->name('mahasiswa.bulk-delete');
+    Route::post('mahasiswa/bulk-export', [MahasiswaController::class, 'bulkExport'])->name('mahasiswa.bulk-export');
+    
     // Admin bisa melakukan CRUD Mahasiswa
     Route::resource('mahasiswa', MahasiswaController::class)->except(['index']); // Kecualikan index karena sudah di atas
 

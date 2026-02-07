@@ -69,6 +69,10 @@ class MahasiswaController extends Controller
             $query->where('siap_sidang', $siapSidang);
         }
 
+        // Get all IDs for bulk operations (before pagination)
+        $allIds = (clone $query)->pluck('id')->toArray();
+
+        // Then paginate
         $mahasiswas = $query->paginate(10);
 
         // 3. PERBAIKAN PENGIRIMAN DATA: Kirim semua variabel yang dibutuhkan oleh view
@@ -78,7 +82,8 @@ class MahasiswaController extends Controller
             'dosens',
             'angkatan',
             'sortField',
-            'sortDirection'
+            'sortDirection',
+            'allIds'
         ));
     }
 
@@ -319,5 +324,90 @@ class MahasiswaController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Bulk delete multiple mahasiswa.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $validated['ids']);
+
+        try {
+            $count = Mahasiswa::whereIn('id', $ids)->delete();
+
+            return redirect()->route('mahasiswa.index')->with('success', "Berhasil menghapus {$count} data mahasiswa.");
+        } catch (\Exception $e) {
+            return redirect()->route('mahasiswa.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk export multiple mahasiswa to CSV.
+     */
+    public function bulkExport(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $mahasiswas = Mahasiswa::whereIn('id', $ids)
+            ->with('dospem')
+            ->orderBy('nama')
+            ->get();
+
+        $filename = 'Data_Mahasiswa_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($mahasiswas) {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // Header Row
+            fputcsv($file, [
+                'NIM',
+                'Nama',
+                'Angkatan',
+                'Dosen Pembimbing',
+                'Judul Skripsi',
+                'Profil Lulusan',
+                'Penjurusan',
+                'Status Sidang',
+                'Prioritas',
+            ]);
+
+            foreach ($mahasiswas as $mahasiswa) {
+                fputcsv($file, [
+                    $mahasiswa->nim,
+                    $mahasiswa->nama,
+                    $mahasiswa->angkatan,
+                    $mahasiswa->dospem->nama ?? 'N/A',
+                    $mahasiswa->judul_skripsi,
+                    $mahasiswa->profil_lulusan ?? '-',
+                    $mahasiswa->penjurusan ?? '-',
+                    $mahasiswa->siap_sidang ? 'Siap' : 'Belum',
+                    $mahasiswa->is_prioritas ? 'Ya' : 'Tidak',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
