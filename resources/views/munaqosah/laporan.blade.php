@@ -226,13 +226,14 @@
                 <thead>
                     <tr>
                         <th width="5%">NO</th>
-                        <th width="20%">MAHASISWA</th>
+                        <th width="18%">MAHASISWA</th>
+                        <th width="13%">DOSPEM</th>
                         <th width="10%">TANGGAL</th>
-                        <th width="10%">WAKTU</th>
-                        <th width="13%">PENGUJI 1</th>
-                        <th width="13%">PENGUJI 2</th>
-                        <th width="12%">RUANG</th>
-                        <th width="12%">STATUS</th>
+                        <th width="9%">WAKTU</th>
+                        <th width="12%">PENGUJI 1</th>
+                        <th width="12%">PENGUJI 2</th>
+                        <th width="10%">RUANG</th>
+                        <th width="11%">STATUS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -246,6 +247,7 @@
                                 @endif
                                 <br>NIM: {{ $munaqosah->mahasiswa->nim ?? '-' }}
                             </td>
+                            <td>{{ $munaqosah->mahasiswa->dospem->nama ?? '-' }}</td>
                             <td>{{ \Carbon\Carbon::parse($munaqosah->tanggal_munaqosah)->format('d-m-Y') }}</td>
                             <td>{{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}</td>
                             <td>{{ $munaqosah->penguji1->nama ?? '-' }}</td>

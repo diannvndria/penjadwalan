@@ -98,7 +98,7 @@ class MunaqosahController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
 
-        $query = Munaqosah::with('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
+        $query = Munaqosah::with('mahasiswa.dospem', 'penguji1', 'penguji2', 'ruangUjian');
 
         if ($startDate) {
             $query->whereDate('tanggal_munaqosah', '>=', $startDate);
