@@ -38,7 +38,11 @@
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 try {
-                    this.selected = JSON.parse(saved);
+                    const savedArray = JSON.parse(saved);
+                    // Filter out any IDs that no longer exist in items (deleted students)
+                    this.selected = savedArray.filter(id => this.items.includes(String(id)));
+                    // Save the filtered selection back to localStorage
+                    this.saveToStorage();
                 } catch (e) {
                     this.selected = [];
                 }
@@ -79,19 +83,19 @@
     }'>
         {{-- Alert Messages --}}
         @if (session('success'))
-            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-start" role="alert">
+            <div id="successAlert" class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-start transition-all duration-500" role="alert">
                 <i class="fas fa-check-circle text-green-500 mt-0.5 mr-3"></i>
                 <span>{{ session('success') }}</span>
             </div>
         @endif
         @if (session('info'))
-            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-6 py-4 rounded-lg shadow-sm flex items-start" role="alert">
+            <div id="infoAlert" class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-6 py-4 rounded-lg shadow-sm flex items-start transition-all duration-500" role="alert">
                 <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
                 <span>{{ session('info') }}</span>
             </div>
         @endif
         @if (session('error'))
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-sm flex items-start" role="alert">
+            <div id="errorAlert" class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-sm flex items-start transition-all duration-500" role="alert">
                 <i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3"></i>
                 <span>{{ session('error') }}</span>
             </div>
@@ -446,6 +450,11 @@
     let mahasiswaToDeleteId = null;
     let selectedIdsForBulkDelete = [];
 
+    // Clear localStorage BEFORE Alpine initializes if there was a successful deletion
+    @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
+        localStorage.removeItem('mahasiswa_selected');
+    @endif
+
     document.addEventListener('DOMContentLoaded', function() {
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
@@ -454,6 +463,32 @@
         const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
         const cancelBulkDeleteBtn = document.getElementById('cancelBulkDeleteBtn');
         const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+        // Auto dismiss alerts after 2 seconds
+        const successAlert = document.getElementById('successAlert');
+        const infoAlert = document.getElementById('infoAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        
+        function dismissAlert(alertElement) {
+            if (alertElement) {
+                setTimeout(() => {
+                    alertElement.style.opacity = '0';
+                    alertElement.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        alertElement.remove();
+                    }, 500);
+                }, 2000);
+            }
+        }
+        
+        dismissAlert(successAlert);
+        dismissAlert(infoAlert);
+        dismissAlert(errorAlert);
+
+        // Trigger Alpine.js to reload selections after localStorage is cleared
+        @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
+            window.dispatchEvent(new Event('storage'));
+        @endif
 
         confirmDeleteBtn.addEventListener('click', function() {
             if (mahasiswaToDeleteId) {
@@ -510,12 +545,5 @@
         modal.classList.remove('flex');
         selectedIdsForBulkDelete = [];
     }
-
-    // Clear localStorage after successful bulk delete
-    document.addEventListener('DOMContentLoaded', function() {
-        @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
-            localStorage.removeItem('mahasiswa_selected');
-        @endif
-    });
 </script>
 @endsection
