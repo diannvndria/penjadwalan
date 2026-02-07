@@ -399,7 +399,7 @@ class MunaqosahController extends Controller
         }
 
         $munaqosahs = Munaqosah::whereIn('id', $ids)
-            ->with(['mahasiswa', 'penguji1', 'penguji2', 'ruangUjian'])
+            ->with(['mahasiswa.dospem', 'penguji1', 'penguji2', 'ruangUjian'])
             ->orderBy('tanggal_munaqosah')
             ->orderBy('waktu_mulai')
             ->get();
@@ -424,6 +424,7 @@ class MunaqosahController extends Controller
             fputcsv($file, [
                 'Nama Mahasiswa',
                 'NIM',
+                'Dospem',
                 'Tanggal',
                 'Waktu Mulai',
                 'Waktu Selesai',
@@ -437,6 +438,7 @@ class MunaqosahController extends Controller
                 fputcsv($file, [
                     $item->mahasiswa->nama ?? '-',
                     $item->mahasiswa->nim ?? '-',
+                    $item->mahasiswa->dospem->nama ?? '-',
                     Carbon::parse($item->tanggal_munaqosah)->format('d-m-Y'),
                     substr($item->waktu_mulai, 0, 5),
                     substr($item->waktu_selesai, 0, 5),
