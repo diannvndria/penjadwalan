@@ -65,13 +65,13 @@
                             <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-user-check text-gray-400 text-sm"></i>
-                                    Penguji 1
+                                    Riwayat Penguji 1
                                 </div>
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-user-check text-gray-400 text-sm"></i>
-                                    Penguji 2
+                                    Riwayat Penguji 2
                                 </div>
                             </th>
                             @if (Auth::user()->isAdmin())
