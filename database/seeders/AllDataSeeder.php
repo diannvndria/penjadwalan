@@ -59,16 +59,10 @@ class AllDataSeeder extends Seeder
             ->withCapacity(12)
             ->create();
 
-        // 3. Pengujis (Synced with Dosens)
-        $dosens->each(function ($dosen, $index) {
-            Penguji::factory()->create([
-                'nama' => $dosen->nama,
-                'nip' => $dosen->nip,
-                'is_prioritas' => $index < 2,
-            ]);
-        });
-
-        Penguji::factory()->count(4)->create();
+        // 3. Pengujis (Distinct lecturers, not duplicating Dosen names)
+        // Create 12 unique examiners with distinct names and NIPs
+        Penguji::factory()->count(2)->create(['is_prioritas' => true]);
+        Penguji::factory()->count(10)->create(['is_prioritas' => false]);
         $allPengujis = Penguji::all();
 
         // 4. Mahasiswa with realistic sequential NIMs per angkatan
