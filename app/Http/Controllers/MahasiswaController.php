@@ -410,4 +410,214 @@ class MahasiswaController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Download CSV template for importing mahasiswa.
+     */
+    public function downloadTemplate()
+    {
+        $filename = 'Template_Import_Mahasiswa.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // Header Row
+            fputcsv($file, [
+                'NIM',
+                'Nama',
+                'Angkatan',
+                'NIP Dospem',
+                'Judul Skripsi',
+                'Profil Lulusan',
+                'Penjurusan',
+                'Siap Sidang',
+                'Prioritas',
+                'Keterangan Prioritas',
+            ]);
+
+            // Sample data row
+            fputcsv($file, [
+                '123456789',
+                'Contoh Mahasiswa',
+                '2020',
+                '198001012000011001',
+                'Sistem Informasi Berbasis Web',
+                'Ilmuwan',
+                'Sistem Informasi',
+                '0',
+                '0',
+                '',
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import mahasiswa from CSV file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
+
+        try {
+            $file = $request->file('csv_file');
+            $path = $file->getRealPath();
+            $data = array_map('str_getcsv', file($path));
+
+            // Remove UTF-8 BOM if present
+            if (isset($data[0][0])) {
+                $data[0][0] = str_replace("\xEF\xBB\xBF", '', $data[0][0]);
+            }
+
+            // Get header row
+            $header = array_shift($data);
+
+            // Validate header
+            $requiredColumns = ['NIM', 'Nama', 'Angkatan', 'NIP Dospem', 'Judul Skripsi'];
+            foreach ($requiredColumns as $column) {
+                if (!in_array($column, $header)) {
+                    return redirect()->route('mahasiswa.index')
+                        ->with('error', "Kolom '$column' tidak ditemukan dalam file CSV. Silakan download template untuk format yang benar.");
+                }
+            }
+
+            $successCount = 0;
+            $errorCount = 0;
+            $errors = [];
+
+            DB::beginTransaction();
+
+            foreach ($data as $rowIndex => $row) {
+                try {
+                    // Skip empty rows
+                    if (empty(array_filter($row))) {
+                        continue;
+                    }
+
+                    // Create associative array from row data
+                    $rowData = array_combine($header, $row);
+
+                    // Trim all values
+                    $rowData = array_map('trim', $rowData);
+
+                    // Validate required fields
+                    if (empty($rowData['NIM']) || empty($rowData['Nama']) || empty($rowData['Angkatan']) || empty($rowData['NIP Dospem']) || empty($rowData['Judul Skripsi'])) {
+                        $errors[] = "Baris " . ($rowIndex + 2) . ": Data tidak lengkap";
+                        $errorCount++;
+                        continue;
+                    }
+
+                    // Find dosen by NIP
+                    $dosen = Dosen::where('nip', $rowData['NIP Dospem'])->first();
+                    if (!$dosen) {
+                        $errors[] = "Baris " . ($rowIndex + 2) . ": Dosen dengan NIP '{$rowData['NIP Dospem']}' tidak ditemukan";
+                        $errorCount++;
+                        continue;
+                    }
+
+                    // Check if NIM already exists
+                    if (Mahasiswa::where('nim', $rowData['NIM'])->exists()) {
+                        $errors[] = "Baris " . ($rowIndex + 2) . ": NIM '{$rowData['NIM']}' sudah terdaftar";
+                        $errorCount++;
+                        continue;
+                    }
+
+                    // Check dosen capacity
+                    if ($dosen->kapasitas_ampu > 0 && $dosen->mahasiswas()->count() >= $dosen->kapasitas_ampu) {
+                        $errors[] = "Baris " . ($rowIndex + 2) . ": Dosen '{$dosen->nama}' sudah mencapai kapasitas maksimal";
+                        $errorCount++;
+                        continue;
+                    }
+
+                    // Validate profil lulusan (optional - only validate if column exists)
+                    $profilLulusan = null;
+                    if (isset($rowData['Profil Lulusan']) && !empty($rowData['Profil Lulusan'])) {
+                        $profilLulusan = $rowData['Profil Lulusan'];
+                        $validProfilLulusan = ['Ilmuwan', 'Wirausaha', 'Profesional'];
+                        if (!in_array($profilLulusan, $validProfilLulusan)) {
+                            $errors[] = "Baris " . ($rowIndex + 2) . ": Profil Lulusan harus salah satu dari: " . implode(', ', $validProfilLulusan);
+                            $errorCount++;
+                            continue;
+                        }
+                    }
+
+                    // Validate penjurusan (optional - only validate if column exists)
+                    $penjurusan = null;
+                    if (isset($rowData['Penjurusan']) && !empty($rowData['Penjurusan'])) {
+                        $penjurusan = $rowData['Penjurusan'];
+                        $validPenjurusan = ['Sistem Informasi', 'Perekayasa Perangkat Lunak', 'Perekayasa Jaringan Komputer', 'Sistem Cerdas'];
+                        if (!in_array($penjurusan, $validPenjurusan)) {
+                            $errors[] = "Baris " . ($rowIndex + 2) . ": Penjurusan harus salah satu dari: " . implode(', ', $validPenjurusan);
+                            $errorCount++;
+                            continue;
+                        }
+                    }
+
+                    // Handle optional fields - check if columns exist before accessing
+                    $siapSidang = (isset($rowData['Siap Sidang']) && $rowData['Siap Sidang'] == '1') ? true : false;
+                    $isPrioritas = (isset($rowData['Prioritas']) && $rowData['Prioritas'] == '1') ? true : false;
+                    $keteranganPrioritas = (isset($rowData['Keterangan Prioritas']) && !empty($rowData['Keterangan Prioritas'])) ? $rowData['Keterangan Prioritas'] : null;
+
+                    // Create mahasiswa
+                    Mahasiswa::create([
+                        'nim' => $rowData['NIM'],
+                        'nama' => $rowData['Nama'],
+                        'angkatan' => (int) $rowData['Angkatan'],
+                        'id_dospem' => $dosen->id,
+                        'judul_skripsi' => $rowData['Judul Skripsi'],
+                        'profil_lulusan' => $profilLulusan,
+                        'penjurusan' => $penjurusan,
+                        'siap_sidang' => $siapSidang,
+                        'is_prioritas' => $isPrioritas,
+                        'keterangan_prioritas' => $keteranganPrioritas,
+                    ]);
+
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $errors[] = "Baris " . ($rowIndex + 2) . ": " . $e->getMessage();
+                    $errorCount++;
+                }
+            }
+
+            DB::commit();
+
+            // Prepare message
+            $message = "Import selesai: {$successCount} data berhasil diimport";
+            if ($errorCount > 0) {
+                $message .= ", {$errorCount} data gagal";
+            }
+
+            if (!empty($errors)) {
+                $errorDetails = implode('; ', array_slice($errors, 0, 5));
+                if (count($errors) > 5) {
+                    $errorDetails .= ' (dan ' . (count($errors) - 5) . ' error lainnya)';
+                }
+                return redirect()->route('mahasiswa.index')
+                    ->with($successCount > 0 ? 'success' : 'error', $message)
+                    ->with('info', 'Detail error: ' . $errorDetails);
+            }
+
+            return redirect()->route('mahasiswa.index')->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('mahasiswa.index')
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
+    }
 }

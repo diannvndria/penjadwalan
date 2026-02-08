@@ -74,6 +74,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('mahasiswa/bulk-delete', [MahasiswaController::class, 'bulkDelete'])->name('mahasiswa.bulk-delete');
     Route::post('mahasiswa/bulk-export', [MahasiswaController::class, 'bulkExport'])->name('mahasiswa.bulk-export');
     
+    // Import routes for Mahasiswa
+    Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
+    Route::get('mahasiswa/download-template', [MahasiswaController::class, 'downloadTemplate'])->name('mahasiswa.download-template');
+    
     // Admin bisa melakukan CRUD Mahasiswa
     Route::resource('mahasiswa', MahasiswaController::class)->except(['index']); // Kecualikan index karena sudah di atas
 

@@ -115,28 +115,32 @@
         @endif
 
         {{-- Filter and Action Bar --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
                 {{-- Filters --}}
-                <form action="{{ route('mahasiswa.index') }}" method="GET" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-filter text-gray-400"></i>
-                        <label for="angkatan" class="text-sm font-medium text-gray-700 whitespace-nowrap">Filter Angkatan:</label>
+                <form id="filterForm" action="{{ route('mahasiswa.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                    {{-- Filter Angkatan --}}
+                    <div class="relative">
+                        <label for="angkatan" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                            <i class="fas fa-filter mr-1"></i> Angkatan
+                        </label>
                         <select name="angkatan" id="angkatan" onchange="this.form.submit()"
-                            class="block w-40 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
-                            <option value="">Semua</option>
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            <option value="">Semua Angkatan</option>
                             @foreach ($angkatans_tersedia as $a)
                                 <option value="{{ $a }}" {{ (string)$angkatan === (string)$a ? 'selected' : '' }}>{{ $a }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-user-tie text-gray-400"></i>
-                        <label for="dospem_id" class="text-sm font-medium text-gray-700 whitespace-nowrap">Dosen Pembimbing:</label>
+                    {{-- Filter Dosen --}}
+                    <div class="relative">
+                        <label for="dospem_id" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                            <i class="fas fa-user-tie mr-1"></i> Dosen Pembimbing
+                        </label>
                         <select name="dospem_id" id="dospem_id" onchange="this.form.submit()"
-                            class="block w-48 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
-                            <option value="">Semua</option>
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            <option value="">Semua Dosen</option>
                             @foreach ($dosens as $dosen)
                                 <option value="{{ $dosen->id }}" {{ request('dospem_id') == $dosen->id ? 'selected' : '' }}>
                                     {{ $dosen->nama }}
@@ -145,24 +149,65 @@
                         </select>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-clipboard-check text-gray-400"></i>
-                        <label for="status_sidang" class="text-sm font-medium text-gray-700 whitespace-nowrap">Status Sidang:</label>
+                    {{-- Filter Status Sidang --}}
+                    <div class="relative">
+                        <label for="status_sidang" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                            <i class="fas fa-clipboard-check mr-1"></i> Status Sidang
+                        </label>
                         <select name="status_sidang" id="status_sidang" onchange="this.form.submit()"
-                            class="block w-40 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
-                            <option value="">Semua</option>
-                            <option value="Belum" {{ request('status_sidang') == 'Belum' ? 'selected' : '' }}>Belum</option>
-                            <option value="Siap" {{ request('status_sidang') == 'Siap' ? 'selected' : '' }}>Siap</option>
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            <option value="">Semua Status</option>
+                            <option value="Belum" {{ request('status_sidang') == 'Belum' ? 'selected' : '' }}>Belum Siap</option>
+                            <option value="Siap" {{ request('status_sidang') == 'Siap' ? 'selected' : '' }}>Siap Sidang</option>
                         </select>
                     </div>
+
+                    {{-- Search --}}
+                    <div class="relative">
+                        <label for="search" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                            <i class="fas fa-search mr-1"></i> Pencarian
+                        </label>
+                        <div class="relative">
+                            <input type="text" 
+                                   name="search" 
+                                   id="search" 
+                                   value="{{ request('search') }}" 
+                                   placeholder="Cari Nama / NIM..." 
+                                   autocomplete="off"
+                                   class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2 pr-10">
+                            @if(request('search'))
+                                <button type="button" 
+                                        onclick="clearSearch()" 
+                                        class="absolute inset-y-0 right-0 top-0 bottom-0 px-3 flex items-center text-gray-400 hover:text-gray-600 transition">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            @else
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    {{-- Hidden inputs to maintain state when searching via enter key --}}
+                    @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
+                    @if(request('direction')) <input type="hidden" name="direction" value="{{ request('direction') }}"> @endif
                 </form>
 
-                {{-- Add Button --}}
+                {{-- Action Buttons --}}
                 @if (Auth::user()->isAdmin())
-                    <a href="{{ route('mahasiswa.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
-                        <i class="fas fa-plus mr-2"></i>
-                        Tambah Mahasiswa
-                    </a>
+                    <div class="flex flex-col sm:flex-row gap-3 pt-1 xl:pt-0 w-full xl:w-auto">
+                        <button type="button" onclick="showImportModal()" 
+                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-green-600 rounded-lg font-semibold text-sm text-green-700 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-150 shadow-sm group">
+                            <i class="fas fa-file-import mr-2 text-green-600 group-hover:text-green-700"></i>
+                            <span>Import CSV</span>
+                        </button>
+                        <a href="{{ route('mahasiswa.create') }}" 
+                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150 shadow-sm shadow-indigo-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            <span>Tambah Data</span>
+                        </a>
+                    </div>
                 @endif
             </div>
         </div>
@@ -415,6 +460,102 @@
         @method('DELETE')
     </form>
 
+    {{-- Import CSV Modal --}}
+    <div id="importModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300">
+        <div class="relative mx-auto bg-white w-full max-w-lg shadow-2xl rounded-2xl overflow-hidden transform transition-all scale-100">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                        <i class="fas fa-file-csv text-sm"></i>
+                    </div>
+                    Import Data Mahasiswa
+                </h3>
+                <button type="button" onclick="hideImportModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="importForm" action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                
+                <div class="p-6 space-y-6">
+                    <!-- Info Alert -->
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                        <div class="flex gap-3">
+                            <i class="fas fa-info-circle text-blue-500 mt-0.5 flex-shrink-0"></i>
+                            <div class="text-sm text-blue-800 space-y-2">
+                                <p class="font-medium">Panduan Import:</p>
+                                <p class="text-blue-600/80 leading-relaxed">
+                                    Pastikan file Anda sesuai format template. NIP Dosen harus sesuai dengan data database.
+                                </p>
+                                <a href="{{ route('mahasiswa.download-template') }}" class="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 hover:underline mt-1 group">
+                                    <span>Download Template CSV</span>
+                                    <i class="fas fa-arrow-right text-xs ml-1 transform group-hover:translate-x-0.5 transition-transform"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Area -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">Upload File CSV</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-indigo-400 hover:bg-gray-50 transition-all group relative cursor-pointer">
+                            <div class="space-y-1 text-center">
+                                <div class="mx-auto w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-cloud-upload-alt text-indigo-500 text-xl"></i>
+                                </div>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="csv_file" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                        <span>Pilih file</span>
+                                        <input id="csv_file" name="csv_file" type="file" accept=".csv" class="sr-only" required onchange="updateFileName(this)">
+                                    </label>
+                                    <p class="pl-1">atau drag & drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">File CSV hingga 10MB</p>
+                                <p id="file-name" class="text-sm font-medium text-green-600 mt-3 hidden flex items-center justify-center bg-green-50 py-1 px-3 rounded-full border border-green-100">
+                                    <i class="fas fa-check-circle mr-1.5"></i> <span id="file-name-text"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Accordion for Detailed Requirements -->
+                     <div x-data="{ expanded: false }" class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button type="button" @click="expanded = !expanded" class="w-full px-4 py-3 bg-gray-50 flex justify-between items-center text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                            <span>Lihat Detail Kolom yang Dibutuhkan</span>
+                            <i class="fas fa-chevron-down transition-transform duration-200" :class="{ 'transform rotate-180': expanded }"></i>
+                        </button>
+                        <div x-show="expanded" x-collapse class="px-4 py-3 bg-white border-t border-gray-200 text-xs">
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">NIM</span> <span class="text-gray-500">Wajib, Unik</span></div>
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">Nama</span> <span class="text-gray-500">Wajib</span></div>
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">Angkatan</span> <span class="text-gray-500">Wajib (Tahun)</span></div>
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">NIP Dospem</span> <span class="text-gray-500">Wajib (DB)</span></div>
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">Judul</span> <span class="text-gray-500">Wajib</span></div>
+                                <div class="flex items-center gap-2"><span class="font-semibold text-gray-700 w-20">Lainnya</span> <span class="text-gray-500">Opsional</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                    <button type="button" 
+                            onclick="hideImportModal()"
+                            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all shadow-sm">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 border border-transparent text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-md shadow-indigo-200 flex items-center">
+                        <i class="fas fa-file-import mr-2"></i>
+                        Mulai Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Bulk Delete Modal --}}
     <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
@@ -456,6 +597,20 @@
     @endif
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('search');
+        const filterForm = document.getElementById('filterForm');
+        
+        if (searchInput && filterForm) {
+            // Submit form when Enter is pressed in search field
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    filterForm.submit();
+                }
+            });
+        }
+
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const deleteForm = document.getElementById('deleteForm');
@@ -544,6 +699,49 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         selectedIdsForBulkDelete = [];
+    }
+
+    function showImportModal() {
+        const modal = document.getElementById('importModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function hideImportModal() {
+        const modal = document.getElementById('importModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.getElementById('importForm').reset();
+    }
+
+    function clearSearch() {
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.value = '';
+            document.getElementById('filterForm').submit();
+        }
+    }
+
+    function updateFileName(input) {
+        const fileNameElement = document.getElementById('file-name');
+        const fileNameText = document.getElementById('file-name-text');
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+
+            if (file.size > maxSize) {
+                alert('Ukuran file melebihi batas maksimum 10MB. Silakan pilih file yang lebih kecil.');
+                input.value = ''; // Reset the input
+                fileNameElement.classList.add('hidden');
+                return;
+            }
+
+            fileNameText.textContent = file.name;
+            fileNameElement.classList.remove('hidden');
+        } else {
+            fileNameElement.classList.add('hidden');
+        }
     }
 </script>
 @endsection
