@@ -165,6 +165,15 @@
                             </label>
                         </div>
 
+                        <div class="flex items-start p-3 bg-white rounded-lg border border-yellow-200">
+                            <input type="hidden" name="prioritas_jadwal" value="0">
+                            <input type="checkbox" id="prioritas_jadwal" name="prioritas_jadwal" value="1" {{ old('prioritas_jadwal', $mahasiswa->prioritas_jadwal ?? false) ? 'checked' : '' }}
+                                class="w-5 h-5 text-yellow-600 rounded border-gray-300 focus:ring-yellow-500 focus:ring-2 mt-0.5">
+                            <label for="prioritas_jadwal" class="ml-3 text-sm font-medium text-gray-900">
+                                Mahasiswa Prioritas Jadwal (akan dijadwalkan lebih awal)
+                            </label>
+                        </div>
+
                         <div>
                             <label for="keterangan_prioritas" class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-comment-alt text-gray-400 mr-2"></i>Keterangan Prioritas

@@ -22,12 +22,14 @@ class Mahasiswa extends Model
         'id_dospem',
         'siap_sidang',
         'is_prioritas',
+        'prioritas_jadwal',
         'keterangan_prioritas',
     ];
 
     protected $casts = [
         'siap_sidang' => 'boolean',
         'is_prioritas' => 'boolean',
+        'prioritas_jadwal' => 'boolean',
     ];
 
     /**

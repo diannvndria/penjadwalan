@@ -157,12 +157,14 @@ class MahasiswaController extends Controller
             'id_dospem' => 'required|exists:dosen,id',
             'siap_sidang' => 'boolean',
             'is_prioritas' => 'boolean',
+            'prioritas_jadwal' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',
         ]);
 
         // Pastikan nilai boolean selalu terisi meskipun checkbox tidak dicentang
         $validated['siap_sidang'] = $request->boolean('siap_sidang');
         $validated['is_prioritas'] = $request->boolean('is_prioritas');
+        $validated['prioritas_jadwal'] = $request->boolean('prioritas_jadwal');
 
         if ($mahasiswa->id_dospem != $request->id_dospem) {
             $newDospem = Dosen::find($request->id_dospem);

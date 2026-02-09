@@ -344,7 +344,7 @@
                                     <div class="flex items-center">
                                         <div>
                                             <p class="text-sm font-medium text-gray-900">{{ $mahasiswa->nama }}</p>
-                                            @if($mahasiswa->is_prioritas)
+                                            @if($mahasiswa->is_prioritas || $mahasiswa->prioritas_jadwal)
                                                 <span class="px-2.5 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200" title="{{ $mahasiswa->keterangan_prioritas }}">
                                                     <i class="fas fa-star mr-1 text-yellow-600"></i>
                                                     Prioritas
