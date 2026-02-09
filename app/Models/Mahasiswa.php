@@ -68,10 +68,30 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Helper method untuk cek status prioritas
+     * Helper method untuk cek status prioritas RUANG
+     * Returns true ONLY if student has is_prioritas flag (room priority)
+     * This is used for room allocation (ground floor/accessible rooms)
      */
     public function isPrioritas(): bool
     {
-        return $this->is_prioritas;
+        return (bool) $this->is_prioritas;
+    }
+
+    /**
+     * Helper method untuk cek prioritas JADWAL
+     * Returns true ONLY if student has prioritas_jadwal flag
+     * This is used for scheduling order (scheduled first)
+     */
+    public function isPrioritasJadwal(): bool
+    {
+        return (bool) $this->prioritas_jadwal;
+    }
+
+    /**
+     * Check if student has any priority flag (for display purposes)
+     */
+    public function hasAnyPriority(): bool
+    {
+        return $this->is_prioritas || $this->prioritas_jadwal;
     }
 }

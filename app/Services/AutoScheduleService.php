@@ -217,9 +217,13 @@ class AutoScheduleService
             $failedCount = 0;
 
             // OPTIMIZATION: Eager load dospem and munaqosah to prevent N+1 queries
+            // Sort by SCHEDULE PRIORITY (prioritas_jadwal) ONLY for scheduling order
+            // Room priority (is_prioritas) does NOT affect scheduling order - only room allocation
             $mahasiswas = Mahasiswa::where('siap_sidang', true)
                 ->whereDoesntHave('munaqosah')
                 ->with(['dospem', 'munaqosah'])
+                ->orderByRaw('CASE WHEN prioritas_jadwal = true THEN 0 ELSE 1 END')
+                ->orderBy('angkatan', 'asc') // Older students (lower angkatan) get priority as tiebreaker
                 ->get();
 
             // OPTIMIZATION: Cache pengujis list for the entire batch operation
@@ -532,16 +536,18 @@ class AutoScheduleService
     }
 
     /**
-     * Cek apakah mahasiswa atau penguji berstatus prioritas
+     * Cek apakah mahasiswa atau penguji berstatus prioritas RUANG
+     * This checks is_prioritas flag ONLY (for room allocation)
+     * prioritas_jadwal is NOT considered here - it only affects scheduling order
      */
     private function checkPriorityStatus(Mahasiswa $mahasiswa, $pengujis): bool
     {
-        // Mahasiswa prioritas
-        if ($mahasiswa->isPrioritas()) {
+        // Mahasiswa prioritas ruang (is_prioritas flag only)
+        if ($mahasiswa->is_prioritas) {
             return true;
         }
 
-        // Salah satu penguji prioritas
+        // Salah satu penguji prioritas (for accessibility needs)
         foreach ($pengujis as $penguji) {
             if ($penguji->isPrioritas()) {
                 return true;
