@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dosen;
 use App\Models\HistoriMunaqosah;       // Import model Munaqosah
 use App\Models\JadwalPenguji;      // Import model Mahasiswa
 use App\Models\Mahasiswa;        // Import model Penguji
@@ -23,6 +24,7 @@ class MunaqosahController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
         $status = $request->query('status');
+        $supervisorId = $request->query('supervisor');
 
         // Sorting parameters
         $sortField = $request->input('sort');
@@ -40,36 +42,45 @@ class MunaqosahController extends Controller
         // Build query with proper join for sorting
         $query = Munaqosah::query();
 
+        // Always join with mahasiswa for supervisor filtering
+        $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.id');
+        
         // Apply filters
         if ($startDate) {
-            $query->whereDate('tanggal_munaqosah', '>=', $startDate);
+            $query->whereDate('munaqosah.tanggal_munaqosah', '>=', $startDate);
         }
 
         if ($endDate) {
-            $query->whereDate('tanggal_munaqosah', '<=', $endDate);
+            $query->whereDate('munaqosah.tanggal_munaqosah', '<=', $endDate);
         }
 
         if ($status) {
-            $query->where('status_konfirmasi', $status);
+            $query->where('munaqosah.status_konfirmasi', $status);
         }
 
-        // Apply sorting with join if needed
+        // Apply supervisor filter
+        if ($supervisorId) {
+            $query->where('mahasiswa.id_dospem', $supervisorId);
+        }
+
+        // Always select munaqosah fields to avoid conflicts
+        $query->select('munaqosah.*');
+
+        // Apply sorting
         if ($sortField === 'mahasiswa_nama') {
-            $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.id')
-                ->select('munaqosah.*')
-                ->orderBy('mahasiswa.nama', $sortDirection)
+            $query->orderBy('mahasiswa.nama', $sortDirection)
                 ->orderBy('munaqosah.tanggal_munaqosah', 'asc')
                 ->orderBy('munaqosah.waktu_mulai', 'asc');
         } elseif ($sortField === 'tanggal_munaqosah') {
-            $query->orderBy('tanggal_munaqosah', $sortDirection)
-                ->orderBy('waktu_mulai', 'asc');
+            $query->orderBy('munaqosah.tanggal_munaqosah', $sortDirection)
+                ->orderBy('munaqosah.waktu_mulai', 'asc');
         } elseif ($sortField === 'waktu_mulai') {
-            $query->orderBy('waktu_mulai', $sortDirection)
-                ->orderBy('tanggal_munaqosah', 'asc');
+            $query->orderBy('munaqosah.waktu_mulai', $sortDirection)
+                ->orderBy('munaqosah.tanggal_munaqosah', 'asc');
         } else {
             // Default ordering when no sort is applied
-            $query->orderBy('tanggal_munaqosah', 'asc')
-                ->orderBy('waktu_mulai', 'asc');
+            $query->orderBy('munaqosah.tanggal_munaqosah', 'asc')
+                ->orderBy('munaqosah.waktu_mulai', 'asc');
         }
 
         // Get all matching IDs before pagination for "Select All" functionality
@@ -79,12 +90,17 @@ class MunaqosahController extends Controller
         $munaqosahs = $query->paginate(10);
         $munaqosahs->load('mahasiswa', 'penguji1', 'penguji2', 'ruangUjian');
 
+        // Get all supervisors for the filter dropdown
+        $supervisors = Dosen::orderBy('nama')->get();
+
         return view('munaqosah.index', [
             'munaqosahs' => $munaqosahs,
             'allIds' => $allIds,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'status' => $status,
+            'supervisorId' => $supervisorId,
+            'supervisors' => $supervisors,
             'sortField' => $sortField,
             'sortDirection' => $sortDirection,
         ]);
