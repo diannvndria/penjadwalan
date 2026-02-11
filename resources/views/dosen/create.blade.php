@@ -36,6 +36,25 @@
                 @csrf
 
                 <div class="space-y-6">
+                    {{-- NIP Field --}}
+                    <div>
+                        <label for="nip" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-id-card text-gray-400 mr-2"></i>NIP
+                        </label>
+                        <input type="text" id="nip" name="nip" value="{{ old('nip') }}"
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all"
+                            placeholder="Masukkan NIP dosen (opsional)">
+                        <p class="mt-2 text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            NIP bersifat opsional dan dapat diisi nanti
+                        </p>
+                        @error('nip') 
+                            <span class="text-red-500 text-xs mt-1 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </span> 
+                        @enderror
+                    </div>
+
                     {{-- Nama Dosen Field --}}
                     <div>
                         <label for="nama" class="block text-sm font-semibold text-gray-700 mb-2">

@@ -15,16 +15,21 @@ class DosenController extends Controller
     {
         // Mengambil semua dosen dan menghitung jumlah mahasiswa yang diampu
         // serta menghitung riwayat ketua sidang (munaqosah yang dikonfirmasi)
-        $dosens = Dosen::withCount('mahasiswas')
+        $query = Dosen::withCount('mahasiswas')
             ->withCount([
                 'munaqosahs as munaqosahs_count' => function ($query) {
                     $query->where('status_konfirmasi', 'dikonfirmasi');
                 }
             ])
-            ->orderBy('nama')
-            ->paginate(10);
+            ->orderBy('nama');
 
-        return view('dosen.index', compact('dosens'));
+        // Get all IDs for bulk operations (before pagination)
+        $allIds = (clone $query)->pluck('id')->toArray();
+
+        // Then paginate
+        $dosens = $query->paginate(10);
+
+        return view('dosen.index', compact('dosens', 'allIds'));
     }
 
     /**
@@ -41,6 +46,7 @@ class DosenController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nip' => 'nullable|string|max:255',
             'nama' => 'required|string|max:255',
             'kapasitas_ampu' => 'required|integer|min:0', // Kapasitas minimal 0
         ]);
@@ -64,6 +70,7 @@ class DosenController extends Controller
     public function update(Request $request, Dosen $dosen)
     {
         $request->validate([
+            'nip' => 'nullable|string|max:255',
             'nama' => 'required|string|max:255',
             'kapasitas_ampu' => 'required|integer|min:0',
         ]);
@@ -86,5 +93,87 @@ class DosenController extends Controller
             // Tangani jika ada mahasiswa yang masih terhubung ke dosen ini (Foreign Key Constraint)
             return redirect()->route('dosen.index')->with('error', 'Tidak dapat menghapus dosen karena masih mengampu mahasiswa. Harap hapus atau pindahkan mahasiswa terlebih dahulu.');
         }
+    }
+
+    /**
+     * Bulk delete multiple dosen.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $validated['ids']);
+
+        try {
+            $count = Dosen::whereIn('id', $ids)->delete();
+
+            return redirect()->route('dosen.index')->with('success', "Berhasil menghapus {$count} data dosen.");
+        } catch (\Exception $e) {
+            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk export multiple dosen to CSV.
+     */
+    public function bulkExport(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $dosens = Dosen::whereIn('id', $ids)
+            ->withCount('mahasiswas')
+            ->withCount([
+                'munaqosahs as munaqosahs_count' => function ($query) {
+                    $query->where('status_konfirmasi', 'dikonfirmasi');
+                }
+            ])
+            ->orderBy('nama')
+            ->get();
+
+        $filename = 'Data_Dosen_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($dosens) {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // Header Row
+            fputcsv($file, [
+                'NIP',
+                'Nama Dosen',
+                'Jumlah Diampu',
+                'Riwayat Ketua Sidang',
+                'Kapasitas',
+            ]);
+
+            foreach ($dosens as $dosen) {
+                fputcsv($file, [
+                    $dosen->nip ?? '-',
+                    $dosen->nama,
+                    $dosen->mahasiswas_count,
+                    $dosen->munaqosahs_count ?? 0,
+                    $dosen->kapasitas_ampu > 0 ? $dosen->kapasitas_ampu : 'Tidak Terbatas',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

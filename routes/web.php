@@ -81,6 +81,10 @@ Route::middleware(['auth'])->group(function () {
     // Admin bisa melakukan CRUD Mahasiswa
     Route::resource('mahasiswa', MahasiswaController::class)->except(['index']); // Kecualikan index karena sudah di atas
 
+    // Bulk operations for Dosen (MUST be before resource routes to avoid route conflict)
+    Route::delete('dosen/bulk-delete', [DosenController::class, 'bulkDelete'])->name('dosen.bulk-delete');
+    Route::post('dosen/bulk-export', [DosenController::class, 'bulkExport'])->name('dosen.bulk-export');
+
     // Admin bisa melakukan CRUD Dosen
     Route::resource('dosen', DosenController::class)->except(['index']); // Kecualikan index
 
