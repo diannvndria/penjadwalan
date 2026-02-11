@@ -5,7 +5,59 @@
 @endsection
 
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-6" x-data='{
+        selected: [],
+        items: @json($allIds ?? []).map(id => String(id)),
+        storageKey: "penguji_selected",
+        
+        init() {
+            // Load saved selections from localStorage
+            const saved = localStorage.getItem(this.storageKey);
+            if (saved) {
+                try {
+                    const savedArray = JSON.parse(saved);
+                    // Filter out any IDs that no longer exist in items (deleted items)
+                    this.selected = savedArray.filter(id => this.items.includes(String(id)));
+                    // Save the filtered selection back to localStorage
+                    this.saveToStorage();
+                } catch (e) {
+                    this.selected = [];
+                }
+            }
+        },
+        
+        get allSelected() {
+            return this.items.length > 0 && this.selected.length === this.items.length;
+        },
+        
+        toggleAll() {
+            if (this.allSelected) {
+                this.selected = [];
+            } else {
+                this.selected = [...this.items];
+            }
+            this.saveToStorage();
+        },
+        
+        toggle(id) {
+            id = String(id);
+            if (this.selected.includes(id)) {
+                this.selected = this.selected.filter(item => item !== id);
+            } else {
+                this.selected.push(id);
+            }
+            this.saveToStorage();
+        },
+        
+        saveToStorage() {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.selected));
+        },
+        
+        clearSelections() {
+            this.selected = [];
+            this.saveToStorage();
+        }
+    }'>
         {{-- Alert Messages --}}
         @if (session('success'))
             <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-sm flex items-start" role="alert">
@@ -30,6 +82,29 @@
             </div>
         @endif
 
+        {{-- Bulk Actions --}}
+        <div x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-indigo-800">
+                <i class="fas fa-check-square"></i>
+                <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" @click="clearSelections()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
+                     Batal
+                </button>
+                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+                <form action="{{ route('penguji.bulk-export') }}" method="POST" target="_blank">
+                    @csrf
+                    <input type="hidden" name="ids" :value="selected.join(',')">
+                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                </form>
+            </div>
+        </div>
+
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {{-- Table Header --}}
@@ -50,6 +125,9 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
+                            <th scope="col" class="px-2 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-10">
+                                <input type="checkbox" @change="toggleAll" :checked="allSelected" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </th>
                             <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-id-card text-gray-400 text-sm"></i>
@@ -87,6 +165,9 @@
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($pengujis as $penguji)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-2 py-4 text-center">
+                                    <input type="checkbox" @change="toggle({{ $penguji->id }})" :checked="selected.includes('{{ $penguji->id }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </td>
                                 <td class="px-4 py-4">
                                     <p class="text-sm font-semibold text-gray-900">{{ $penguji->nip ?? '-' }}</p>
                                 </td>
@@ -187,10 +268,42 @@
         </div>
     </div>
 
-    {{-- Hidden Form --}}
+    {{-- Bulk Delete Modal --}}
+    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i class="fas fa-trash-alt text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Konfirmasi Hapus Masal</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Apakah Anda yakin ingin menghapus <span id="bulkDeleteCount" class="font-bold text-gray-800"></span> data penguji yang dipilih? Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex justify-center space-x-4 mt-4">
+                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                        Ya, Hapus Semua
+                    </button>
+                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Hidden Form for Single Delete --}}
     <form id="deleteForm" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
+    </form>
+
+    {{-- Hidden Form for Bulk Delete --}}
+    <form id="bulkDeleteForm" action="{{ route('penguji.bulk-delete') }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="ids" id="bulkDeleteIds">
     </form>
 @endsection
 
@@ -214,6 +327,35 @@
         cancelDeleteBtn.addEventListener('click', function() {
             hideDeleteModal();
         });
+
+        // Bulk Delete Logic
+        const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
+        const cancelBulkDeleteBtn = document.getElementById('cancelBulkDeleteBtn');
+        const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+        confirmBulkDeleteBtn.addEventListener('click', function() {
+            bulkDeleteForm.submit();
+        });
+
+        cancelBulkDeleteBtn.addEventListener('click', function() {
+            hideBulkDeleteModal();
+        });
+
+        // Expose function to global scope due to Alpine/Inline binding
+        window.showBulkDeleteModal = function(selectedIds) {
+            document.getElementById('bulkDeleteCount').textContent = selectedIds.length;
+            document.getElementById('bulkDeleteIds').value = selectedIds.join(',');
+            
+            const modal = document.getElementById('bulkDeleteModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.hideBulkDeleteModal = function() {
+            const modal = document.getElementById('bulkDeleteModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
     });
 
     function showDeleteModal(id, itemName) {

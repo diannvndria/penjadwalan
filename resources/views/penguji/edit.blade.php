@@ -52,6 +52,24 @@
                         </div>
                     </div>
 
+                    {{-- NIP Field --}}
+                    <div>
+                        <label for="nip" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-id-card text-gray-400 mr-2"></i>NIP
+                        </label>
+                        <input type="text" id="nip" name="nip" value="{{ old('nip', $penguji->nip) }}"
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
+                            placeholder="Masukkan NIP (Opsional)">
+                        <p class="mt-1 text-xs text-gray-500">
+                            * NIP bersifat opsional
+                        </p>
+                        @error('nip') 
+                            <span class="text-red-500 text-xs mt-1 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                            </span> 
+                        @enderror
+                    </div>
+
                     {{-- Nama Penguji Field --}}
                     <div>
                         <label for="nama" class="block text-sm font-semibold text-gray-700 mb-2">

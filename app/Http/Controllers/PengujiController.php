@@ -12,18 +12,100 @@ class PengujiController extends Controller
      */
     public function index()
     {
-        $pengujis = Penguji::withCount([
+        $query = Penguji::withCount([
             'munaqosahsAsPenguji1 as munaqosahs_as_penguji1_count' => function ($query) {
                 $query->where('status_konfirmasi', 'dikonfirmasi');
             },
             'munaqosahsAsPenguji2 as munaqosahs_as_penguji2_count' => function ($query) {
                 $query->where('status_konfirmasi', 'dikonfirmasi');
             }
-        ])
-        ->orderBy('nama')
+        ]);
+
+        $allIds = (clone $query)->pluck('id')->toArray();
+
+        $pengujis = $query->orderBy('nama')
         ->paginate(10);
 
-        return view('penguji.index', compact('pengujis'));
+        return view('penguji.index', compact('pengujis', 'allIds'));
+    }
+
+    /**
+     * Menghapus beberapa data penguji sekaligus.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->ids);
+
+        try {
+            $count = Penguji::destroy($ids);
+            return redirect()->route('penguji.index')->with('success', "$count data penguji berhasil dihapus.");
+        } catch (\Exception $e) {
+            return redirect()->route('penguji.index')->with('error', 'Beberapa data penguji tidak dapat dihapus karena masih digunakan.');
+        }
+    }
+
+    /**
+     * Export beberapa data penguji sekaligus.
+     */
+    public function bulkExport(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|string',
+        ]);
+
+        $ids = explode(',', $request->ids);
+        $pengujis = Penguji::whereIn('id', $ids)
+                    ->withCount([
+                        'munaqosahsAsPenguji1 as munaqosahs_as_penguji1_count' => function ($query) {
+                            $query->where('status_konfirmasi', 'dikonfirmasi');
+                        },
+                        'munaqosahsAsPenguji2 as munaqosahs_as_penguji2_count' => function ($query) {
+                            $query->where('status_konfirmasi', 'dikonfirmasi');
+                        }
+                    ])
+                    ->get();
+
+        $filename = "penguji_export_" . date('Y-m-d_H-i-s') . ".csv";
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('NIP', 'Nama Penguji', 'Prioritas', 'Keterangan Prioritas', 'Histori Penguji 1', 'Histori Penguji 2');
+
+        $callback = function() use($pengujis, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($pengujis as $penguji) {
+                $row['NIP']  = $penguji->nip ?? '';
+                $row['Nama Penguji']    = $penguji->nama;
+                $row['Prioritas']    = $penguji->is_prioritas ? 'Prioritas' : 'Biasa';
+                $row['Keterangan Prioritas']  = $penguji->keterangan_prioritas ?? '';
+                $row['Histori Penguji 1'] = $penguji->munaqosahs_as_penguji1_count ?? 0;
+                $row['Histori Penguji 2'] = $penguji->munaqosahs_as_penguji2_count ?? 0;
+
+                fputcsv($file, array(
+                    $row['NIP'], 
+                    $row['Nama Penguji'], 
+                    $row['Prioritas'], 
+                    $row['Keterangan Prioritas'],
+                    $row['Histori Penguji 1'],
+                    $row['Histori Penguji 2']
+                ));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -40,6 +122,7 @@ class PengujiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'nip' => 'nullable|string|max:255|unique:penguji,nip',
             'nama' => 'required|string|max:255',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',
@@ -64,6 +147,7 @@ class PengujiController extends Controller
     public function update(Request $request, Penguji $penguji)
     {
         $request->validate([
+            'nip' => 'nullable|string|max:255|unique:penguji,nip,' . $penguji->id,
             'nama' => 'required|string|max:255',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',

@@ -88,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
     // Admin bisa melakukan CRUD Dosen
     Route::resource('dosen', DosenController::class)->except(['index']); // Kecualikan index
 
+    // Bulk operations for Penguji (MUST be before resource routes to avoid route conflict)
+    Route::delete('penguji/bulk-delete', [PengujiController::class, 'bulkDelete'])->name('penguji.bulk-delete');
+    Route::post('penguji/bulk-export', [PengujiController::class, 'bulkExport'])->name('penguji.bulk-export');
+
     // Admin bisa melakukan CRUD Penguji
     Route::resource('penguji', PengujiController::class)->except(['index']); // Kecualikan index
 
