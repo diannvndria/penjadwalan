@@ -106,7 +106,16 @@ class MahasiswaController extends Controller
             'nim' => 'required|string|max:20|unique:mahasiswa,nim',
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
-            'judul_skripsi' => 'required|string',
+            'judul_skripsi' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count($value);
+                    if ($wordCount > 20) {
+                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: ' . $wordCount . ' kata.');
+                    }
+                },
+            ],
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional', // Validasi profil lulusan
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
             'id_dospem' => 'required|exists:dosen,id',
@@ -151,7 +160,16 @@ class MahasiswaController extends Controller
             'nim' => 'required|string|max:20|unique:mahasiswa,nim,'.$mahasiswa->id,
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
-            'judul_skripsi' => 'required|string',
+            'judul_skripsi' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count($value);
+                    if ($wordCount > 20) {
+                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: ' . $wordCount . ' kata.');
+                    }
+                },
+            ],
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional',
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
             'id_dospem' => 'required|exists:dosen,id',

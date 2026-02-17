@@ -100,7 +100,20 @@
                     </label>
                     <textarea id="judul_skripsi" name="judul_skripsi" rows="3" required
                         class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
-                        placeholder="Masukkan judul skripsi">{{ old('judul_skripsi') }}</textarea>
+                        placeholder="Masukkan judul skripsi (maksimal 20 kata)">{{ old('judul_skripsi') }}</textarea>
+                    <div class="mt-2 flex items-center justify-between">
+                        <p class="text-xs text-gray-500 flex items-center">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Judul skripsi maksimal 20 kata
+                        </p>
+                        <span id="word-count" class="text-xs font-medium text-gray-600">0 / 20 kata</span>
+                    </div>
+                    <div id="word-count-error" class="hidden mt-1">
+                        <span class="text-red-500 text-xs flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span id="error-message"></span>
+                        </span>
+                    </div>
                     @error('judul_skripsi') <span class="text-red-500 text-xs mt-1 flex items-center"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</span> @enderror
                 </div>
 
@@ -199,3 +212,88 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const judulSkripsiTextarea = document.getElementById('judul_skripsi');
+        const wordCountDisplay = document.getElementById('word-count');
+        const wordCountError = document.getElementById('word-count-error');
+        const errorMessage = document.getElementById('error-message');
+        const form = judulSkripsiTextarea.closest('form');
+        const MAX_WORDS = 20;
+
+        function countWords(text) {
+            // Trim whitespace and split by spaces, filtering out empty strings
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            return words.length;
+        }
+
+        function updateWordCount() {
+            const text = judulSkripsiTextarea.value;
+            const wordCount = countWords(text);
+            
+            // Update word count display
+            wordCountDisplay.textContent = `${wordCount} / ${MAX_WORDS} kata`;
+            
+            // Show/hide error and update styling
+            if (wordCount > MAX_WORDS) {
+                wordCountDisplay.classList.remove('text-gray-600');
+                wordCountDisplay.classList.add('text-red-600', 'font-bold');
+                wordCountError.classList.remove('hidden');
+                errorMessage.textContent = `Judul skripsi melebihi batas ${MAX_WORDS} kata. Saat ini: ${wordCount} kata.`;
+                judulSkripsiTextarea.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                judulSkripsiTextarea.classList.remove('border-gray-300', 'focus:border-blue-500', 'focus:ring-blue-500');
+            } else {
+                wordCountDisplay.classList.remove('text-red-600', 'font-bold');
+                wordCountDisplay.classList.add('text-gray-600');
+                if (wordCount === MAX_WORDS) {
+                    wordCountDisplay.classList.add('text-yellow-600', 'font-semibold');
+                }
+                wordCountError.classList.add('hidden');
+                judulSkripsiTextarea.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                judulSkripsiTextarea.classList.add('border-gray-300', 'focus:border-blue-500', 'focus:ring-blue-500');
+            }
+        }
+
+        // Update word count on input
+        judulSkripsiTextarea.addEventListener('input', updateWordCount);
+
+        // Validate on form submit
+        form.addEventListener('submit', function(e) {
+            const text = judulSkripsiTextarea.value;
+            const wordCount = countWords(text);
+            
+            if (wordCount > MAX_WORDS) {
+                e.preventDefault();
+                judulSkripsiTextarea.focus();
+                judulSkripsiTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Show error alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-lg z-50 max-w-md';
+                alertDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3"></i>
+                        <div>
+                            <strong class="font-semibold">Validasi Gagal!</strong>
+                            <p class="mt-1 text-sm">Judul skripsi tidak boleh lebih dari ${MAX_WORDS} kata. Saat ini: ${wordCount} kata.</p>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Remove alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+                
+                return false;
+            }
+        });
+
+        // Initial count on page load
+        updateWordCount();
+    });
+</script>
+@endpush
