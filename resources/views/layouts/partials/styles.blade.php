@@ -107,6 +107,19 @@
                 pointer-events: none;
             }
 
+            /* Hide tooltip when clicked (Supabase-like) */
+            .sidebar:not(.expanded) .nav-item.clicked .label,
+            .sidebar:not(.expanded) .nav-item:active .label {
+                opacity: 0 !important;
+                visibility: hidden;
+                transition: opacity 200ms ease, visibility 0s linear 200ms !important;
+            }
+            .sidebar:not(.expanded) .nav-item.clicked .label::before,
+            .sidebar:not(.expanded) .nav-item:active .label::before {
+                opacity: 0 !important;
+                transition: opacity 200ms ease !important;
+            }
+
             /* Tooltip Arrow */
             .sidebar:not(.expanded) .nav-item:hover .label::before {
                 content: '';

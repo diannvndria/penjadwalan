@@ -99,5 +99,27 @@
                         sidebar.classList.add('ready-to-animate');
                     });
                 })();
+
+                // Tooltip behavior: Hide immediately on click, restore on mouse leave
+                (function() {
+                    const navItems = document.querySelectorAll('.sidebar .nav-item');
+
+                    // On page load, the active item is likely under the mouse cursor (since it was just clicked).
+                    // We suppress the tooltip immediately so it doesn't auto-appear on the new page.
+                    // It will only appear again after the user moves the mouse away and back.
+                    const activeItem = document.querySelector('.sidebar .nav-item.active');
+                    if (activeItem) {
+                        activeItem.classList.add('clicked');
+                    }
+
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function() {
+                            this.classList.add('clicked');
+                        });
+                        item.addEventListener('mouseleave', function() {
+                            this.classList.remove('clicked');
+                        });
+                    });
+                })();
             </script>
         </aside>
