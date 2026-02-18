@@ -21,7 +21,7 @@ class PengujiController extends Controller
             },
         ]);
 
-        $allIds = (clone $query)->pluck('id')->toArray();
+        $allIds = (clone $query)->pluck('nip')->toArray();
 
         $pengujis = $query->orderBy('nama')
             ->paginate(10);
@@ -41,7 +41,7 @@ class PengujiController extends Controller
         $ids = explode(',', $request->ids);
 
         try {
-            $count = Penguji::destroy($ids);
+            $count = Penguji::destroy($ids); // Eloquent destroy works with PKs (NIP now)
 
             return redirect()->route('penguji.index')->with('success', "$count data penguji berhasil dihapus.");
         } catch (\Exception $e) {
@@ -59,7 +59,7 @@ class PengujiController extends Controller
         ]);
 
         $ids = explode(',', $request->ids);
-        $pengujis = Penguji::whereIn('id', $ids)
+        $pengujis = Penguji::whereIn('nip', $ids)
             ->withCount([
                 'munaqosahsAsPenguji1 as munaqosahs_as_penguji1_count' => function ($query) {
                     $query->where('status_konfirmasi', 'dikonfirmasi');
@@ -123,7 +123,7 @@ class PengujiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nip' => 'nullable|string|max:255|unique:penguji,nip',
+            'nip' => 'required|string|max:255|unique:penguji,nip',
             'nama' => 'required|string|max:255',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',
@@ -148,7 +148,7 @@ class PengujiController extends Controller
     public function update(Request $request, Penguji $penguji)
     {
         $request->validate([
-            'nip' => 'nullable|string|max:255|unique:penguji,nip,'.$penguji->id,
+            'nip' => 'required|string|max:255|unique:penguji,nip,'.$penguji->nip.',nip',
             'nama' => 'required|string|max:255',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',

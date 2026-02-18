@@ -12,6 +12,12 @@ class Penguji extends Model
 
     protected $table = 'penguji';
 
+    protected $primaryKey = 'nip';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         'nip',
         'nama',

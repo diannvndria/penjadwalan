@@ -107,7 +107,7 @@
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
                         <option value="">Pilih Penguji</option>
                         @foreach($pengujis as $penguji)
-                            <option value="{{ $penguji->id }}" {{ old('id_penguji1') == $penguji->id ? 'selected' : '' }}>{{ $penguji->nama }}</option>
+                            <option value="{{ $penguji->nip }}" {{ old('id_penguji1') == $penguji->nip ? 'selected' : '' }}>{{ $penguji->nama }}</option>
                         @endforeach
                     </select>
                     @error('id_penguji1') <span class="text-red-500 text-xs mt-1 block"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</span> @enderror
@@ -122,7 +122,7 @@
                         class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
                         <option value="">Tidak Ada</option>
                         @foreach($pengujis as $penguji)
-                            <option value="{{ $penguji->id }}" {{ old('id_penguji2') == $penguji->id ? 'selected' : '' }}>{{ $penguji->nama }}</option>
+                            <option value="{{ $penguji->nip }}" {{ old('id_penguji2') == $penguji->nip ? 'selected' : '' }}>{{ $penguji->nama }}</option>
                         @endforeach
                     </select>
                     @error('id_penguji2') <span class="text-red-500 text-xs mt-1 block"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</span> @enderror

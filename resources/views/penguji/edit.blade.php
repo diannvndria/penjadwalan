@@ -32,7 +32,7 @@
             </div>
 
             {{-- Form Content --}}
-            <form method="POST" action="{{ route('penguji.update', $penguji->id) }}" class="p-6">
+            <form method="POST" action="{{ route('penguji.update', $penguji->nip) }}" class="p-6">
                 @csrf
                 @method('PUT')
 
@@ -63,10 +63,10 @@
                         <p class="mt-1 text-xs text-gray-500">
                             * NIP bersifat opsional
                         </p>
-                        @error('nip') 
+                        @error('nip')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -78,10 +78,10 @@
                         <input type="text" id="nama" name="nama" value="{{ old('nama', $penguji->nama) }}" required autofocus
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all"
                             placeholder="Masukkan nama lengkap penguji">
-                        @error('nama') 
+                        @error('nama')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -115,10 +115,10 @@
                                     <i class="fas fa-info-circle mr-1"></i>
                                     Jelaskan alasan pemberian status prioritas (opsional)
                                 </p>
-                                @error('keterangan_prioritas') 
+                                @error('keterangan_prioritas')
                                     <span class="text-red-500 text-xs mt-1 flex items-center">
                                         <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                                    </span> 
+                                    </span>
                                 @enderror
                             </div>
                         </div>

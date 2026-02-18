@@ -103,7 +103,7 @@ class AllDataSeeder extends Seeder
         // 5. Jadwal Penguji
         foreach ($allPengujis as $p) {
             JadwalPenguji::factory()->count(2)->create([
-                'id_penguji' => $p->id,
+                'id_penguji' => $p->nip,
             ]);
         }
     }

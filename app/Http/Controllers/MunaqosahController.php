@@ -165,8 +165,8 @@ class MunaqosahController extends Controller
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
-            'id_penguji1' => 'required|exists:penguji,id',
-            'id_penguji2' => 'nullable|exists:penguji,id|different:id_penguji1',
+            'id_penguji1' => 'required|exists:penguji,nip',
+            'id_penguji2' => 'nullable|exists:penguji,nip|different:id_penguji1',
             'id_ruang_ujian' => 'required|exists:ruang_ujian,id',
         ]);
 
@@ -180,7 +180,7 @@ class MunaqosahController extends Controller
         ]));
 
         // OPTIMIZATION: Fetch all pengujis at once instead of one by one
-        $pengujis = Penguji::whereIn('id', $pengujiIds)->pluck('nama', 'id');
+        $pengujis = Penguji::whereIn('nip', $pengujiIds)->pluck('nama', 'nip');
 
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai)) {
@@ -246,8 +246,8 @@ class MunaqosahController extends Controller
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
-            'id_penguji1' => 'required|exists:penguji,id',
-            'id_penguji2' => 'nullable|exists:penguji,id|different:id_penguji1',
+            'id_penguji1' => 'required|exists:penguji,nip',
+            'id_penguji2' => 'nullable|exists:penguji,nip|different:id_penguji1',
             'id_ruang_ujian' => 'required|exists:ruang_ujian,id',
             'status_konfirmasi' => 'required|in:pending,dikonfirmasi,ditolak',
         ]);
@@ -262,7 +262,7 @@ class MunaqosahController extends Controller
         ]));
 
         // OPTIMIZATION: Fetch all pengujis at once instead of one by one
-        $pengujis = Penguji::whereIn('id', $pengujiIds)->pluck('nama', 'id');
+        $pengujis = Penguji::whereIn('nip', $pengujiIds)->pluck('nama', 'nip');
 
         foreach ($pengujiIds as $pengujiId) {
             if ($this->checkPengujiConflict($pengujiId, $tanggal, $waktuMulai, $waktuSelesai, $munaqosah->id)) {

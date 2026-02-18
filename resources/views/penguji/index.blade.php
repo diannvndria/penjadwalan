@@ -142,7 +142,7 @@
                         @forelse ($pengujis as $penguji)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-2 py-4 text-center">
-                                    <input type="checkbox" @change="toggle({{ $penguji->id }})" :checked="selected.includes('{{ $penguji->id }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <input type="checkbox" @change="toggle('{{ $penguji->nip }}')" :checked="selected.includes('{{ $penguji->nip }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 </td>
                                 <td class="px-4 py-4">
                                     <p class="text-sm font-semibold text-gray-900">{{ $penguji->nip ?? '-' }}</p>
@@ -182,12 +182,12 @@
                                 @if (Auth::user()->isAdmin())
                                     <td class="px-4 py-4 text-center">
                                         <div class="flex items-center justify-center gap-2">
-                                            <a href="{{ route('penguji.edit', $penguji->id) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium transition-colors duration-150 border border-blue-200">
+                                            <a href="{{ route('penguji.edit', $penguji->nip) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium transition-colors duration-150 border border-blue-200">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Edit
                                             </a>
                                             <button type="button"
-                                                onclick="showDeleteModal({{ $penguji->id }}, '{{ $penguji->nama }}')"
+                                                onclick="showDeleteModal('{{ $penguji->nip }}', '{{ $penguji->nama }}')"
                                                 class="inline-flex items-center px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded text-xs font-medium transition-colors duration-150 border border-red-200">
                                                 <i class="fas fa-trash-alt mr-1"></i>
                                                 Hapus

@@ -17,7 +17,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
         try {
             // Add index to improve query performance
             $jadwalPengujis = JadwalPenguji::with(['penguji' => function ($query) {
-                $query->select('id', 'nip', 'nama');
+                $query->select('nip', 'nama');
             }])
                 ->select('id', 'id_penguji', 'tanggal', 'waktu_mulai', 'waktu_selesai', 'deskripsi')
                 ->orderBy('tanggal')
@@ -48,7 +48,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function store(Request $request)
     {
         $request->validate([
-            'id_penguji' => 'required|exists:penguji,id',
+            'id_penguji' => 'required|exists:penguji,nip',
             'tanggal' => 'required|date|after_or_equal:today', // Tanggal tidak bisa di masa lalu
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai', // Waktu selesai harus setelah waktu mulai
@@ -96,7 +96,7 @@ class JadwalPengujiController extends Controller // <-- Pastikan nama kelas ini 
     public function update(Request $request, JadwalPenguji $jadwalPenguji)
     {
         $request->validate([
-            'id_penguji' => 'required|exists:penguji,id',
+            'id_penguji' => 'required|exists:penguji,nip',
             'tanggal' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',

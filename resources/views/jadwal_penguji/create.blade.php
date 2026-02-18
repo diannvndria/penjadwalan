@@ -45,13 +45,13 @@
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all">
                             <option value="">Pilih Penguji</option>
                             @foreach($pengujis as $penguji)
-                                <option value="{{ $penguji->id }}" {{ old('id_penguji') == $penguji->id ? 'selected' : '' }}>{{ $penguji->nama }}</option>
+                                <option value="{{ $penguji->nip }}" {{ old('id_penguji') == $penguji->nip ? 'selected' : '' }}>{{ $penguji->nama }}</option>
                             @endforeach
                         </select>
-                        @error('id_penguji') 
+                        @error('id_penguji')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -62,10 +62,10 @@
                         </label>
                         <input type="date" id="tanggal" name="tanggal" value="{{ old('tanggal') }}" required
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all">
-                        @error('tanggal') 
+                        @error('tanggal')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -77,10 +77,10 @@
                             </label>
                             <input type="time" id="waktu_mulai" name="waktu_mulai" value="{{ old('waktu_mulai') }}" required
                                 class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all">
-                            @error('waktu_mulai') 
+                            @error('waktu_mulai')
                                 <span class="text-red-500 text-xs mt-1 flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                                </span> 
+                                </span>
                             @enderror
                         </div>
                         <div>
@@ -89,10 +89,10 @@
                             </label>
                             <input type="time" id="waktu_selesai" name="waktu_selesai" value="{{ old('waktu_selesai') }}" required
                                 class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all">
-                            @error('waktu_selesai') 
+                            @error('waktu_selesai')
                                 <span class="text-red-500 text-xs mt-1 flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                                </span> 
+                                </span>
                             @enderror
                         </div>
                     </div>
@@ -105,10 +105,10 @@
                         <input type="text" id="deskripsi" name="deskripsi" value="{{ old('deskripsi') }}"
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all"
                             placeholder="Tambahkan catatan atau keterangan">
-                        @error('deskripsi') 
+                        @error('deskripsi')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 

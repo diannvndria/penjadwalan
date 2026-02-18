@@ -402,17 +402,17 @@ class AutoScheduleService
 
         foreach ($pengujis as $penguji) {
             // Dosen pembimbing tidak boleh jadi penguji
-            if ($dospemId && $penguji->id == $dospemId) {
+            if ($dospemId && $penguji->nip == $dospemId) {
                 continue;
             }
 
             // Cek apakah penguji sibuk (using in-memory check instead of DB query)
-            if (in_array($penguji->id, $busyIds)) {
+            if (in_array($penguji->nip, $busyIds)) {
                 continue;
             }
 
             // Attach workload count for sorting
-            $penguji->current_workload = $workloadCounts[$penguji->id] ?? 0;
+            $penguji->current_workload = $workloadCounts[$penguji->nip] ?? 0;
             $availablePengujis[] = $penguji;
         }
 
@@ -434,15 +434,15 @@ class AutoScheduleService
         // Initialize workload tracker from database if not yet loaded
         if ($this->workloadTracker === null) {
             $result = DB::select("
-                SELECT p.id,
-                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.id), 0) +
-                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.id), 0) as total
+                SELECT p.nip,
+                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.nip), 0) +
+                       COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.nip), 0) as total
                 FROM penguji p
             ");
 
             $this->workloadTracker = [];
             foreach ($result as $row) {
-                $this->workloadTracker[$row->id] = (int) $row->total;
+                $this->workloadTracker[$row->nip] = (int) $row->total;
             }
         }
 
@@ -453,7 +453,7 @@ class AutoScheduleService
      * Update workload tracker after a schedule is created
      * This ensures even distribution during batch operations
      */
-    private function incrementPengujiWorkload(int $penguji1Id, int $penguji2Id): void
+    private function incrementPengujiWorkload(string $penguji1Id, string $penguji2Id): void
     {
         if ($this->workloadTracker !== null) {
             $this->workloadTracker[$penguji1Id] = ($this->workloadTracker[$penguji1Id] ?? 0) + 1;
@@ -476,7 +476,7 @@ class AutoScheduleService
     /**
      * Track examiner bookings in-memory for the current batch
      */
-    private function trackExaminerBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, int $penguji1Id, int $penguji2Id): void
+    private function trackExaminerBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, string $penguji1Id, string $penguji2Id): void
     {
         $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
         if (!isset($this->examinerBookings[$slotKey])) {
@@ -611,8 +611,8 @@ class AutoScheduleService
             'tanggal_munaqosah' => $scheduleData['tanggal'],
             'waktu_mulai' => $scheduleData['waktu_mulai'],
             'waktu_selesai' => $scheduleData['waktu_selesai'],
-            'id_penguji1' => $scheduleData['penguji1']->id,
-            'id_penguji2' => $scheduleData['penguji2']->id,
+            'id_penguji1' => $scheduleData['penguji1']->nip,
+            'id_penguji2' => $scheduleData['penguji2']->nip,
             'id_ruang_ujian' => $scheduleData['id_ruang_ujian'] ?? null,
             'status_konfirmasi' => 'pending',
         ]);
@@ -639,7 +639,7 @@ class AutoScheduleService
         ]);
 
         // Update in-memory workload tracker for load balancing during batch operations
-        $this->incrementPengujiWorkload($scheduleData['penguji1']->id, $scheduleData['penguji2']->id);
+        $this->incrementPengujiWorkload($scheduleData['penguji1']->nip, $scheduleData['penguji2']->nip);
 
         // Track room and examiner bookings for this time slot to prevent double-booking in batch
         if ($scheduleData['id_ruang_ujian']) {
@@ -655,8 +655,8 @@ class AutoScheduleService
             $scheduleData['tanggal'],
             $scheduleData['waktu_mulai'],
             $scheduleData['waktu_selesai'],
-            $scheduleData['penguji1']->id,
-            $scheduleData['penguji2']->id
+            $scheduleData['penguji1']->nip,
+            $scheduleData['penguji2']->nip
         );
     }
 }

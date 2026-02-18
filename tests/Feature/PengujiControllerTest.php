@@ -47,6 +47,7 @@ class PengujiControllerTest extends TestCase
     public function it_stores_new_penguji(): void
     {
         $response = $this->actingAs($this->user)->post(route('penguji.store'), [
+            'nip' => '198501012010011001',
             'nama' => 'Dr. Penguji Test',
             'is_prioritas' => false,
         ]);
@@ -54,6 +55,7 @@ class PengujiControllerTest extends TestCase
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('penguji', [
+            'nip' => '198501012010011001',
             'nama' => 'Dr. Penguji Test',
             'is_prioritas' => false,
         ]);
@@ -63,6 +65,7 @@ class PengujiControllerTest extends TestCase
     public function it_stores_penguji_with_priority(): void
     {
         $response = $this->actingAs($this->user)->post(route('penguji.store'), [
+            'nip' => '198501012010011002',
             'nama' => 'Dr. Priority Penguji',
             'is_prioritas' => true,
             'keterangan_prioritas' => 'Ketua Jurusan',
@@ -70,6 +73,7 @@ class PengujiControllerTest extends TestCase
 
         $response->assertRedirect(route('penguji.index'));
         $this->assertDatabaseHas('penguji', [
+            'nip' => '198501012010011002',
             'nama' => 'Dr. Priority Penguji',
             'is_prioritas' => true,
             'keterangan_prioritas' => 'Ketua Jurusan',
@@ -83,13 +87,14 @@ class PengujiControllerTest extends TestCase
             'nama' => '',
         ]);
 
-        $response->assertSessionHasErrors('nama');
+        $response->assertSessionHasErrors(['nama', 'nip']);
     }
 
     #[Test]
     public function it_validates_nama_max_length(): void
     {
         $response = $this->actingAs($this->user)->post(route('penguji.store'), [
+            'nip' => '1234567890',
             'nama' => str_repeat('a', 256),
         ]);
 
@@ -101,7 +106,7 @@ class PengujiControllerTest extends TestCase
     {
         $penguji = Penguji::factory()->create();
 
-        $response = $this->actingAs($this->user)->get(route('penguji.edit', $penguji));
+        $response = $this->actingAs($this->user)->get(route('penguji.edit', $penguji->nip));
 
         $response->assertStatus(200);
         $response->assertViewIs('penguji.edit');
@@ -113,7 +118,8 @@ class PengujiControllerTest extends TestCase
     {
         $penguji = Penguji::factory()->create(['nama' => 'Old Name']);
 
-        $response = $this->actingAs($this->user)->put(route('penguji.update', $penguji), [
+        $response = $this->actingAs($this->user)->put(route('penguji.update', $penguji->nip), [
+            'nip' => $penguji->nip,
             'nama' => 'New Name',
             'is_prioritas' => true,
             'keterangan_prioritas' => 'Updated priority reason',
@@ -122,7 +128,7 @@ class PengujiControllerTest extends TestCase
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('penguji', [
-            'id' => $penguji->id,
+            'nip' => $penguji->nip,
             'nama' => 'New Name',
             'is_prioritas' => true,
         ]);
@@ -133,7 +139,7 @@ class PengujiControllerTest extends TestCase
     {
         $penguji = Penguji::factory()->create();
 
-        $response = $this->actingAs($this->user)->put(route('penguji.update', $penguji), [
+        $response = $this->actingAs($this->user)->put(route('penguji.update', $penguji->nip), [
             'nama' => '',
         ]);
 
@@ -145,11 +151,11 @@ class PengujiControllerTest extends TestCase
     {
         $penguji = Penguji::factory()->create();
 
-        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji));
+        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji->nip));
 
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('success');
-        $this->assertDatabaseMissing('penguji', ['id' => $penguji->id]);
+        $this->assertDatabaseMissing('penguji', ['nip' => $penguji->nip]);
     }
 
     #[Test]
@@ -158,11 +164,11 @@ class PengujiControllerTest extends TestCase
         $penguji = Penguji::factory()->create();
         $jadwal = JadwalPenguji::factory()->forPenguji($penguji)->create();
 
-        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji));
+        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji->nip));
 
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('success');
-        $this->assertDatabaseMissing('penguji', ['id' => $penguji->id]);
+        $this->assertDatabaseMissing('penguji', ['nip' => $penguji->nip]);
         $this->assertDatabaseMissing('jadwal_penguji', ['id' => $jadwal->id]);
     }
 
@@ -170,9 +176,9 @@ class PengujiControllerTest extends TestCase
     public function it_prevents_deleting_penguji_assigned_to_munaqosah(): void
     {
         $penguji = Penguji::factory()->create();
-        Munaqosah::factory()->create(['id_penguji1' => $penguji->id]);
+        Munaqosah::factory()->create(['id_penguji1' => $penguji->nip]);
 
-        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji));
+        $response = $this->actingAs($this->user)->delete(route('penguji.destroy', $penguji->nip));
 
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('error');
@@ -183,7 +189,7 @@ class PengujiControllerTest extends TestCase
     public function it_bulk_deletes_penguji(): void
     {
         $pengujis = Penguji::factory()->count(3)->create();
-        $ids = $pengujis->pluck('id')->implode(',');
+        $ids = $pengujis->pluck('nip')->implode(',');
 
         $response = $this->actingAs($this->user)->delete(route('penguji.bulk-delete'), [
             'ids' => $ids,
@@ -192,7 +198,7 @@ class PengujiControllerTest extends TestCase
         $response->assertRedirect(route('penguji.index'));
         $response->assertSessionHas('success');
         foreach ($pengujis as $penguji) {
-            $this->assertDatabaseMissing('penguji', ['id' => $penguji->id]);
+            $this->assertDatabaseMissing('penguji', ['nip' => $penguji->nip]);
         }
     }
 
@@ -200,7 +206,7 @@ class PengujiControllerTest extends TestCase
     public function it_bulk_exports_penguji(): void
     {
         $pengujis = Penguji::factory()->count(3)->create();
-        $ids = $pengujis->pluck('id')->implode(',');
+        $ids = $pengujis->pluck('nip')->implode(',');
 
         $response = $this->actingAs($this->user)->post(route('penguji.bulk-export'), [
             'ids' => $ids,

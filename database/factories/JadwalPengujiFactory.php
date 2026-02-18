@@ -60,7 +60,7 @@ class JadwalPengujiFactory extends Factory
     public function forPenguji(Penguji $penguji): static
     {
         return $this->state(fn (array $attributes) => [
-            'id_penguji' => $penguji->id,
+            'id_penguji' => $penguji->nip,
         ]);
     }
 }

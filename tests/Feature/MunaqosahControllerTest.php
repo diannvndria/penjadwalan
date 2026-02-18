@@ -105,8 +105,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -148,7 +148,7 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
-            'id_penguji1' => $this->penguji1->id,
+            'id_penguji1' => $this->penguji1->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -163,8 +163,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji1->id, // Same as penguji1
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji1->nip, // Same as penguji1
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -188,8 +188,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -209,7 +209,7 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
-            'id_penguji1' => $this->penguji1->id,
+            'id_penguji1' => $this->penguji1->nip,
         ]);
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
@@ -217,8 +217,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '10:00', // Overlapping time
             'waktu_selesai' => '12:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -241,8 +241,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
-            'id_penguji1' => $otherPenguji1->id,
-            'id_penguji2' => $otherPenguji2->id,
+            'id_penguji1' => $otherPenguji1->nip,
+            'id_penguji2' => $otherPenguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 
@@ -251,14 +251,10 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '10:00', // Overlapping time
             'waktu_selesai' => '12:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id, // Same room
         ]);
-
-        if ($response->getSession()->get('errors')) {
-            dump($response->getSession()->get('errors')->getMessages());
-        }
 
         $response->assertSessionHasErrors('bentrok');
     }
@@ -292,8 +288,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '14:00',
             'waktu_selesai' => '16:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
             'status_konfirmasi' => 'dikonfirmasi',
         ]);
@@ -380,8 +376,8 @@ class MunaqosahControllerTest extends TestCase
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
-            'id_penguji1' => $this->penguji1->id,
-            'id_penguji2' => $this->penguji2->id,
+            'id_penguji1' => $this->penguji1->nip,
+            'id_penguji2' => $this->penguji2->nip,
             'id_ruang_ujian' => $this->ruang->id,
         ]);
 

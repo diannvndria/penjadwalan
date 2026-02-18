@@ -112,8 +112,8 @@ class AutoScheduleTest extends TestCase
         // Create existing munaqosah
         Munaqosah::factory()->create([
             'id_mahasiswa' => $mahasiswa->nim,
-            'id_penguji1' => $penguji1->id,
-            'id_penguji2' => $penguji2->id,
+            'id_penguji1' => $penguji1->nip,
+            'id_penguji2' => $penguji2->nip,
             'id_ruang_ujian' => $ruang->id,
         ]);
 

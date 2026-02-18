@@ -53,7 +53,7 @@ class JadwalPengujiControllerTest extends TestCase
         $futureDate = Carbon::tomorrow()->toDateString();
 
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -63,7 +63,7 @@ class JadwalPengujiControllerTest extends TestCase
         $response->assertRedirect(route('jadwal-penguji.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('jadwal_penguji', [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
@@ -82,7 +82,7 @@ class JadwalPengujiControllerTest extends TestCase
     public function it_validates_penguji_exists(): void
     {
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => 9999, // Non-existent
+            'id_penguji' => '99999999', // Non-existent
             'tanggal' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -95,7 +95,7 @@ class JadwalPengujiControllerTest extends TestCase
     public function it_validates_tanggal_not_in_past(): void
     {
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => Carbon::yesterday()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -108,7 +108,7 @@ class JadwalPengujiControllerTest extends TestCase
     public function it_validates_waktu_selesai_after_waktu_mulai(): void
     {
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '11:00',
             'waktu_selesai' => '09:00', // Before start time
@@ -131,7 +131,7 @@ class JadwalPengujiControllerTest extends TestCase
 
         // Try to create overlapping jadwal 10:00 - 12:00
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '10:00',
             'waktu_selesai' => '12:00',
@@ -154,7 +154,7 @@ class JadwalPengujiControllerTest extends TestCase
 
         // Create non-overlapping jadwal 13:00 - 15:00
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '13:00',
             'waktu_selesai' => '15:00',
@@ -179,7 +179,7 @@ class JadwalPengujiControllerTest extends TestCase
 
         // Create same time jadwal for penguji 2
         $response = $this->actingAs($this->user)->post(route('jadwal-penguji.store'), [
-            'id_penguji' => $penguji2->id,
+            'id_penguji' => $penguji2->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -213,7 +213,7 @@ class JadwalPengujiControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->put(route('jadwal-penguji.update', $jadwal), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '14:00',
             'waktu_selesai' => '16:00',
@@ -242,7 +242,7 @@ class JadwalPengujiControllerTest extends TestCase
 
         // Update same jadwal with same time should work
         $response = $this->actingAs($this->user)->put(route('jadwal-penguji.update', $jadwal), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -272,7 +272,7 @@ class JadwalPengujiControllerTest extends TestCase
 
         // Try to update jadwal1 to overlap with jadwal2
         $response = $this->actingAs($this->user)->put(route('jadwal-penguji.update', $jadwal1), [
-            'id_penguji' => $this->penguji->id,
+            'id_penguji' => $this->penguji->nip,
             'tanggal' => $futureDate,
             'waktu_mulai' => '14:00',
             'waktu_selesai' => '16:00',
