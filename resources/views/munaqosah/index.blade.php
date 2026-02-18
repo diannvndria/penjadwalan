@@ -7,7 +7,7 @@
 @section('content')
     <div class="space-y-6" x-data='{
         selected: [],
-        items: @json($allIds),
+        items: @json($allIds).map(id => String(id)),
         get allSelected() {
             return this.items.length > 0 && this.selected.length === this.items.length;
         },
@@ -25,6 +25,9 @@
             } else {
                 this.selected.push(id);
             }
+        },
+        clearSelections() {
+            this.selected = [];
         }
     }'>
         @if (session('success'))
@@ -57,7 +60,7 @@
                         {{-- Preserve sorting parameters --}}
                         <input type="hidden" name="sort" value="{{ $sortField ?? '' }}">
                         <input type="hidden" name="direction" value="{{ $sortDirection ?? '' }}">
-                        
+
                         <div>
                             <label for="start_date" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
@@ -123,13 +126,13 @@
         </div>
 
         {{-- Bulk Actions --}}
-        <div x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 text-indigo-800">
                 <i class="fas fa-check-square"></i>
                 <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" @click="selected = []" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
+                <button type="button" @click="clearSelections()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
                      Batal
                 </button>
                 <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
@@ -555,7 +558,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
-        
+
         if (successAlert) {
             setTimeout(function() {
                 successAlert.style.opacity = '0';
@@ -564,7 +567,7 @@
                 }, 300);
             }, 2000);
         }
-        
+
         if (errorAlert) {
             setTimeout(function() {
                 errorAlert.style.opacity = '0';

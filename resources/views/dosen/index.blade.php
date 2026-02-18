@@ -8,37 +8,19 @@
     <div class="space-y-6" x-data='{
         selected: [],
         items: @json($allIds ?? []).map(id => String(id)),
-        storageKey: "dosen_selected",
-        
-        init() {
-            // Load saved selections from localStorage
-            const saved = localStorage.getItem(this.storageKey);
-            if (saved) {
-                try {
-                    const savedArray = JSON.parse(saved);
-                    // Filter out any IDs that no longer exist in items (deleted dosen)
-                    this.selected = savedArray.filter(id => this.items.includes(String(id)));
-                    // Save the filtered selection back to localStorage
-                    this.saveToStorage();
-                } catch (e) {
-                    this.selected = [];
-                }
-            }
-        },
-        
+
         get allSelected() {
             return this.items.length > 0 && this.selected.length === this.items.length;
         },
-        
+
         toggleAll() {
             if (this.allSelected) {
                 this.selected = [];
             } else {
                 this.selected = [...this.items];
             }
-            this.saveToStorage();
         },
-        
+
         toggle(id) {
             id = String(id);
             if (this.selected.includes(id)) {
@@ -46,16 +28,10 @@
             } else {
                 this.selected.push(id);
             }
-            this.saveToStorage();
         },
-        
-        saveToStorage() {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.selected));
-        },
-        
+
         clearSelections() {
             this.selected = [];
-            this.saveToStorage();
         }
     }'>
         {{-- Alert Messages --}}
@@ -83,7 +59,7 @@
         @endif
 
         {{-- Bulk Actions --}}
-        <div x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 text-indigo-800">
                 <i class="fas fa-check-square"></i>
                 <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
@@ -225,13 +201,13 @@
                                 @if (Auth::user()->isAdmin())
                                     <td class="px-3 py-4 whitespace-nowrap text-center">
                                         <div class="flex items-center justify-center gap-1">
-                                            <a href="{{ route('dosen.edit', $dosen->id) }}" 
+                                            <a href="{{ route('dosen.edit', $dosen->id) }}"
                                                class="inline-flex items-center px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium transition-colors duration-150"
                                                title="Edit">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Edit
                                             </a>
-                                            <button type="button" 
+                                            <button type="button"
                                                     onclick="showDeleteModal({{ $dosen->id }}, '{{ $dosen->nama }}')"
                                                     class="inline-flex items-center px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded text-xs font-medium transition-colors duration-150"
                                                     title="Hapus">
@@ -337,11 +313,6 @@
         const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
         const cancelBulkDeleteBtn = document.getElementById('cancelBulkDeleteBtn');
         const bulkDeleteForm = document.getElementById('bulkDeleteForm');
-
-        // Trigger Alpine.js to reload selections after localStorage is cleared
-        @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
-            window.dispatchEvent(new Event('storage'));
-        @endif
 
         confirmDeleteBtn.addEventListener('click', function() {
             if (dosenToDeleteId) {

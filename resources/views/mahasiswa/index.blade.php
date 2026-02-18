@@ -16,7 +16,7 @@
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
     }
-    
+
     .truncate-text {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -31,37 +31,19 @@
     <div class="space-y-6" x-data='{
         selected: [],
         items: @json($allIds ?? []).map(id => String(id)),
-        storageKey: "mahasiswa_selected",
-        
-        init() {
-            // Load saved selections from localStorage
-            const saved = localStorage.getItem(this.storageKey);
-            if (saved) {
-                try {
-                    const savedArray = JSON.parse(saved);
-                    // Filter out any IDs that no longer exist in items (deleted students)
-                    this.selected = savedArray.filter(id => this.items.includes(String(id)));
-                    // Save the filtered selection back to localStorage
-                    this.saveToStorage();
-                } catch (e) {
-                    this.selected = [];
-                }
-            }
-        },
-        
+
         get allSelected() {
             return this.items.length > 0 && this.selected.length === this.items.length;
         },
-        
+
         toggleAll() {
             if (this.allSelected) {
                 this.selected = [];
             } else {
                 this.selected = [...this.items];
             }
-            this.saveToStorage();
         },
-        
+
         toggle(id) {
             id = String(id);
             if (this.selected.includes(id)) {
@@ -69,16 +51,10 @@
             } else {
                 this.selected.push(id);
             }
-            this.saveToStorage();
         },
-        
-        saveToStorage() {
-            localStorage.setItem(this.storageKey, JSON.stringify(this.selected));
-        },
-        
+
         clearSelections() {
             this.selected = [];
-            this.saveToStorage();
         }
     }'>
         {{-- Alert Messages --}}
@@ -168,16 +144,16 @@
                             <i class="fas fa-search mr-1"></i> Pencarian
                         </label>
                         <div class="relative">
-                            <input type="text" 
-                                   name="search" 
-                                   id="search" 
-                                   value="{{ request('search') }}" 
-                                   placeholder="Cari Nama / NIM..." 
+                            <input type="text"
+                                   name="search"
+                                   id="search"
+                                   value="{{ request('search') }}"
+                                   placeholder="Cari Nama / NIM..."
                                    autocomplete="off"
                                    class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2 pr-10">
                             @if(request('search'))
-                                <button type="button" 
-                                        onclick="clearSearch()" 
+                                <button type="button"
+                                        onclick="clearSearch()"
                                         class="absolute inset-y-0 right-0 top-0 bottom-0 px-3 flex items-center text-gray-400 hover:text-gray-600 transition">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -188,7 +164,7 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     {{-- Hidden inputs to maintain state when searching via enter key --}}
                     @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
                     @if(request('direction')) <input type="hidden" name="direction" value="{{ request('direction') }}"> @endif
@@ -197,12 +173,12 @@
                 {{-- Action Buttons --}}
                 @if (Auth::user()->isAdmin())
                     <div class="flex flex-col sm:flex-row gap-3 pt-1 xl:pt-0 w-full xl:w-auto">
-                        <button type="button" onclick="showImportModal()" 
+                        <button type="button" onclick="showImportModal()"
                             class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-green-600 rounded-lg font-semibold text-sm text-green-700 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-150 shadow-sm group">
                             <i class="fas fa-file-import mr-2 text-green-600 group-hover:text-green-700"></i>
                             <span>Import CSV</span>
                         </button>
-                        <a href="{{ route('mahasiswa.create') }}" 
+                        <a href="{{ route('mahasiswa.create') }}"
                             class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150 shadow-sm shadow-indigo-200">
                             <i class="fas fa-plus mr-2"></i>
                             <span>Tambah Data</span>
@@ -213,7 +189,7 @@
         </div>
 
         {{-- Bulk Actions --}}
-        <div x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 text-indigo-800">
                 <i class="fas fa-check-square"></i>
                 <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
@@ -391,13 +367,13 @@
                                 @if (Auth::user()->isAdmin())
                                     <td class="px-4 py-4 whitespace-nowrap text-center">
                                         <div class="flex items-center justify-center gap-2">
-                                            <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}" 
+                                            <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}"
                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors duration-150"
                                                title="Edit">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Edit
                                             </a>
-                                            <button type="button" 
+                                            <button type="button"
                                                     onclick="showDeleteModal({{ $mahasiswa->id }}, '{{ $mahasiswa->nama }}')"
                                                     class="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors duration-150"
                                                     title="Hapus">
@@ -475,10 +451,10 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            
+
             <form id="importForm" action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                
+
                 <div class="p-6 space-y-6">
                     <!-- Info Alert -->
                     <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
@@ -519,7 +495,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Accordion for Detailed Requirements -->
                      <div x-data="{ expanded: false }" class="border border-gray-200 rounded-lg overflow-hidden">
                         <button type="button" @click="expanded = !expanded" class="w-full px-4 py-3 bg-gray-50 flex justify-between items-center text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors">
@@ -541,12 +517,12 @@
 
                 <!-- Footer -->
                 <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
-                    <button type="button" 
+                    <button type="button"
                             onclick="hideImportModal()"
                             class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all shadow-sm">
                         Batal
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                             class="px-4 py-2 bg-indigo-600 border border-transparent text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-md shadow-indigo-200 flex items-center">
                         <i class="fas fa-file-import mr-2"></i>
                         Mulai Import
@@ -591,16 +567,11 @@
     let mahasiswaToDeleteId = null;
     let selectedIdsForBulkDelete = [];
 
-    // Clear localStorage BEFORE Alpine initializes if there was a successful deletion
-    @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
-        localStorage.removeItem('mahasiswa_selected');
-    @endif
-
     document.addEventListener('DOMContentLoaded', function() {
         // Search functionality
         const searchInput = document.getElementById('search');
         const filterForm = document.getElementById('filterForm');
-        
+
         if (searchInput && filterForm) {
             // Submit form when Enter is pressed in search field
             searchInput.addEventListener('keypress', function(e) {
@@ -623,7 +594,7 @@
         const successAlert = document.getElementById('successAlert');
         const infoAlert = document.getElementById('infoAlert');
         const errorAlert = document.getElementById('errorAlert');
-        
+
         function dismissAlert(alertElement) {
             if (alertElement) {
                 setTimeout(() => {
@@ -635,15 +606,10 @@
                 }, 2000);
             }
         }
-        
+
         dismissAlert(successAlert);
         dismissAlert(infoAlert);
         dismissAlert(errorAlert);
-
-        // Trigger Alpine.js to reload selections after localStorage is cleared
-        @if(session('success') && strpos(session('success'), 'Berhasil menghapus') !== false)
-            window.dispatchEvent(new Event('storage'));
-        @endif
 
         confirmDeleteBtn.addEventListener('click', function() {
             if (mahasiswaToDeleteId) {
@@ -725,7 +691,7 @@
     function updateFileName(input) {
         const fileNameElement = document.getElementById('file-name');
         const fileNameText = document.getElementById('file-name-text');
-        
+
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const maxSize = 10 * 1024 * 1024; // 10MB in bytes
