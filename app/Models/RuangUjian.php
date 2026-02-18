@@ -40,4 +40,9 @@ class RuangUjian extends Model
     {
         return $query->where('lantai', $lantai);
     }
+
+    public function munaqosahs()
+    {
+        return $this->hasMany(Munaqosah::class, 'id_ruang_ujian');
+    }
 }

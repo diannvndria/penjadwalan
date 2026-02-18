@@ -41,6 +41,13 @@ class PengujiController extends Controller
         $ids = explode(',', $request->ids);
 
         try {
+            // Check usage first
+            if (Penguji::whereIn('nip', $ids)->where(function ($query) {
+                $query->has('munaqosahsAsPenguji1')->orHas('munaqosahsAsPenguji2');
+            })->exists()) {
+                return redirect()->route('penguji.index')->with('error', 'Beberapa data penguji tidak dapat dihapus karena masih digunakan.');
+            }
+
             $count = Penguji::destroy($ids); // Eloquent destroy works with PKs (NIP now)
 
             return redirect()->route('penguji.index')->with('success', "$count data penguji berhasil dihapus.");
@@ -164,13 +171,16 @@ class PengujiController extends Controller
      */
     public function destroy(Penguji $penguji)
     {
+        if ($penguji->munaqosahsAsPenguji1()->exists() || $penguji->munaqosahsAsPenguji2()->exists()) {
+            return redirect()->route('penguji.index')->with('error', 'Tidak dapat menghapus penguji karena masih terhubung dengan munaqosah.');
+        }
+
         try {
             $penguji->delete();
 
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            // Tangani jika penguji masih terhubung ke jadwal atau munaqosah (Foreign Key Constraint)
-            return redirect()->route('penguji.index')->with('error', 'Tidak dapat menghapus penguji karena masih terhubung dengan jadwal atau munaqosah.');
+            return redirect()->route('penguji.index')->with('error', 'Terjadi kesalahan saat menghapus penguji: ' . $e->getMessage());
         }
     }
 }

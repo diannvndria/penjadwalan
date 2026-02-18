@@ -58,12 +58,16 @@ class RuangUjianController extends Controller
 
     public function destroy(RuangUjian $ruangUjian)
     {
+        if ($ruangUjian->munaqosahs()->exists()) {
+             return redirect()->route('ruang-ujian.index')->with('error', 'Tidak dapat menghapus ruang ujian karena masih digunakan dalam jadwal.');
+        }
+
         try {
             $ruangUjian->delete();
 
             return redirect()->route('ruang-ujian.index')->with('success', 'Ruang ujian berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('ruang-ujian.index')->with('error', 'Tidak dapat menghapus ruang ujian karena masih digunakan dalam jadwal.');
+            return redirect()->route('ruang-ujian.index')->with('error', 'Terjadi kesalahan saat menghapus ruang ujian: ' . $e->getMessage());
         }
     }
 }

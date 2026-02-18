@@ -85,13 +85,16 @@ class DosenController extends Controller
      */
     public function destroy(Dosen $dosen)
     {
+        if ($dosen->mahasiswas()->exists()) {
+            return redirect()->route('dosen.index')->with('error', 'Tidak dapat menghapus dosen karena masih mengampu mahasiswa. Harap hapus atau pindahkan mahasiswa terlebih dahulu.');
+        }
+
         try {
             $dosen->delete();
 
             return redirect()->route('dosen.index')->with('success', 'Dosen berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            // Tangani jika ada mahasiswa yang masih terhubung ke dosen ini (Foreign Key Constraint)
-            return redirect()->route('dosen.index')->with('error', 'Tidak dapat menghapus dosen karena masih mengampu mahasiswa. Harap hapus atau pindahkan mahasiswa terlebih dahulu.');
+            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus dosen: ' . $e->getMessage());
         }
     }
 
@@ -107,6 +110,11 @@ class DosenController extends Controller
         $ids = explode(',', $validated['ids']);
 
         try {
+            // Check usage first
+            if (Dosen::whereIn('nip', $ids)->has('mahasiswas')->exists()) {
+                return redirect()->route('dosen.index')->with('error', 'Beberapa dosen tidak dapat dihapus karena masih mengampu mahasiswa.');
+            }
+
             $count = Dosen::whereIn('nip', $ids)->delete();
 
             return redirect()->route('dosen.index')->with('success', "Berhasil menghapus {$count} data dosen.");
