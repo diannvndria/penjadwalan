@@ -311,7 +311,7 @@
                         @forelse ($mahasiswas as $mahasiswa)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-2 py-4 text-center">
-                                    <input type="checkbox" @change="toggle({{ $mahasiswa->id }})" :checked="selected.includes('{{ $mahasiswa->id }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <input type="checkbox" @change="toggle('{{ $mahasiswa->nim }}')" :checked="selected.includes('{{ $mahasiswa->nim }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <span class="text-sm font-semibold text-gray-900 font-mono">{{ $mahasiswa->nim }}</span>
@@ -367,14 +367,14 @@
                                 @if (Auth::user()->isAdmin())
                                     <td class="px-4 py-4 whitespace-nowrap text-center">
                                         <div class="flex items-center justify-center gap-2">
-                                            <a href="{{ route('mahasiswa.edit', $mahasiswa->id) }}"
+                                            <a href="{{ route('mahasiswa.edit', $mahasiswa->nim) }}"
                                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors duration-150"
                                                title="Edit">
                                                 <i class="fas fa-edit mr-1"></i>
                                                 Edit
                                             </a>
                                             <button type="button"
-                                                    onclick="showDeleteModal({{ $mahasiswa->id }}, '{{ $mahasiswa->nama }}')"
+                                                    onclick="showDeleteModal('{{ $mahasiswa->nim }}', '{{ $mahasiswa->nama }}')"
                                                     class="inline-flex items-center px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors duration-150"
                                                     title="Hapus">
                                                 <i class="fas fa-trash-alt mr-1"></i>

@@ -101,7 +101,7 @@ class MunaqosahControllerTest extends TestCase
         $futureDate = Carbon::tomorrow()->toDateString();
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -113,7 +113,7 @@ class MunaqosahControllerTest extends TestCase
         $response->assertRedirect(route('munaqosah.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('munaqosah', [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
@@ -141,10 +141,10 @@ class MunaqosahControllerTest extends TestCase
     {
         $dosen = Dosen::factory()->create();
         $mahasiswaWithMunaqosah = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
-        Munaqosah::factory()->create(['id_mahasiswa' => $mahasiswaWithMunaqosah->id]);
+        Munaqosah::factory()->create(['id_mahasiswa' => $mahasiswaWithMunaqosah->nim]);
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $mahasiswaWithMunaqosah->id,
+            'id_mahasiswa' => $mahasiswaWithMunaqosah->nim,
             'tanggal_munaqosah' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -159,7 +159,7 @@ class MunaqosahControllerTest extends TestCase
     public function it_validates_penguji1_and_penguji2_are_different(): void
     {
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => Carbon::tomorrow()->toDateString(),
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -184,7 +184,7 @@ class MunaqosahControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',
@@ -205,7 +205,7 @@ class MunaqosahControllerTest extends TestCase
         $dosen = Dosen::factory()->create();
         $otherMahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
         Munaqosah::factory()->create([
-            'id_mahasiswa' => $otherMahasiswa->id,
+            'id_mahasiswa' => $otherMahasiswa->nim,
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
@@ -213,7 +213,7 @@ class MunaqosahControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '10:00', // Overlapping time
             'waktu_selesai' => '12:00',
@@ -237,7 +237,7 @@ class MunaqosahControllerTest extends TestCase
         $otherPenguji2 = Penguji::factory()->create();
 
         Munaqosah::factory()->create([
-            'id_mahasiswa' => $otherMahasiswa->id,
+            'id_mahasiswa' => $otherMahasiswa->nim,
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
@@ -247,7 +247,7 @@ class MunaqosahControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '10:00', // Overlapping time
             'waktu_selesai' => '12:00',
@@ -280,7 +280,7 @@ class MunaqosahControllerTest extends TestCase
     {
         $futureDate = Carbon::tomorrow()->toDateString();
         $munaqosah = Munaqosah::factory()->create([
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $this->formatDate($futureDate),
             'waktu_mulai' => $this->formatTime('09:00'),
             'waktu_selesai' => $this->formatTime('11:00'),
@@ -288,7 +288,7 @@ class MunaqosahControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->put(route('munaqosah.update', $munaqosah), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '14:00',
             'waktu_selesai' => '16:00',
@@ -376,7 +376,7 @@ class MunaqosahControllerTest extends TestCase
         $futureDate = Carbon::tomorrow()->toDateString();
 
         $this->actingAs($this->user)->post(route('munaqosah.store'), [
-            'id_mahasiswa' => $this->mahasiswa->id,
+            'id_mahasiswa' => $this->mahasiswa->nim,
             'tanggal_munaqosah' => $futureDate,
             'waktu_mulai' => '09:00',
             'waktu_selesai' => '11:00',

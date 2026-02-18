@@ -38,7 +38,7 @@
             </div>
 
             {{-- Form Content --}}
-            <form method="POST" action="{{ route('mahasiswa.update', $mahasiswa->id) }}" class="p-6">
+            <form method="POST" action="{{ route('mahasiswa.update', $mahasiswa->nim) }}" class="p-6">
                 @csrf
                 @method('PUT')
 

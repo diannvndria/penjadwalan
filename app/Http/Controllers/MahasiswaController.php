@@ -70,7 +70,7 @@ class MahasiswaController extends Controller
         }
 
         // Get all IDs for bulk operations (before pagination)
-        $allIds = (clone $query)->pluck('id')->toArray();
+        $allIds = (clone $query)->pluck('nim')->toArray();
 
         // Then paginate
         $mahasiswas = $query->paginate(10);
@@ -112,7 +112,7 @@ class MahasiswaController extends Controller
                 function ($attribute, $value, $fail) {
                     $wordCount = str_word_count($value);
                     if ($wordCount > 20) {
-                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: ' . $wordCount . ' kata.');
+                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: '.$wordCount.' kata.');
                     }
                 },
             ],
@@ -157,7 +157,7 @@ class MahasiswaController extends Controller
         $oldSiapSidang = $mahasiswa->siap_sidang;
 
         $validated = $request->validate([
-            'nim' => 'required|string|max:20|unique:mahasiswa,nim,'.$mahasiswa->id,
+            'nim' => 'required|string|max:20|unique:mahasiswa,nim,'.$mahasiswa->nim.',nim',
             'nama' => 'required|string|max:255',
             'angkatan' => 'required|integer|min:2000|max:'.date('Y'),
             'judul_skripsi' => [
@@ -166,7 +166,7 @@ class MahasiswaController extends Controller
                 function ($attribute, $value, $fail) {
                     $wordCount = str_word_count($value);
                     if ($wordCount > 20) {
-                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: ' . $wordCount . ' kata.');
+                        $fail('Judul skripsi tidak boleh lebih dari 20 kata. Saat ini: '.$wordCount.' kata.');
                     }
                 },
             ],
@@ -358,7 +358,7 @@ class MahasiswaController extends Controller
         $ids = explode(',', $validated['ids']);
 
         try {
-            $count = Mahasiswa::whereIn('id', $ids)->delete();
+            $count = Mahasiswa::whereKey($ids)->delete();
 
             return redirect()->route('mahasiswa.index')->with('success', "Berhasil menghapus {$count} data mahasiswa.");
         } catch (\Exception $e) {
@@ -377,7 +377,7 @@ class MahasiswaController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
         }
 
-        $mahasiswas = Mahasiswa::whereIn('id', $ids)
+        $mahasiswas = Mahasiswa::whereKey($ids)
             ->with('dospem')
             ->orderBy('nama')
             ->get();

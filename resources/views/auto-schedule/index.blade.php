@@ -410,8 +410,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     `}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <button onclick="scheduleIndividual(${student.id}, '${student.nama}')"
-                            id="schedule-btn-${student.id}"
+                    <button onclick="scheduleIndividual('${student.nim}', '${student.nama}')"
+                            id="schedule-btn-${student.nim}"
                             class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fas fa-calendar-plus mr-1.5"></i>
                         Jadwalkan
@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             data.results.forEach(result => {
-                const statusBadge = result.result.success 
+                const statusBadge = result.result.success
                     ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200"><i class="fas fa-check-circle mr-1"></i> Berhasil</span>'
                     : '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200"><i class="fas fa-times-circle mr-1"></i> Gagal</span>';
 
@@ -588,15 +588,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Global functions for button clicks
-    window.scheduleIndividual = function(studentId, studentName) {
+    window.scheduleIndividual = function(studentNim, studentName) {
         // Disable the button immediately to prevent double-clicks
-        const button = document.getElementById(`schedule-btn-${studentId}`);
+        const button = document.getElementById(`schedule-btn-${studentNim}`);
         if (button) {
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>Memproses...';
         }
 
-        currentStudentId = studentId;
+        currentStudentId = studentNim;
         document.getElementById('modalTitle').innerHTML = '<i class="fas fa-calendar-check"></i> Konfirmasi Penjadwalan';
         document.getElementById('modalMessage').textContent =
             `Apakah Anda yakin ingin menjadwalkan mahasiswa "${studentName}" secara otomatis?`;
@@ -722,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         const config = alertConfig[type] || alertConfig['info'];
-        
+
         const alert = document.createElement('div');
         alert.className = `${config.bg} border-l-4 ${config.border} ${config.text} p-4 rounded-lg shadow-sm mb-4 flex items-start gap-3`;
         alert.innerHTML = `

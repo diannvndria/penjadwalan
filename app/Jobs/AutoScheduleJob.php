@@ -11,14 +11,14 @@ class AutoScheduleJob implements ShouldQueue
 {
     use Queueable;
 
-    protected int $mahasiswaId;
+    protected string $mahasiswaId;
 
     protected string $mode;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(?int $mahasiswaId = null, string $mode = 'single')
+    public function __construct(?string $mahasiswaId = null, string $mode = 'single')
     {
         $this->mahasiswaId = $mahasiswaId;
         $this->mode = $mode; // 'single' or 'batch'

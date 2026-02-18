@@ -165,7 +165,7 @@ class AutoScheduleService
     // Salin saja semuanya untuk memastikan file Anda lengkap dan benar.
     // ===================================================================
 
-    public function scheduleForMahasiswa(int $mahasiswaId): array
+    public function scheduleForMahasiswa(string $mahasiswaId): array
     {
         try {
             $mahasiswa = Mahasiswa::with('dospem')->findOrFail($mahasiswaId);
@@ -255,7 +255,7 @@ class AutoScheduleService
 
                     } catch (\Exception $e) {
                         // Log the error for this specific student
-                        Log::error("Error scheduling for student ID {$mahasiswa->id}", [
+                        Log::error("Error scheduling for student NIM {$mahasiswa->nim}", [
                             'error' => $e->getMessage(),
                             'trace' => $e->getTraceAsString(),
                         ]);
@@ -333,7 +333,7 @@ class AutoScheduleService
             return ['success' => false, 'message' => 'Tidak dapat menemukan slot waktu & kombinasi 2 penguji yang tersedia.'];
 
         } catch (\Exception $e) {
-            Log::error("Error scheduling for student ID {$mahasiswa->id}: ".$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error("Error scheduling for student NIM {$mahasiswa->nim}: ".$e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             return ['success' => false, 'message' => 'Terjadi kesalahan internal: '.$e->getMessage()];
         }
@@ -607,7 +607,7 @@ class AutoScheduleService
     private function createMunaqosahSchedule($scheduleData)
     {
         $munaqosah = Munaqosah::create([
-            'id_mahasiswa' => $scheduleData['mahasiswa']->id,
+            'id_mahasiswa' => $scheduleData['mahasiswa']->nim,
             'tanggal_munaqosah' => $scheduleData['tanggal'],
             'waktu_mulai' => $scheduleData['waktu_mulai'],
             'waktu_selesai' => $scheduleData['waktu_selesai'],

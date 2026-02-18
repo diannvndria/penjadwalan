@@ -46,12 +46,12 @@ class AutoScheduleTest extends TestCase
         $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Test auto-schedule
-        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
+        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->nim);
 
         // Assertions
         $this->assertTrue($result['success'], $result['message'] ?? 'Unknown error');
         $this->assertDatabaseHas('munaqosah', [
-            'id_mahasiswa' => $mahasiswa->id,
+            'id_mahasiswa' => $mahasiswa->nim,
             'status_konfirmasi' => 'pending',
         ]);
     }
@@ -89,12 +89,12 @@ class AutoScheduleTest extends TestCase
         $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
         // Test auto-schedule
-        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
+        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->nim);
 
         // Assertions
         $this->assertFalse($result['success']);
         $this->assertDatabaseMissing('munaqosah', [
-            'id_mahasiswa' => $mahasiswa->id,
+            'id_mahasiswa' => $mahasiswa->nim,
         ]);
     }
 
@@ -111,14 +111,14 @@ class AutoScheduleTest extends TestCase
 
         // Create existing munaqosah
         Munaqosah::factory()->create([
-            'id_mahasiswa' => $mahasiswa->id,
+            'id_mahasiswa' => $mahasiswa->nim,
             'id_penguji1' => $penguji1->id,
             'id_penguji2' => $penguji2->id,
             'id_ruang_ujian' => $ruang->id,
         ]);
 
         // Test auto-schedule
-        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
+        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->nim);
 
         // Assertions
         $this->assertFalse($result['success']);
@@ -145,10 +145,10 @@ class AutoScheduleTest extends TestCase
         $this->assertEquals(2, $result['scheduled_count']);
         $this->assertEquals(0, $result['failed_count']);
         $this->assertDatabaseHas('munaqosah', [
-            'id_mahasiswa' => $mahasiswa1->id,
+            'id_mahasiswa' => $mahasiswa1->nim,
         ]);
         $this->assertDatabaseHas('munaqosah', [
-            'id_mahasiswa' => $mahasiswa2->id,
+            'id_mahasiswa' => $mahasiswa2->nim,
         ]);
     }
 
@@ -210,7 +210,7 @@ class AutoScheduleTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)
             ->postJson('/auto-schedule/schedule-student', [
-                'mahasiswa_id' => $mahasiswa->id,
+                'mahasiswa_id' => $mahasiswa->nim,
             ]);
 
         $response->assertStatus(200)
@@ -231,7 +231,7 @@ class AutoScheduleTest extends TestCase
 
         $response = $this->actingAs($this->adminUser)
             ->postJson('/auto-schedule/simulate', [
-                'mahasiswa_id' => $mahasiswa->id,
+                'mahasiswa_id' => $mahasiswa->nim,
             ]);
 
         $response->assertStatus(200)
@@ -243,7 +243,7 @@ class AutoScheduleTest extends TestCase
 
         // Ensure no actual munaqosah was created
         $this->assertDatabaseMissing('munaqosah', [
-            'id_mahasiswa' => $mahasiswa->id,
+            'id_mahasiswa' => $mahasiswa->nim,
         ]);
     }
 
@@ -256,7 +256,7 @@ class AutoScheduleTest extends TestCase
 
         $mahasiswa = Mahasiswa::factory()->siapSidang()->forDosen($dosen)->create();
 
-        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->id);
+        $result = $this->autoScheduleService->scheduleForMahasiswa($mahasiswa->nim);
 
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('2 penguji', $result['message']);

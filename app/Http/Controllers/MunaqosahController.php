@@ -43,7 +43,7 @@ class MunaqosahController extends Controller
         $query = Munaqosah::query();
 
         // Always join with mahasiswa for supervisor filtering
-        $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.id');
+        $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.nim');
 
         // Apply filters
         if ($startDate) {
@@ -161,7 +161,7 @@ class MunaqosahController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_mahasiswa' => 'required|exists:mahasiswa,id|unique:munaqosah,id_mahasiswa',
+            'id_mahasiswa' => 'required|exists:mahasiswa,nim|unique:munaqosah,id_mahasiswa',
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
@@ -225,7 +225,7 @@ class MunaqosahController extends Controller
     public function edit(Munaqosah $munaqosah)
     {
         $mahasiswasSiapSidang = Mahasiswa::where('siap_sidang', true)
-            ->orWhere('id', $munaqosah->id_mahasiswa)
+            ->orWhere('nim', $munaqosah->id_mahasiswa)
             ->with('dospem')
             ->get();
         $pengujis = Penguji::all();
@@ -242,7 +242,7 @@ class MunaqosahController extends Controller
         $originalData = $munaqosah->getOriginal();
 
         $request->validate([
-            'id_mahasiswa' => 'required|exists:mahasiswa,id|unique:munaqosah,id_mahasiswa,'.$munaqosah->id,
+            'id_mahasiswa' => 'required|exists:mahasiswa,nim|unique:munaqosah,id_mahasiswa,'.$munaqosah->id,
             'tanggal_munaqosah' => 'required|date|after_or_equal:today',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',

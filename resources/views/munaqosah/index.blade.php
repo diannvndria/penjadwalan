@@ -95,7 +95,7 @@
                             <select id="supervisor" name="supervisor" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
                                 <option value="">Semua Dospem</option>
                                 @foreach($supervisors ?? [] as $supervisor)
-                                    <option value="{{ $supervisor->id }}" {{ ($supervisorId ?? '') == $supervisor->id ? 'selected' : '' }}>
+                                    <option value="{{ $supervisor->nip }}" {{ ($supervisorId ?? '') == $supervisor->nip ? 'selected' : '' }}>
                                         {{ $supervisor->nama }}
                                     </option>
                                 @endforeach

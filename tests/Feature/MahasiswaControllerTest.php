@@ -224,7 +224,7 @@ class MahasiswaControllerTest extends TestCase
         $response->assertRedirect(route('mahasiswa.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('mahasiswa', [
-            'id' => $mahasiswa->id,
+            'nim' => $mahasiswa->nim,
             'nama' => 'New Name',
         ]);
     }
@@ -257,13 +257,13 @@ class MahasiswaControllerTest extends TestCase
             'nama' => $mahasiswa->nama,
             'angkatan' => $mahasiswa->angkatan,
             'judul_skripsi' => $mahasiswa->judul_skripsi,
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
             'siap_sidang' => '0', // Value from hidden field
         ]);
 
         $response->assertRedirect(route('mahasiswa.index'));
         $this->assertDatabaseHas('mahasiswa', [
-            'id' => $mahasiswa->id,
+            'nim' => $mahasiswa->nim,
             'siap_sidang' => false,
         ]);
     }
@@ -295,7 +295,7 @@ class MahasiswaControllerTest extends TestCase
         $response = $this->actingAs($this->user)->delete(route('mahasiswa.destroy', $mahasiswa));
 
         $response->assertRedirect(route('mahasiswa.index'));
-        $this->assertDatabaseMissing('mahasiswa', ['id' => $mahasiswa->id]);
+        $this->assertDatabaseMissing('mahasiswa', ['nim' => $mahasiswa->nim]);
     }
 
     #[Test]
@@ -318,7 +318,7 @@ class MahasiswaControllerTest extends TestCase
     public function it_bulk_deletes_mahasiswa(): void
     {
         $mahasiswas = Mahasiswa::factory()->count(3)->forDosen($this->dosen)->create();
-        $ids = $mahasiswas->pluck('id')->implode(',');
+        $ids = $mahasiswas->pluck('nim')->implode(',');
 
         $response = $this->actingAs($this->user)->delete(route('mahasiswa.bulk-delete'), [
             'ids' => $ids,
@@ -327,7 +327,7 @@ class MahasiswaControllerTest extends TestCase
         $response->assertRedirect(route('mahasiswa.index'));
         $response->assertSessionHas('success');
         foreach ($mahasiswas as $mahasiswa) {
-            $this->assertDatabaseMissing('mahasiswa', ['id' => $mahasiswa->id]);
+            $this->assertDatabaseMissing('mahasiswa', ['nim' => $mahasiswa->nim]);
         }
     }
 
@@ -335,7 +335,7 @@ class MahasiswaControllerTest extends TestCase
     public function it_bulk_exports_mahasiswa(): void
     {
         $mahasiswas = Mahasiswa::factory()->count(3)->forDosen($this->dosen)->create();
-        $ids = $mahasiswas->pluck('id')->implode(',');
+        $ids = $mahasiswas->pluck('nim')->implode(',');
 
         $response = $this->actingAs($this->user)->post(route('mahasiswa.bulk-export'), [
             'ids' => $ids,
