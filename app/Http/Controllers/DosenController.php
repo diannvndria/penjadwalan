@@ -24,7 +24,7 @@ class DosenController extends Controller
             ->orderBy('nama');
 
         // Get all IDs for bulk operations (before pagination)
-        $allIds = (clone $query)->pluck('id')->toArray();
+        $allIds = (clone $query)->pluck('nip')->toArray();
 
         // Then paginate
         $dosens = $query->paginate(10);
@@ -46,7 +46,7 @@ class DosenController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nip' => 'nullable|string|max:255',
+            'nip' => 'required|string|max:255|unique:dosen,nip',
             'nama' => 'required|string|max:255',
             'kapasitas_ampu' => 'required|integer|min:0', // Kapasitas minimal 0
         ]);
@@ -70,7 +70,7 @@ class DosenController extends Controller
     public function update(Request $request, Dosen $dosen)
     {
         $request->validate([
-            'nip' => 'nullable|string|max:255',
+            'nip' => 'required|string|max:255|unique:dosen,nip,'.$dosen->nip.',nip',
             'nama' => 'required|string|max:255',
             'kapasitas_ampu' => 'required|integer|min:0',
         ]);
@@ -107,7 +107,7 @@ class DosenController extends Controller
         $ids = explode(',', $validated['ids']);
 
         try {
-            $count = Dosen::whereIn('id', $ids)->delete();
+            $count = Dosen::whereIn('nip', $ids)->delete();
 
             return redirect()->route('dosen.index')->with('success', "Berhasil menghapus {$count} data dosen.");
         } catch (\Exception $e) {
@@ -126,7 +126,7 @@ class DosenController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih.');
         }
 
-        $dosens = Dosen::whereIn('id', $ids)
+        $dosens = Dosen::whereIn('nip', $ids)
             ->withCount('mahasiswas')
             ->withCount([
                 'munaqosahs as munaqosahs_count' => function ($query) {

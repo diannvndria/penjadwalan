@@ -46,6 +46,7 @@ class DosenControllerTest extends TestCase
     public function it_stores_new_dosen(): void
     {
         $response = $this->actingAs($this->user)->post(route('dosen.store'), [
+            'nip' => '1234567890',
             'nama' => 'Dr. John Doe',
             'kapasitas_ampu' => 10,
         ]);
@@ -53,6 +54,7 @@ class DosenControllerTest extends TestCase
         $response->assertRedirect(route('dosen.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('dosen', [
+            'nip' => '1234567890',
             'nama' => 'Dr. John Doe',
             'kapasitas_ampu' => 10,
         ]);
@@ -62,17 +64,19 @@ class DosenControllerTest extends TestCase
     public function it_validates_required_fields_on_store(): void
     {
         $response = $this->actingAs($this->user)->post(route('dosen.store'), [
+            'nip' => '',
             'nama' => '',
             'kapasitas_ampu' => '',
         ]);
 
-        $response->assertSessionHasErrors(['nama', 'kapasitas_ampu']);
+        $response->assertSessionHasErrors(['nip', 'nama', 'kapasitas_ampu']);
     }
 
     #[Test]
     public function it_validates_kapasitas_ampu_is_non_negative(): void
     {
         $response = $this->actingAs($this->user)->post(route('dosen.store'), [
+            'nip' => '1234567890',
             'nama' => 'Dr. John Doe',
             'kapasitas_ampu' => -5,
         ]);
@@ -84,6 +88,7 @@ class DosenControllerTest extends TestCase
     public function it_validates_kapasitas_ampu_is_integer(): void
     {
         $response = $this->actingAs($this->user)->post(route('dosen.store'), [
+            'nip' => '1234567890',
             'nama' => 'Dr. John Doe',
             'kapasitas_ampu' => 'abc',
         ]);
@@ -112,6 +117,7 @@ class DosenControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->put(route('dosen.update', $dosen), [
+            'nip' => $dosen->nip,
             'nama' => 'New Name',
             'kapasitas_ampu' => 15,
         ]);
@@ -119,7 +125,7 @@ class DosenControllerTest extends TestCase
         $response->assertRedirect(route('dosen.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('dosen', [
-            'id' => $dosen->id,
+            'nip' => $dosen->nip,
             'nama' => 'New Name',
             'kapasitas_ampu' => 15,
         ]);
@@ -131,11 +137,12 @@ class DosenControllerTest extends TestCase
         $dosen = Dosen::factory()->create();
 
         $response = $this->actingAs($this->user)->put(route('dosen.update', $dosen), [
+            'nip' => '',
             'nama' => '',
             'kapasitas_ampu' => '',
         ]);
 
-        $response->assertSessionHasErrors(['nama', 'kapasitas_ampu']);
+        $response->assertSessionHasErrors(['nip', 'nama', 'kapasitas_ampu']);
     }
 
     #[Test]
@@ -147,7 +154,7 @@ class DosenControllerTest extends TestCase
 
         $response->assertRedirect(route('dosen.index'));
         $response->assertSessionHas('success');
-        $this->assertDatabaseMissing('dosen', ['id' => $dosen->id]);
+        $this->assertDatabaseMissing('dosen', ['nip' => $dosen->nip]);
     }
 
     #[Test]
@@ -179,7 +186,7 @@ class DosenControllerTest extends TestCase
     public function it_bulk_deletes_dosen(): void
     {
         $dosens = Dosen::factory()->count(3)->create();
-        $ids = $dosens->pluck('id')->implode(',');
+        $ids = $dosens->pluck('nip')->implode(',');
 
         $response = $this->actingAs($this->user)->delete(route('dosen.bulk-delete'), [
             'ids' => $ids,
@@ -188,7 +195,7 @@ class DosenControllerTest extends TestCase
         $response->assertRedirect(route('dosen.index'));
         $response->assertSessionHas('success');
         foreach ($dosens as $dosen) {
-            $this->assertDatabaseMissing('dosen', ['id' => $dosen->id]);
+            $this->assertDatabaseMissing('dosen', ['nip' => $dosen->nip]);
         }
     }
 
@@ -196,7 +203,7 @@ class DosenControllerTest extends TestCase
     public function it_bulk_exports_dosen(): void
     {
         $dosens = Dosen::factory()->count(3)->create();
-        $ids = $dosens->pluck('id')->implode(',');
+        $ids = $dosens->pluck('nip')->implode(',');
 
         $response = $this->actingAs($this->user)->post(route('dosen.bulk-export'), [
             'ids' => $ids,

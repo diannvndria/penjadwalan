@@ -66,7 +66,7 @@ class MahasiswaControllerTest extends TestCase
         Mahasiswa::factory()->forDosen($this->dosen)->create();
         Mahasiswa::factory()->forDosen($dosen2)->create();
 
-        $response = $this->actingAs($this->user)->get(route('mahasiswa.index', ['dospem_id' => $this->dosen->id]));
+        $response = $this->actingAs($this->user)->get(route('mahasiswa.index', ['dospem_id' => $this->dosen->nip]));
 
         $response->assertStatus(200);
     }
@@ -91,7 +91,7 @@ class MahasiswaControllerTest extends TestCase
             'judul_skripsi' => 'Judul Skripsi Test',
             'profil_lulusan' => 'Ilmuwan',
             'penjurusan' => 'Sistem Informasi',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
             'siap_sidang' => false,
             'is_prioritas' => false,
         ]);
@@ -122,7 +122,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2023,
             'judul_skripsi' => 'Judul Skripsi',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
 
         $response->assertSessionHasErrors('nim');
@@ -136,7 +136,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'Test Mahasiswa',
             'angkatan' => 1990, // Before 2000
             'judul_skripsi' => 'Judul Skripsi',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
 
         $response->assertSessionHasErrors('angkatan');
@@ -151,7 +151,7 @@ class MahasiswaControllerTest extends TestCase
             'angkatan' => 2023,
             'judul_skripsi' => 'Judul Skripsi',
             'profil_lulusan' => 'InvalidOption',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
 
         $response->assertSessionHasErrors('profil_lulusan');
@@ -168,7 +168,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2023,
             'judul_skripsi' => 'Judul Skripsi',
-            'id_dospem' => $dosenWithCapacity1->id,
+            'id_dospem' => $dosenWithCapacity1->nip,
         ]);
 
         $response->assertSessionHasErrors('id_dospem');
@@ -185,7 +185,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'Test Mahasiswa',
             'angkatan' => 2023,
             'judul_skripsi' => 'Judul Skripsi',
-            'id_dospem' => $dosenUnlimited->id,
+            'id_dospem' => $dosenUnlimited->nip,
         ]);
 
         $response->assertRedirect(route('mahasiswa.index'));
@@ -218,7 +218,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'New Name',
             'angkatan' => 2024,
             'judul_skripsi' => 'New Judul',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
 
         $response->assertRedirect(route('mahasiswa.index'));
@@ -239,7 +239,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => 'Updated Name',
             'angkatan' => 2023,
             'judul_skripsi' => 'Judul',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
 
         $response->assertRedirect(route('mahasiswa.index'));
@@ -281,7 +281,7 @@ class MahasiswaControllerTest extends TestCase
             'nama' => $mahasiswa->nama,
             'angkatan' => $mahasiswa->angkatan,
             'judul_skripsi' => $mahasiswa->judul_skripsi,
-            'id_dospem' => $dosenWithCapacity1->id, // Try to switch to full dosen
+            'id_dospem' => $dosenWithCapacity1->nip, // Try to switch to full dosen
         ]);
 
         $response->assertSessionHasErrors('id_dospem');
@@ -373,7 +373,7 @@ class MahasiswaControllerTest extends TestCase
         $this->assertDatabaseHas('mahasiswa', [
             'nim' => '123456',
             'nama' => 'Test Import',
-            'id_dospem' => $this->dosen->id,
+            'id_dospem' => $this->dosen->nip,
         ]);
     }
 

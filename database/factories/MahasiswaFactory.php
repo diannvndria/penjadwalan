@@ -210,7 +210,7 @@ class MahasiswaFactory extends Factory
     public function forDosen(Dosen $dosen): static
     {
         return $this->state(fn (array $attributes) => [
-            'id_dospem' => $dosen->id,
+            'id_dospem' => $dosen->nip,
         ]);
     }
 

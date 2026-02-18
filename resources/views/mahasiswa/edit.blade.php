@@ -82,7 +82,7 @@
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all">
                             <option value="">Pilih Dosen</option>
                             @foreach($dosens as $dosen)
-                                <option value="{{ $dosen->id }}" {{ old('id_dospem', $mahasiswa->id_dospem) == $dosen->id ? 'selected' : '' }}>
+                                <option value="{{ $dosen->nip }}" {{ old('id_dospem', $mahasiswa->id_dospem) == $dosen->nip ? 'selected' : '' }}>
                                     {{ $dosen->nama }}
                                 </option>
                             @endforeach

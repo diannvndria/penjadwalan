@@ -11,6 +11,12 @@ class Dosen extends Model
 
     protected $table = 'dosen';
 
+    protected $primaryKey = 'nip';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     // Kolom yang bisa diisi secara massal (mass assignable)
     protected $fillable = [
         'nip',

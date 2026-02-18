@@ -32,7 +32,7 @@
             </div>
 
             {{-- Form Content --}}
-            <form method="POST" action="{{ route('dosen.update', $dosen->id) }}" class="p-6">
+            <form method="POST" action="{{ route('dosen.update', $dosen->nip) }}" class="p-6">
                 @csrf
                 @method('PUT')
 
@@ -57,17 +57,17 @@
                         <label for="nip" class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-id-card text-gray-400 mr-2"></i>NIP
                         </label>
-                        <input type="text" id="nip" name="nip" value="{{ old('nip', $dosen->nip) }}"
+                        <input type="text" id="nip" name="nip" value="{{ old('nip', $dosen->nip) }}" required
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all"
-                            placeholder="Masukkan NIP dosen (opsional)">
+                            placeholder="Masukkan NIP dosen">
                         <p class="mt-2 text-xs text-gray-500 flex items-center">
                             <i class="fas fa-info-circle mr-1"></i>
-                            NIP bersifat opsional dan dapat diisi nanti
+                            NIP wajib diisi
                         </p>
-                        @error('nip') 
+                        @error('nip')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -79,10 +79,10 @@
                         <input type="text" id="nama" name="nama" value="{{ old('nama', $dosen->nama) }}" required autofocus
                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-all"
                             placeholder="Masukkan nama lengkap dosen">
-                        @error('nama') 
+                        @error('nama')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 
@@ -98,10 +98,10 @@
                             <i class="fas fa-info-circle mr-1"></i>
                             Masukkan 0 untuk kapasitas tidak terbatas
                         </p>
-                        @error('kapasitas_ampu') 
+                        @error('kapasitas_ampu')
                             <span class="text-red-500 text-xs mt-1 flex items-center">
                                 <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                            </span> 
+                            </span>
                         @enderror
                     </div>
 

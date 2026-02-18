@@ -30,7 +30,7 @@ class DosenFactory extends Factory
             $birthDate->format('Ymd'),         // Birth date (8)
             $appointmentDate->format('Ym'),    // Appointment date (6)
             fake()->numberBetween(1, 2),       // Gender (1)
-            fake()->numerify('###')            // Sequence (3)
+            fake()->unique()->numerify('###')            // Sequence (3)
         );
 
         return [

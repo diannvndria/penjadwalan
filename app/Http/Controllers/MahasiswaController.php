@@ -118,7 +118,7 @@ class MahasiswaController extends Controller
             ],
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional', // Validasi profil lulusan
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas', // Validasi penjurusan
-            'id_dospem' => 'required|exists:dosen,id',
+            'id_dospem' => 'required|exists:dosen,nip',
             'siap_sidang' => 'boolean',
             'is_prioritas' => 'boolean',
             'keterangan_prioritas' => 'nullable|string|max:500',
@@ -172,7 +172,7 @@ class MahasiswaController extends Controller
             ],
             'profil_lulusan' => 'nullable|string|in:Ilmuwan,Wirausaha,Profesional',
             'penjurusan' => 'nullable|string|in:Sistem Informasi,Perekayasa Perangkat Lunak,Perekayasa Jaringan Komputer,Sistem Cerdas',
-            'id_dospem' => 'required|exists:dosen,id',
+            'id_dospem' => 'required|exists:dosen,nip',
             'siap_sidang' => 'boolean',
             'is_prioritas' => 'boolean',
             'prioritas_jadwal' => 'boolean',
@@ -605,7 +605,7 @@ class MahasiswaController extends Controller
                         'nim' => $rowData['NIM'],
                         'nama' => $rowData['Nama'],
                         'angkatan' => (int) $rowData['Angkatan'],
-                        'id_dospem' => $dosen->id,
+                        'id_dospem' => $dosen->nip,
                         'judul_skripsi' => $rowData['Judul Skripsi'],
                         'profil_lulusan' => $profilLulusan,
                         'penjurusan' => $penjurusan,

@@ -118,7 +118,7 @@
                             class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
                             <option value="">Semua Dosen</option>
                             @foreach ($dosens as $dosen)
-                                <option value="{{ $dosen->id }}" {{ request('dospem_id') == $dosen->id ? 'selected' : '' }}>
+                                <option value="{{ $dosen->nip }}" {{ request('dospem_id') == $dosen->nip ? 'selected' : '' }}>
                                     {{ $dosen->nama }}
                                 </option>
                             @endforeach

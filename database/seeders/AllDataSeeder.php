@@ -90,7 +90,7 @@ class AllDataSeeder extends Seeder
                     ->angkatan($year)
                     ->when($isPrioritas, fn ($f) => $f->prioritas())
                     ->create([
-                        'id_dospem' => $dosens->random()->id,
+                        'id_dospem' => $dosens->random()->nip,
                         'siap_sidang' => $isSiapSidang,
                     ]);
 
