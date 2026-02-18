@@ -44,7 +44,7 @@ class MunaqosahController extends Controller
 
         // Always join with mahasiswa for supervisor filtering
         $query->leftJoin('mahasiswa', 'munaqosah.id_mahasiswa', '=', 'mahasiswa.id');
-        
+
         // Apply filters
         if ($startDate) {
             $query->whereDate('munaqosah.tanggal_munaqosah', '>=', $startDate);

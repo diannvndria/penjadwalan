@@ -315,6 +315,86 @@ class MahasiswaControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_bulk_deletes_mahasiswa(): void
+    {
+        $mahasiswas = Mahasiswa::factory()->count(3)->forDosen($this->dosen)->create();
+        $ids = $mahasiswas->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->delete(route('mahasiswa.bulk-delete'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.index'));
+        $response->assertSessionHas('success');
+        foreach ($mahasiswas as $mahasiswa) {
+            $this->assertDatabaseMissing('mahasiswa', ['id' => $mahasiswa->id]);
+        }
+    }
+
+    #[Test]
+    public function it_bulk_exports_mahasiswa(): void
+    {
+        $mahasiswas = Mahasiswa::factory()->count(3)->forDosen($this->dosen)->create();
+        $ids = $mahasiswas->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->post(route('mahasiswa.bulk-export'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="Data_Mahasiswa_'.now()->format('Y-m-d_H-i-s').'.csv"');
+    }
+
+    #[Test]
+    public function it_downloads_import_template(): void
+    {
+        $response = $this->actingAs($this->user)->get(route('mahasiswa.download-template'));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="Template_Import_Mahasiswa.csv"');
+    }
+
+    #[Test]
+    public function it_imports_mahasiswa_from_csv(): void
+    {
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('mahasiswa.csv',
+            "NIM,Nama,Angkatan,NIP Dospem,Judul Skripsi\n".
+            "123456,Test Import,2023,{$this->dosen->nip},Judul Skripsi Import"
+        );
+
+        $response = $this->actingAs($this->user)->post(route('mahasiswa.import'), [
+            'csv_file' => $file,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('mahasiswa', [
+            'nim' => '123456',
+            'nama' => 'Test Import',
+            'id_dospem' => $this->dosen->id,
+        ]);
+    }
+
+    #[Test]
+    public function it_handles_import_errors(): void
+    {
+        // CSV with missing required field (NIM)
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('mahasiswa_error.csv',
+            "NIM,Nama,Angkatan,NIP Dospem,Judul Skripsi\n".
+            ",Test Error,2023,{$this->dosen->nip},Judul Skripsi Error"
+        );
+
+        $response = $this->actingAs($this->user)->post(route('mahasiswa.import'), [
+            'csv_file' => $file,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.index'));
+        $response->assertSessionHas('error');
+    }
+
+    #[Test]
     public function it_requires_authentication(): void
     {
         $response = $this->get(route('mahasiswa.index'));

@@ -180,6 +180,38 @@ class PengujiControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_bulk_deletes_penguji(): void
+    {
+        $pengujis = Penguji::factory()->count(3)->create();
+        $ids = $pengujis->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->delete(route('penguji.bulk-delete'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertRedirect(route('penguji.index'));
+        $response->assertSessionHas('success');
+        foreach ($pengujis as $penguji) {
+            $this->assertDatabaseMissing('penguji', ['id' => $penguji->id]);
+        }
+    }
+
+    #[Test]
+    public function it_bulk_exports_penguji(): void
+    {
+        $pengujis = Penguji::factory()->count(3)->create();
+        $ids = $pengujis->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->post(route('penguji.bulk-export'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="penguji_export_'.now()->format('Y-m-d_H-i-s').'.csv"');
+    }
+
+    #[Test]
     public function it_requires_authentication(): void
     {
         $response = $this->get(route('penguji.index'));

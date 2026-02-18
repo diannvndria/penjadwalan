@@ -176,6 +176,38 @@ class DosenControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_bulk_deletes_dosen(): void
+    {
+        $dosens = Dosen::factory()->count(3)->create();
+        $ids = $dosens->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->delete(route('dosen.bulk-delete'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertRedirect(route('dosen.index'));
+        $response->assertSessionHas('success');
+        foreach ($dosens as $dosen) {
+            $this->assertDatabaseMissing('dosen', ['id' => $dosen->id]);
+        }
+    }
+
+    #[Test]
+    public function it_bulk_exports_dosen(): void
+    {
+        $dosens = Dosen::factory()->count(3)->create();
+        $ids = $dosens->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->post(route('dosen.bulk-export'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="Data_Dosen_'.now()->format('Y-m-d_H-i-s').'.csv"');
+    }
+
+    #[Test]
     public function it_requires_authentication(): void
     {
         $response = $this->get(route('dosen.index'));

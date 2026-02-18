@@ -19,7 +19,7 @@ class DosenController extends Controller
             ->withCount([
                 'munaqosahs as munaqosahs_count' => function ($query) {
                     $query->where('status_konfirmasi', 'dikonfirmasi');
-                }
+                },
             ])
             ->orderBy('nama');
 
@@ -111,7 +111,7 @@ class DosenController extends Controller
 
             return redirect()->route('dosen.index')->with('success', "Berhasil menghapus {$count} data dosen.");
         } catch (\Exception $e) {
-            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus data: '.$e->getMessage());
         }
     }
 
@@ -131,12 +131,12 @@ class DosenController extends Controller
             ->withCount([
                 'munaqosahs as munaqosahs_count' => function ($query) {
                     $query->where('status_konfirmasi', 'dikonfirmasi');
-                }
+                },
             ])
             ->orderBy('nama')
             ->get();
 
-        $filename = 'Data_Dosen_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $filename = 'Data_Dosen_'.now()->format('Y-m-d_H-i-s').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',

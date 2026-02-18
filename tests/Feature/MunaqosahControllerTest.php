@@ -356,6 +356,21 @@ class MunaqosahControllerTest extends TestCase
     }
 
     #[Test]
+    public function it_bulk_exports_munaqosah(): void
+    {
+        $munaqosahs = Munaqosah::factory()->count(3)->create();
+        $ids = $munaqosahs->pluck('id')->implode(',');
+
+        $response = $this->actingAs($this->user)->post(route('munaqosah.bulk-export'), [
+            'ids' => $ids,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $response->assertHeader('Content-Disposition', 'attachment; filename="Jadwal_Sidang_'.now()->format('Y-m-d_H-i-s').'.csv"');
+    }
+
+    #[Test]
     public function it_creates_histori_on_munaqosah_creation(): void
     {
         $futureDate = Carbon::tomorrow()->toDateString();

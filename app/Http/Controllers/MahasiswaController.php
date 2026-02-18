@@ -362,7 +362,7 @@ class MahasiswaController extends Controller
 
             return redirect()->route('mahasiswa.index')->with('success', "Berhasil menghapus {$count} data mahasiswa.");
         } catch (\Exception $e) {
-            return redirect()->route('mahasiswa.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            return redirect()->route('mahasiswa.index')->with('error', 'Terjadi kesalahan saat menghapus data: '.$e->getMessage());
         }
     }
 
@@ -382,7 +382,7 @@ class MahasiswaController extends Controller
             ->orderBy('nama')
             ->get();
 
-        $filename = 'Data_Mahasiswa_' . Carbon::now()->format('Y-m-d_H-i-s') . '.csv';
+        $filename = 'Data_Mahasiswa_'.Carbon::now()->format('Y-m-d_H-i-s').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -511,7 +511,7 @@ class MahasiswaController extends Controller
             // Validate header
             $requiredColumns = ['NIM', 'Nama', 'Angkatan', 'NIP Dospem', 'Judul Skripsi'];
             foreach ($requiredColumns as $column) {
-                if (!in_array($column, $header)) {
+                if (! in_array($column, $header)) {
                     return redirect()->route('mahasiswa.index')
                         ->with('error', "Kolom '$column' tidak ditemukan dalam file CSV. Silakan download template untuk format yang benar.");
                 }
@@ -538,53 +538,59 @@ class MahasiswaController extends Controller
 
                     // Validate required fields
                     if (empty($rowData['NIM']) || empty($rowData['Nama']) || empty($rowData['Angkatan']) || empty($rowData['NIP Dospem']) || empty($rowData['Judul Skripsi'])) {
-                        $errors[] = "Baris " . ($rowIndex + 2) . ": Data tidak lengkap";
+                        $errors[] = 'Baris '.($rowIndex + 2).': Data tidak lengkap';
                         $errorCount++;
+
                         continue;
                     }
 
                     // Find dosen by NIP
                     $dosen = Dosen::where('nip', $rowData['NIP Dospem'])->first();
-                    if (!$dosen) {
-                        $errors[] = "Baris " . ($rowIndex + 2) . ": Dosen dengan NIP '{$rowData['NIP Dospem']}' tidak ditemukan";
+                    if (! $dosen) {
+                        $errors[] = 'Baris '.($rowIndex + 2).": Dosen dengan NIP '{$rowData['NIP Dospem']}' tidak ditemukan";
                         $errorCount++;
+
                         continue;
                     }
 
                     // Check if NIM already exists
                     if (Mahasiswa::where('nim', $rowData['NIM'])->exists()) {
-                        $errors[] = "Baris " . ($rowIndex + 2) . ": NIM '{$rowData['NIM']}' sudah terdaftar";
+                        $errors[] = 'Baris '.($rowIndex + 2).": NIM '{$rowData['NIM']}' sudah terdaftar";
                         $errorCount++;
+
                         continue;
                     }
 
                     // Check dosen capacity
                     if ($dosen->kapasitas_ampu > 0 && $dosen->mahasiswas()->count() >= $dosen->kapasitas_ampu) {
-                        $errors[] = "Baris " . ($rowIndex + 2) . ": Dosen '{$dosen->nama}' sudah mencapai kapasitas maksimal";
+                        $errors[] = 'Baris '.($rowIndex + 2).": Dosen '{$dosen->nama}' sudah mencapai kapasitas maksimal";
                         $errorCount++;
+
                         continue;
                     }
 
                     // Validate profil lulusan (optional - only validate if column exists)
                     $profilLulusan = null;
-                    if (isset($rowData['Profil Lulusan']) && !empty($rowData['Profil Lulusan'])) {
+                    if (isset($rowData['Profil Lulusan']) && ! empty($rowData['Profil Lulusan'])) {
                         $profilLulusan = $rowData['Profil Lulusan'];
                         $validProfilLulusan = ['Ilmuwan', 'Wirausaha', 'Profesional'];
-                        if (!in_array($profilLulusan, $validProfilLulusan)) {
-                            $errors[] = "Baris " . ($rowIndex + 2) . ": Profil Lulusan harus salah satu dari: " . implode(', ', $validProfilLulusan);
+                        if (! in_array($profilLulusan, $validProfilLulusan)) {
+                            $errors[] = 'Baris '.($rowIndex + 2).': Profil Lulusan harus salah satu dari: '.implode(', ', $validProfilLulusan);
                             $errorCount++;
+
                             continue;
                         }
                     }
 
                     // Validate penjurusan (optional - only validate if column exists)
                     $penjurusan = null;
-                    if (isset($rowData['Penjurusan']) && !empty($rowData['Penjurusan'])) {
+                    if (isset($rowData['Penjurusan']) && ! empty($rowData['Penjurusan'])) {
                         $penjurusan = $rowData['Penjurusan'];
                         $validPenjurusan = ['Sistem Informasi', 'Perekayasa Perangkat Lunak', 'Perekayasa Jaringan Komputer', 'Sistem Cerdas'];
-                        if (!in_array($penjurusan, $validPenjurusan)) {
-                            $errors[] = "Baris " . ($rowIndex + 2) . ": Penjurusan harus salah satu dari: " . implode(', ', $validPenjurusan);
+                        if (! in_array($penjurusan, $validPenjurusan)) {
+                            $errors[] = 'Baris '.($rowIndex + 2).': Penjurusan harus salah satu dari: '.implode(', ', $validPenjurusan);
                             $errorCount++;
+
                             continue;
                         }
                     }
@@ -592,7 +598,7 @@ class MahasiswaController extends Controller
                     // Handle optional fields - check if columns exist before accessing
                     $siapSidang = (isset($rowData['Siap Sidang']) && $rowData['Siap Sidang'] == '1') ? true : false;
                     $isPrioritas = (isset($rowData['Prioritas']) && $rowData['Prioritas'] == '1') ? true : false;
-                    $keteranganPrioritas = (isset($rowData['Keterangan Prioritas']) && !empty($rowData['Keterangan Prioritas'])) ? $rowData['Keterangan Prioritas'] : null;
+                    $keteranganPrioritas = (isset($rowData['Keterangan Prioritas']) && ! empty($rowData['Keterangan Prioritas'])) ? $rowData['Keterangan Prioritas'] : null;
 
                     // Create mahasiswa
                     Mahasiswa::create([
@@ -610,7 +616,7 @@ class MahasiswaController extends Controller
 
                     $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Baris " . ($rowIndex + 2) . ": " . $e->getMessage();
+                    $errors[] = 'Baris '.($rowIndex + 2).': '.$e->getMessage();
                     $errorCount++;
                 }
             }
@@ -623,21 +629,23 @@ class MahasiswaController extends Controller
                 $message .= ", {$errorCount} data gagal";
             }
 
-            if (!empty($errors)) {
+            if (! empty($errors)) {
                 $errorDetails = implode('; ', array_slice($errors, 0, 5));
                 if (count($errors) > 5) {
-                    $errorDetails .= ' (dan ' . (count($errors) - 5) . ' error lainnya)';
+                    $errorDetails .= ' (dan '.(count($errors) - 5).' error lainnya)';
                 }
+
                 return redirect()->route('mahasiswa.index')
                     ->with($successCount > 0 ? 'success' : 'error', $message)
-                    ->with('info', 'Detail error: ' . $errorDetails);
+                    ->with('info', 'Detail error: '.$errorDetails);
             }
 
             return redirect()->route('mahasiswa.index')->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('mahasiswa.index')
-                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan saat import: '.$e->getMessage());
         }
     }
 }
