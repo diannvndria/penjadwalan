@@ -94,7 +94,7 @@ class DosenController extends Controller
 
             return redirect()->route('dosen.index')->with('success', 'Dosen berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus dosen: ' . $e->getMessage());
+            return redirect()->route('dosen.index')->with('error', 'Terjadi kesalahan saat menghapus dosen: '.$e->getMessage());
         }
     }
 

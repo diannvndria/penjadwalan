@@ -1,5 +1,28 @@
 @extends('layouts.app')
 
+@section('styles')
+<style>
+    .mobile-card {
+        @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200;
+    }
+    .mobile-card-header {
+        @apply flex items-start justify-between mb-3 pb-3 border-b border-gray-100;
+    }
+    .mobile-card-body {
+        @apply space-y-2.5;
+    }
+    .mobile-field {
+        @apply flex justify-between items-start text-sm gap-2;
+    }
+    .mobile-field-label {
+        @apply text-gray-600 font-medium flex-shrink-0;
+    }
+    .mobile-field-value {
+        @apply text-gray-900 font-semibold text-right;
+    }
+</style>
+@endsection
+
 @section('header')
     {{ __('Jadwal Sidang') }}
 @endsection
@@ -53,14 +76,15 @@
 
         {{-- Filter and Action Bar --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-                {{-- Filter Form --}}
-                <div class="flex-1">
-                    <form method="GET" action="{{ route('munaqosah.index') }}" class="flex flex-col sm:flex-row gap-4 items-end">
-                        {{-- Preserve sorting parameters --}}
-                        <input type="hidden" name="sort" value="{{ $sortField ?? '' }}">
-                        <input type="hidden" name="direction" value="{{ $sortDirection ?? '' }}">
+            <form method="GET" action="{{ route('munaqosah.index') }}">
+                {{-- Preserve sorting parameters --}}
+                <input type="hidden" name="sort" value="{{ $sortField ?? '' }}">
+                <input type="hidden" name="direction" value="{{ $sortDirection ?? '' }}">
 
+                {{-- Desktop Layout: Single Row --}}
+                <div class="hidden lg:flex lg:items-end lg:gap-4">
+                    {{-- Filter Fields --}}
+                    <div class="flex-1 grid grid-cols-4 gap-4">
                         <div>
                             <label for="start_date" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
@@ -101,28 +125,96 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
-                                <i class="fas fa-filter mr-2"></i>Filter
-                            </button>
-                            <a href="{{ route('munaqosah.index') }}" class="inline-flex items-center px-5 py-2.5 bg-gray-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-sm transition">
-                                <i class="fas fa-redo mr-2"></i>Reset
-                            </a>
-                            <a href="{{ route('munaqosah.downloadReport', ['start_date' => $startDate ?? '', 'end_date' => $endDate ?? '']) }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
-                                <i class="fas fa-file-pdf mr-2"></i>Download
-                            </a>
-                        </div>
-                    </form>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                        <a href="{{ route('munaqosah.index') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-gray-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-sm transition">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </a>
+                        <a href="{{ route('munaqosah.downloadReport', ['start_date' => $startDate ?? '', 'end_date' => $endDate ?? '']) }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                            <i class="fas fa-file-pdf mr-2"></i>Download
+                        </a>
+                    </div>
+
+                    {{-- Add Button --}}
+                    @if (Auth::user()->isAdmin())
+                        <a href="{{ route('munaqosah.create') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md whitespace-nowrap">
+                            <i class="fas fa-plus mr-2"></i>
+                            Buat Jadwal Sidang
+                        </a>
+                    @endif
                 </div>
 
-                {{-- Add Button --}}
-                @if (Auth::user()->isAdmin())
-                    <a href="{{ route('munaqosah.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
-                        <i class="fas fa-plus mr-2"></i>
-                        Buat Jadwal Sidang
-                    </a>
-                @endif
-            </div>
+                {{-- Mobile/Tablet Layout: Stacked --}}
+                <div class="lg:hidden space-y-4">
+                    {{-- Filter Fields --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="start_date_mobile" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
+                                Tanggal Mulai
+                            </label>
+                            <input type="date" id="start_date_mobile" name="start_date" value="{{ $startDate ?? '' }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                        </div>
+                        <div>
+                            <label for="end_date_mobile" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-check mr-2 text-indigo-600"></i>
+                                Tanggal Selesai
+                            </label>
+                            <input type="date" id="end_date_mobile" name="end_date" value="{{ $endDate ?? '' }}" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                        </div>
+                        <div>
+                            <label for="status_mobile" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-info-circle mr-2 text-indigo-600"></i>
+                                Status
+                            </label>
+                            <select id="status_mobile" name="status" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                                <option value="">Semua Status</option>
+                                <option value="pending" {{ ($status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="dikonfirmasi" {{ ($status ?? '') == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                <option value="ditolak" {{ ($status ?? '') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="supervisor_mobile" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-user-tie mr-2 text-indigo-600"></i>
+                                Dosen Pembimbing
+                            </label>
+                            <select id="supervisor_mobile" name="supervisor" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition">
+                                <option value="">Semua Dospem</option>
+                                @foreach($supervisors ?? [] as $supervisor)
+                                    <option value="{{ $supervisor->nip }}" {{ ($supervisorId ?? '') == $supervisor->nip ? 'selected' : '' }}>
+                                        {{ $supervisor->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="flex flex-col gap-2">
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                        <a href="{{ route('munaqosah.index') }}" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gray-500 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 shadow-sm transition">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </a>
+                        <a href="{{ route('munaqosah.downloadReport', ['start_date' => $startDate ?? '', 'end_date' => $endDate ?? '']) }}" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                            <i class="fas fa-file-pdf mr-2"></i>Download
+                        </a>
+                        @if (Auth::user()->isAdmin())
+                            <a href="{{ route('munaqosah.create') }}" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
+                                <i class="fas fa-plus mr-2"></i>
+                                Buat Jadwal Sidang
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </form>
         </div>
 
         {{-- Bulk Actions --}}
@@ -131,18 +223,18 @@
                 <i class="fas fa-check-square"></i>
                 <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
             </div>
-            <div class="flex items-center gap-2">
-                <button type="button" @click="clearSelections()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <button type="button" @click="clearSelections()" class="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
                      Batal
                 </button>
-                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                <button type="button" @click="showBulkDeleteModal(selected)" class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
-                <form action="{{ route('munaqosah.bulk-export') }}" method="POST" target="_blank">
+                <form action="{{ route('munaqosah.bulk-export') }}" method="POST" target="_blank" class="w-full sm:w-auto">
                     @csrf
                     <!-- Route is defined now -->
                     <input type="hidden" name="ids" :value="selected.join(',')">
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                 </form>
@@ -151,7 +243,8 @@
 
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
+            {{-- Desktop Table View (hidden on mobile) --}}
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
                         <tr>
@@ -350,28 +443,142 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- Mobile Card View (shown on mobile only) --}}
+            <div class="lg:hidden p-4">
+                @forelse ($munaqosahs as $munaqosah)
+                    <div class="mobile-card" :class="{'ring-2 ring-indigo-300 bg-indigo-50/30': selected.includes('{{ $munaqosah->id }}')}">
+                        <div class="mobile-card-header">
+                            <div class="flex-1">
+                                <div class="flex items-start gap-2 mb-1">
+                                    <input type="checkbox" value="{{ $munaqosah->id }}" @change="toggle('{{ $munaqosah->id }}')" :checked="selected.includes('{{ $munaqosah->id }}')" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 text-base">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</h3>
+                                        <p class="text-xs text-gray-600 mt-0.5">{{ $munaqosah->mahasiswa->nim ?? '' }}</p>
+                                        @if($munaqosah->mahasiswa && ($munaqosah->mahasiswa->is_prioritas || $munaqosah->mahasiswa->prioritas_jadwal))
+                                            <span class="inline-flex items-center px-2 py-0.5 mt-1 text-[10px] font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                <i class="fas fa-star mr-1 text-yellow-600 text-[8px]"></i>Prioritas
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ml-2">
+                                @php
+                                    $statusConfig = [
+                                        'pending' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'border' => 'border-yellow-200', 'icon' => 'fa-clock'],
+                                        'dikonfirmasi' => ['bg' => 'bg-green-50', 'text' => 'text-green-700', 'border' => 'border-green-200', 'icon' => 'fa-check-circle'],
+                                        'ditolak' => ['bg' => 'bg-red-50', 'text' => 'text-red-700', 'border' => 'border-red-200', 'icon' => 'fa-times-circle'],
+                                    ][$munaqosah->status_konfirmasi] ?? ['bg' => 'bg-gray-50', 'text' => 'text-gray-700', 'border' => 'border-gray-200', 'icon' => 'fa-question-circle'];
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }} border {{ $statusConfig['border'] }}">
+                                    <i class="fas {{ $statusConfig['icon'] }} mr-1 text-[10px]"></i>{{ ucfirst($munaqosah->status_konfirmasi) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mobile-card-body">
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-calendar-day text-gray-400 mr-1"></i>Tanggal:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        {{ $munaqosah->tanggal_munaqosah->format('d-m-Y') }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-clock text-gray-400 mr-1"></i>Waktu:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                                        {{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-user-tie text-gray-400 mr-1"></i>Dospem:</span>
+                                <span class="mobile-field-value text-sm">{{ $munaqosah->mahasiswa->dospem->nama ?? '-' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-chalkboard-teacher text-gray-400 mr-1"></i>Penguji 1:</span>
+                                <span class="mobile-field-value text-sm">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-user-check text-gray-400 mr-1"></i>Penguji 2:</span>
+                                <span class="mobile-field-value text-sm">{{ $munaqosah->penguji2->nama ?? '-' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-door-open text-gray-400 mr-1"></i>Ruang:</span>
+                                <span class="mobile-field-value text-sm">{{ $munaqosah->ruangUjian->nama ?? '-' }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
+                                    <i class="fas fa-ellipsis-h mr-2"></i>
+                                    Menu Aksi
+                                </button>
+                                <div x-show="open"
+                                     x-cloak
+                                     @click.away="open = false"
+                                     class="absolute left-0 right-0 mt-2 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-50">
+                                    <div class="py-1">
+                                        <a href="{{ route('munaqosah.histori', $munaqosah->id) }}"
+                                           class="flex items-center px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition">
+                                            <i class="fas fa-history mr-3 w-4"></i>Histori
+                                        </a>
+                                        @if (Auth::user()->isAdmin())
+                                            <a href="{{ route('munaqosah.edit', $munaqosah->id) }}"
+                                               class="flex items-center px-4 py-2.5 text-sm text-indigo-600 hover:bg-indigo-50 transition">
+                                                <i class="fas fa-edit mr-3 w-4"></i>Edit
+                                            </a>
+                                            <button type="button"
+                                                    onclick="showDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
+                                                    class="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                                                <i class="fas fa-trash mr-3 w-4"></i>Hapus
+                                            </button>
+                                            @if(strtolower($munaqosah->status_konfirmasi) === 'dikonfirmasi')
+                                                <button type="button"
+                                                        onclick="showPermanentDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
+                                                        class="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-100 transition border-t border-gray-100">
+                                                    <i class="fas fa-trash-alt mr-3 w-4"></i>Hapus Permanen
+                                                </button>
+                                            @endif
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <i class="fas fa-calendar-times text-5xl mb-3"></i>
+                            <p class="text-sm font-medium">Tidak ada jadwal sidang.</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
         </div>
 
         {{-- Pagination --}}
-        <div class="mt-6 flex justify-end">
+        <div class="mt-6 flex justify-center lg:justify-end">
             {{ $munaqosahs->appends(['sort' => $sortField ?? '', 'direction' => $sortDirection ?? '', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status])->links('vendor.pagination.custom') }}
         </div>
     </div>
 
-    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <div class="mt-2 px-3 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="deleteModalMessage">
                         Apakah Anda yakin ingin menghapus jadwal sidang untuk <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>
@@ -380,20 +587,20 @@
     </div>
 
     {{-- Modal untuk Bulk Delete --}}
-    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg font-medium text-gray-900">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <div class="mt-2 px-3 sm:px-7 py-3">
                     <p class="text-sm text-gray-500">
                         Apakah Anda yakin ingin menghapus <span id="bulkDeleteCount" class="font-semibold"></span> jadwal sidang yang dipilih? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>
@@ -402,14 +609,14 @@
     </div>
 
     {{-- Modal untuk Permanent Delete --}}
-    <div id="permanentDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="permanentDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                     <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 mt-4" id="permanentDeleteModalTitle">Hapus Data Permanen</h3>
-                <div class="mt-2 px-7 py-3">
+                <div class="mt-2 px-3 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="permanentDeleteModalMessage">
                         Apakah Anda yakin ingin menghapus PERMANEN jadwal sidang untuk <span id="permanentDeleteItemName" class="font-semibold"></span>?
                     </p>
@@ -417,11 +624,11 @@
                         <i class="fas fa-exclamation-circle mr-1"></i>Data yang terkonfirmasi akan dihapus selamanya dan tidak dapat dikembalikan!
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmPermanentDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="confirmPermanentDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus Permanen
                     </button>
-                    <button id="cancelPermanentDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelPermanentDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full sm:w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>

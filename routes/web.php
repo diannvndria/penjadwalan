@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('munaqosah', [MunaqosahController::class, 'index'])->name('munaqosah.index');
     Route::get('munaqosah/{munaqosah}/histori', [MunaqosahController::class, 'histori'])->name('munaqosah.histori');
     Route::get('munaqosah/download/report', [MunaqosahController::class, 'downloadReport'])->name('munaqosah.downloadReport');
-    
+
     // Bulk Actions for Munaqosah
     Route::post('munaqosah/bulk-delete', [MunaqosahController::class, 'bulkDestroy'])->name('munaqosah.bulk-delete');
     Route::post('munaqosah/bulk-export', [MunaqosahController::class, 'bulkExport'])->name('munaqosah.bulk-export');
@@ -73,11 +73,11 @@ Route::middleware(['auth'])->group(function () {
     // Bulk operations for Mahasiswa (MUST be before resource routes to avoid route conflict)
     Route::delete('mahasiswa/bulk-delete', [MahasiswaController::class, 'bulkDelete'])->name('mahasiswa.bulk-delete');
     Route::post('mahasiswa/bulk-export', [MahasiswaController::class, 'bulkExport'])->name('mahasiswa.bulk-export');
-    
+
     // Import routes for Mahasiswa
     Route::post('mahasiswa/import', [MahasiswaController::class, 'import'])->name('mahasiswa.import');
     Route::get('mahasiswa/download-template', [MahasiswaController::class, 'downloadTemplate'])->name('mahasiswa.download-template');
-    
+
     // Admin bisa melakukan CRUD Mahasiswa
     Route::resource('mahasiswa', MahasiswaController::class)->except(['index']); // Kecualikan index karena sudah di atas
 

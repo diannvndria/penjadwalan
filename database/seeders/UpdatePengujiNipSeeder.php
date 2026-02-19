@@ -15,7 +15,7 @@ class UpdatePengujiNipSeeder extends Seeder
         $pengujis = DB::table('penguji')->get();
 
         foreach ($pengujis as $penguji) {
-            $nip = '19860' . str_pad($penguji->id, 2, '0', STR_PAD_LEFT) . '0' . str_pad($penguji->id, 2, '0', STR_PAD_LEFT) . '100' . str_pad($penguji->id, 1, '0', STR_PAD_LEFT);
+            $nip = '19860'.str_pad($penguji->id, 2, '0', STR_PAD_LEFT).'0'.str_pad($penguji->id, 2, '0', STR_PAD_LEFT).'100'.str_pad($penguji->id, 1, '0', STR_PAD_LEFT);
             DB::table('penguji')
                 ->where('id', $penguji->id)
                 ->update(['nip' => $nip]);

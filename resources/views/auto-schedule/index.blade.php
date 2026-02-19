@@ -4,6 +4,63 @@
     Auto-Schedule Penjadwalan Sidang
 @endsection
 
+@section('styles')
+<style>
+    /* Mobile Card Styles */
+    .mobile-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+    
+    .mobile-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .mobile-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .mobile-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .mobile-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.375rem 0;
+    }
+    
+    .mobile-field-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    .mobile-field-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1f2937;
+        text-align: right;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -12,13 +69,13 @@
 
         <!-- Configuration Panel -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 mb-6">
-            <div class="p-6 text-gray-900">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <div class="p-4 sm:p-6 text-gray-900">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-cog text-indigo-600"></i>
                         Konfigurasi Auto-Schedule
                     </h3>
-                    <button id="editConfigBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                    <button id="editConfigBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
                         <i class="fas fa-edit mr-2"></i>
                         Edit Konfigurasi
                     </button>
@@ -64,8 +121,8 @@
                 </div>
 
                 <!-- Configuration Form (Hidden by default) -->
-                <form id="configForm" class="hidden mt-6 bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-xl border border-gray-200">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <form id="configForm" class="hidden mt-6 bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-6 rounded-xl border border-gray-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <div>
                             <label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-clock text-gray-400"></i>
@@ -91,12 +148,12 @@
                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
                     </div>
-                    <div class="mt-6 flex space-x-3">
-                        <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
                             <i class="fas fa-save mr-2"></i>
                             Simpan Konfigurasi
                         </button>
-                        <button type="button" id="cancelConfigBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
+                        <button type="button" id="cancelConfigBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
                             <i class="fas fa-times mr-2"></i>
                             Batal
                         </button>
@@ -107,26 +164,28 @@
 
         <!-- Ready Students Panel -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 mb-6">
-            <div class="p-6 text-gray-900">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-3">
+            <div class="p-4 sm:p-6 text-gray-900">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2 sm:gap-3">
                         <i class="fas fa-user-graduate text-indigo-600"></i>
-                        Mahasiswa Siap Sidang
-                        <span id="readyCount" class="inline-flex items-center justify-center h-8 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-sm">0</span>
+                        <span class="hidden sm:inline">Mahasiswa Siap Sidang</span>
+                        <span class="sm:hidden">Siap Sidang</span>
+                        <span id="readyCount" class="inline-flex items-center justify-center h-7 sm:h-8 px-2 sm:px-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-sm">0</span>
                     </h3>
-                    <div class="flex gap-3">
-                        <button id="refreshBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
+                        <button id="refreshBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
                             <i class="fas fa-sync-alt mr-2"></i>
                             Refresh
                         </button>
-                        <button id="batchScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                        <button id="batchScheduleBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
                             <i class="fas fa-calendar-check mr-2"></i>
                             Jadwalkan Semua
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200">
+                {{-- Desktop Table View --}}
+                <div class="hidden lg:block overflow-hidden rounded-xl border border-gray-200">
                     <table id="readyStudentsTable" class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr class="bg-gradient-to-r from-gray-50 to-gray-100/50">
@@ -167,6 +226,11 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Mobile Card View --}}
+                <div id="mobileCardsContainer" class="lg:hidden">
+                    <!-- Will be populated by JavaScript -->
+                </div>
             </div>
         </div>
 
@@ -186,25 +250,25 @@
 </div>
 
 <!-- Modal for Individual Schedule Confirmation -->
-<div id="scheduleModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-            <h3 class="text-xl font-bold text-white flex items-center gap-2" id="modalTitle">
+<div id="scheduleModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-3 sm:py-4">
+            <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2" id="modalTitle">
                 <i class="fas fa-calendar-check"></i>
                 Konfirmasi Penjadwalan
             </h3>
         </div>
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <p class="text-gray-700 text-sm leading-relaxed" id="modalMessage">
                 Apakah Anda yakin ingin menjadwalkan mahasiswa ini secara otomatis?
             </p>
         </div>
-        <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end">
-            <button id="cancelScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-300 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 shadow-sm transition">
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row gap-3 justify-end">
+            <button id="cancelScheduleBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-white border border-gray-300 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 shadow-sm transition">
                 <i class="fas fa-times mr-2"></i>
                 Batal
             </button>
-            <button id="confirmScheduleBtn" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition">
+            <button id="confirmScheduleBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition">
                 <i class="fas fa-check mr-2"></i>
                 Ya, Jadwalkan
             </button>
@@ -368,9 +432,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateStudentsTable(students) {
         const tbody = document.getElementById('studentsTableBody');
+        const mobileContainer = document.getElementById('mobileCardsContainer');
         tbody.innerHTML = '';
+        mobileContainer.innerHTML = '';
 
         if (students.length === 0) {
+            // Desktop empty state
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" class="px-6 py-12 text-center">
@@ -382,13 +449,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                 </tr>
             `;
+            
+            // Mobile empty state
+            mobileContainer.innerHTML = `
+                <div class="py-12 text-center">
+                    <div class="flex flex-col items-center justify-center text-gray-400">
+                        <i class="fas fa-inbox text-5xl mb-3"></i>
+                        <p class="text-sm font-medium">Tidak ada mahasiswa yang siap sidang</p>
+                    </div>
+                </div>
+            `;
             return;
         }
 
         students.forEach(student => {
+            // Desktop table row
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50 transition-colors';
-            const initial = student.nama.charAt(0).toUpperCase();
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="text-sm font-medium text-gray-900">${student.nim}</span>
@@ -419,6 +496,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             `;
             tbody.appendChild(row);
+            
+            // Mobile card
+            const card = document.createElement('div');
+            card.className = 'mobile-card';
+            card.innerHTML = `
+                <div class="mobile-card-header">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 text-base">${student.nama}</h3>
+                        <p class="text-xs text-gray-600 mt-0.5">${student.nim}</p>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        <i class="fas fa-calendar-alt mr-1"></i>${student.angkatan}
+                    </span>
+                </div>
+                <div class="mobile-card-body">
+                    <div class="mobile-field">
+                        <span class="mobile-field-label"><i class="fas fa-chalkboard-teacher text-gray-400 mr-1"></i>Dospem:</span>
+                        <span class="mobile-field-value">${student.dospem ? student.dospem.nama : 'Belum ditentukan'}</span>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <button onclick="scheduleIndividual('${student.nim}', '${student.nama}')"
+                            id="schedule-btn-mobile-${student.nim}"
+                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Jadwalkan
+                    </button>
+                </div>
+            `;
+            mobileContainer.appendChild(card);
         });
     }
 

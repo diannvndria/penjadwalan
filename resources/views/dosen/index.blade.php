@@ -4,6 +4,60 @@
     {{ __('Daftar Pembimbing') }}
 @endsection
 
+@section('styles')
+<style>
+    /* Mobile Card Styles */
+    @media (max-width: 1023px) {
+        .mobile-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.15s;
+        }
+        
+        .mobile-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: #d1d5db;
+        }
+
+        .mobile-card-header {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .mobile-card-body {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .mobile-field {
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .mobile-field-label {
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .mobile-field-value {
+            color: #1f2937;
+            flex: 1;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="space-y-6" x-data='{
         selected: [],
@@ -51,7 +105,7 @@
         {{-- Action Bar --}}
         @if (Auth::user()->isAdmin())
             <div class="flex justify-end">
-                <a href="{{ route('dosen.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
+                <a href="{{ route('dosen.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Dosen Baru
                 </a>
@@ -59,22 +113,22 @@
         @endif
 
         {{-- Bulk Actions --}}
-        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 text-indigo-800">
+        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-2 text-indigo-800 justify-center sm:justify-start">
                 <i class="fas fa-check-square"></i>
-                <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
+                <span class="font-semibold text-sm sm:text-base" x-text="selected.length + ' Data Dipilih'"></span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <button type="button" @click="clearSelections()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
                      Batal
                 </button>
-                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
                 <form action="{{ route('dosen.bulk-export') }}" method="POST" target="_blank">
                     @csrf
                     <input type="hidden" name="ids" :value="selected.join(',')">
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                 </form>
@@ -84,20 +138,20 @@
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {{-- Table Header --}}
-            <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-chalkboard-teacher text-gray-600 mr-3"></i>
-                        <h3 class="font-semibold text-gray-800">Daftar Dosen Pembimbing</h3>
-                        <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                        <i class="fas fa-chalkboard-teacher text-gray-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                        <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Daftar Dosen Pembimbing</h3>
+                        <span class="ml-2 sm:ml-3 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                             {{ $dosens->total() }} Total
                         </span>
                     </div>
                 </div>
             </div>
 
-            {{-- Table Container --}}
-            <div class="overflow-x-auto">
+            {{-- Desktop Table View (hidden on mobile) --}}
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -233,9 +287,87 @@
                 </table>
             </div>
 
+            {{-- Mobile Card View (shown on mobile only) --}}
+            <div class="lg:hidden p-4">
+                @forelse ($dosens as $dosen)
+                    <div class="mobile-card">
+                        <div class="mobile-card-header">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="checkbox" @change="toggle({{ $dosen->nip }})" :checked="selected.includes('{{ $dosen->nip }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <span class="text-xs font-mono font-semibold text-gray-600">{{ $dosen->nip }}</span>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 text-base">{{ $dosen->nama }}</h3>
+                            </div>
+                            <div class="flex flex-col gap-1.5 items-end ml-3">
+                                @if ($dosen->kapasitas_ampu > 0 && $dosen->jumlah_diampu_sekarang >= $dosen->kapasitas_ampu)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Full
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Tersedia
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mobile-card-body">
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-users text-gray-400 mr-1"></i>Diampu:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                        {{ $dosen->jumlah_diampu_sekarang }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-gavel text-gray-400 mr-1"></i>Ketua Sidang:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                        {{ $dosen->munaqosahs_count ?? 0 }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-layer-group text-gray-400 mr-1"></i>Kapasitas:</span>
+                                <span class="mobile-field-value">
+                                    {{ $dosen->kapasitas_ampu > 0 ? $dosen->kapasitas_ampu : '∞ (Tidak Terbatas)' }}
+                                    @if ($dosen->kapasitas_ampu > 0 && $dosen->jumlah_diampu_sekarang < $dosen->kapasitas_ampu)
+                                        <span class="text-xs text-gray-500">(Sisa: {{ $dosen->kapasitas_ampu - $dosen->jumlah_diampu_sekarang }})</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        @if (Auth::user()->isAdmin())
+                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                                <a href="{{ route('dosen.edit', $dosen->nip) }}"
+                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150">
+                                    <i class="fas fa-edit mr-1.5"></i>
+                                    Edit
+                                </a>
+                                <button type="button"
+                                        onclick="showDeleteModal('{{ $dosen->nip }}', '{{ $dosen->nama }}')"
+                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150">
+                                    <i class="fas fa-trash-alt mr-1.5"></i>
+                                    Hapus
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                        <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500 font-medium">Tidak ada data dosen</p>
+                        <p class="text-gray-400 text-sm mt-1">Silakan tambahkan data dosen baru</p>
+                    </div>
+                @endforelse
+            </div>
+
             {{-- Pagination --}}
             @if($dosens->hasPages())
-                <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex justify-end">
+                <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100 bg-gray-50/30 flex justify-center sm:justify-end">
                     {{ $dosens->links('vendor.pagination.custom') }}
                 </div>
             @endif
@@ -243,20 +375,20 @@
     </div>
 
     {{-- Delete Modal --}}
-    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-4 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="deleteModalMessage">
                         Apakah Anda yakin ingin menghapus dosen <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+                    <button id="confirmDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>
@@ -271,20 +403,20 @@
     </form>
 
     {{-- Bulk Delete Modal --}}
-    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900">Konfirmasi Hapus Multiple</h3>
-                <div class="mt-2 px-7 py-3">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900">Konfirmasi Hapus Multiple</h3>
+                <div class="mt-2 px-4 sm:px-7 py-3">
                     <p class="text-sm text-gray-500">
                         Apakah Anda yakin ingin menghapus <span id="bulkDeleteCount" class="font-semibold text-red-600"></span> data dosen? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+                    <button id="confirmBulkDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus Semua
                     </button>
-                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelBulkDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>

@@ -24,6 +24,56 @@
         display: block;
         width: 100%;
     }
+
+    /* Mobile Card Styles */
+    @media (max-width: 1023px) {
+        .mobile-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.15s;
+        }
+        
+        .mobile-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: #d1d5db;
+        }
+
+        .mobile-card-header {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .mobile-card-body {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .mobile-field {
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .mobile-field-label {
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .mobile-field-value {
+            color: #1f2937;
+            flex: 1;
+        }
+    }
 </style>
 @endsection
 
@@ -91,17 +141,17 @@
         @endif
 
         {{-- Filter and Action Bar --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-4 sm:mb-6">
+            <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4 sm:gap-6">
                 {{-- Filters --}}
-                <form id="filterForm" action="{{ route('mahasiswa.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                <form id="filterForm" action="{{ route('mahasiswa.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 flex-1">
                     {{-- Filter Angkatan --}}
                     <div class="relative">
-                        <label for="angkatan" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        <label for="angkatan" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                             <i class="fas fa-filter mr-1"></i> Angkatan
                         </label>
                         <select name="angkatan" id="angkatan" onchange="this.form.submit()"
-                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2.5">
                             <option value="">Semua Angkatan</option>
                             @foreach ($angkatans_tersedia as $a)
                                 <option value="{{ $a }}" {{ (string)$angkatan === (string)$a ? 'selected' : '' }}>{{ $a }}</option>
@@ -111,11 +161,11 @@
 
                     {{-- Filter Dosen --}}
                     <div class="relative">
-                        <label for="dospem_id" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        <label for="dospem_id" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                             <i class="fas fa-user-tie mr-1"></i> Dosen Pembimbing
                         </label>
                         <select name="dospem_id" id="dospem_id" onchange="this.form.submit()"
-                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2.5">
                             <option value="">Semua Dosen</option>
                             @foreach ($dosens as $dosen)
                                 <option value="{{ $dosen->nip }}" {{ request('dospem_id') == $dosen->nip ? 'selected' : '' }}>
@@ -127,11 +177,11 @@
 
                     {{-- Filter Status Sidang --}}
                     <div class="relative">
-                        <label for="status_sidang" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        <label for="status_sidang" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                             <i class="fas fa-clipboard-check mr-1"></i> Status Sidang
                         </label>
                         <select name="status_sidang" id="status_sidang" onchange="this.form.submit()"
-                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2">
+                            class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2.5">
                             <option value="">Semua Status</option>
                             <option value="Belum" {{ request('status_sidang') == 'Belum' ? 'selected' : '' }}>Belum Siap</option>
                             <option value="Siap" {{ request('status_sidang') == 'Siap' ? 'selected' : '' }}>Siap Sidang</option>
@@ -140,7 +190,7 @@
 
                     {{-- Search --}}
                     <div class="relative">
-                        <label for="search" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        <label for="search" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                             <i class="fas fa-search mr-1"></i> Pencarian
                         </label>
                         <div class="relative">
@@ -150,7 +200,7 @@
                                    value="{{ request('search') }}"
                                    placeholder="Cari Nama / NIM..."
                                    autocomplete="off"
-                                   class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2 pr-10">
+                                   class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm py-2.5 pr-10">
                             @if(request('search'))
                                 <button type="button"
                                         onclick="clearSearch()"
@@ -172,14 +222,14 @@
 
                 {{-- Action Buttons --}}
                 @if (Auth::user()->isAdmin())
-                    <div class="flex flex-col sm:flex-row gap-3 pt-1 xl:pt-0 w-full xl:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full xl:w-auto">
                         <button type="button" onclick="showImportModal()"
-                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-green-600 rounded-lg font-semibold text-sm text-green-700 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-150 shadow-sm group">
+                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2.5 bg-white border border-green-600 rounded-lg font-semibold text-sm text-green-700 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-150 shadow-sm group">
                             <i class="fas fa-file-import mr-2 text-green-600 group-hover:text-green-700"></i>
                             <span>Import CSV</span>
                         </button>
                         <a href="{{ route('mahasiswa.create') }}"
-                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150 shadow-sm shadow-indigo-200">
+                            class="flex-1 xl:flex-none inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-150 shadow-sm shadow-indigo-200">
                             <i class="fas fa-plus mr-2"></i>
                             <span>Tambah Data</span>
                         </a>
@@ -189,22 +239,22 @@
         </div>
 
         {{-- Bulk Actions --}}
-        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 text-indigo-800">
+        <div x-cloak x-show="selected.length > 0" x-transition.opacity class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-2 text-indigo-800 justify-center sm:justify-start">
                 <i class="fas fa-check-square"></i>
-                <span class="font-semibold" x-text="selected.length + ' Data Dipilih'"></span>
+                <span class="font-semibold text-sm sm:text-base" x-text="selected.length + ' Data Dipilih'"></span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <button type="button" @click="clearSelections()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-semibold transition">
                      Batal
                 </button>
-                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                <button type="button" @click="showBulkDeleteModal(selected)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
                 <form action="{{ route('mahasiswa.bulk-export') }}" method="POST" target="_blank">
                     @csrf
                     <input type="hidden" name="ids" :value="selected.join(',')">
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <button type="submit" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                         <i class="fas fa-file-export"></i> Export
                     </button>
                 </form>
@@ -214,20 +264,20 @@
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {{-- Table Header --}}
-            <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-table text-gray-600 mr-3"></i>
-                        <h3 class="font-semibold text-gray-800">Data Mahasiswa</h3>
-                        <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                        <i class="fas fa-table text-gray-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                        <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Data Mahasiswa</h3>
+                        <span class="ml-2 sm:ml-3 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                             {{ $mahasiswas->total() }} Total
                         </span>
                     </div>
                 </div>
             </div>
 
-            {{-- Table Container --}}
-            <div class="overflow-x-auto">
+            {{-- Desktop Table View (hidden on mobile) --}}
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -399,9 +449,87 @@
                 </table>
             </div>
 
+            {{-- Mobile Card View (shown on mobile only) --}}
+            <div class="lg:hidden p-4">
+                @forelse ($mahasiswas as $mahasiswa)
+                    <div class="mobile-card">
+                        <div class="mobile-card-header">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <input type="checkbox" @change="toggle('{{ $mahasiswa->nim }}')" :checked="selected.includes('{{ $mahasiswa->nim }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <span class="text-xs font-mono font-semibold text-gray-600">{{ $mahasiswa->nim }}</span>
+                                </div>
+                                <h3 class="font-semibold text-gray-900 text-base">{{ $mahasiswa->nama }}</h3>
+                                @if($mahasiswa->is_prioritas || $mahasiswa->prioritas_jadwal)
+                                    <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        <i class="fas fa-star mr-1 text-yellow-600 text-xs"></i>
+                                        Prioritas
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="flex flex-col gap-1.5 items-end ml-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ $mahasiswa->angkatan }}
+                                </span>
+                                @if($mahasiswa->siap_sidang)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Siap
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Belum
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mobile-card-body">
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-user-tie text-gray-400 mr-1"></i>Dospem:</span>
+                                <span class="mobile-field-value">{{ $mahasiswa->dospem->nama ?? 'N/A' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-book text-gray-400 mr-1"></i>Judul:</span>
+                                <span class="mobile-field-value">{{ $mahasiswa->judul_skripsi }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-graduation-cap text-gray-400 mr-1"></i>Profil:</span>
+                                <span class="mobile-field-value">{{ $mahasiswa->profil_lulusan ?? '-' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-code-branch text-gray-400 mr-1"></i>Penjurusan:</span>
+                                <span class="mobile-field-value">{{ $mahasiswa->penjurusan ?? '-' }}</span>
+                            </div>
+                        </div>
+                        @if (Auth::user()->isAdmin())
+                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                                <a href="{{ route('mahasiswa.edit', $mahasiswa->nim) }}"
+                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150">
+                                    <i class="fas fa-edit mr-1.5"></i>
+                                    Edit
+                                </a>
+                                <button type="button"
+                                        onclick="showDeleteModal('{{ $mahasiswa->nim }}', '{{ $mahasiswa->nama }}')"
+                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150">
+                                    <i class="fas fa-trash-alt mr-1.5"></i>
+                                    Hapus
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                        <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+                        <p class="text-gray-500 font-medium">Tidak ada data mahasiswa</p>
+                        <p class="text-gray-400 text-sm mt-1">Silakan tambahkan data mahasiswa baru</p>
+                    </div>
+                @endforelse
+            </div>
+
             {{-- Pagination --}}
             @if($mahasiswas->hasPages())
-                <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/30 flex justify-end">
+                <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100 bg-gray-50/30 flex justify-center sm:justify-end">
                     {{ $mahasiswas->appends(['sort' => $sortField, 'direction' => $sortDirection, 'angkatan' => request('angkatan'), 'dospem_id' => request('dospem_id'), 'status_sidang' => request('status_sidang'), 'search' => request('search')])->links('vendor.pagination.custom') }}
                 </div>
             @endif
@@ -409,20 +537,20 @@
     </div>
 
     {{-- Delete Modal --}}
-    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-4 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="deleteModalMessage">
                         Apakah Anda yakin ingin menghapus mahasiswa <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+                    <button id="confirmDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>
@@ -437,15 +565,16 @@
     </form>
 
     {{-- Import CSV Modal --}}
-    <div id="importModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300">
-        <div class="relative mx-auto bg-white w-full max-w-lg shadow-2xl rounded-2xl overflow-hidden transform transition-all scale-100">
+    <div id="importModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 p-4">
+        <div class="relative mx-auto bg-white w-full max-w-lg shadow-2xl rounded-2xl overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                        <i class="fas fa-file-csv text-sm"></i>
+            <div class="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                        <i class="fas fa-file-csv text-xs sm:text-sm"></i>
                     </div>
-                    Import Data Mahasiswa
+                    <span class="hidden sm:inline">Import Data Mahasiswa</span>
+                    <span class="sm:hidden">Import CSV</span>
                 </h3>
                 <button type="button" onclick="hideImportModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors">
                     <i class="fas fa-times"></i>
@@ -455,7 +584,7 @@
             <form id="importForm" action="{{ route('mahasiswa.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <div class="p-6 space-y-6">
+                <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <!-- Info Alert -->
                     <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
                         <div class="flex gap-3">
@@ -516,14 +645,14 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                <div class="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 border-t border-gray-100">
                     <button type="button"
                             onclick="hideImportModal()"
-                            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all shadow-sm">
+                            class="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all shadow-sm">
                         Batal
                     </button>
                     <button type="submit"
-                            class="px-4 py-2 bg-indigo-600 border border-transparent text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-md shadow-indigo-200 flex items-center">
+                            class="w-full sm:w-auto px-4 py-2 bg-indigo-600 border border-transparent text-white rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-md shadow-indigo-200 flex items-center justify-center">
                         <i class="fas fa-file-import mr-2"></i>
                         Mulai Import
                     </button>
@@ -533,20 +662,20 @@
     </div>
 
     {{-- Bulk Delete Modal --}}
-    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+    <div id="bulkDeleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="relative mx-auto p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-4 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="bulkDeleteMessage">
                         Apakah Anda yakin ingin menghapus <span id="bulkDeleteCount" class="font-semibold"></span> data mahasiswa yang dipilih? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmBulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+                    <button id="confirmBulkDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelBulkDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelBulkDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>

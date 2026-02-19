@@ -433,12 +433,12 @@ class AutoScheduleService
     {
         // Initialize workload tracker from database if not yet loaded
         if ($this->workloadTracker === null) {
-            $result = DB::select("
+            $result = DB::select('
                 SELECT p.nip,
                        COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji1 = p.nip), 0) +
                        COALESCE((SELECT COUNT(*) FROM munaqosah WHERE id_penguji2 = p.nip), 0) as total
                 FROM penguji p
-            ");
+            ');
 
             $this->workloadTracker = [];
             foreach ($result as $row) {
@@ -467,7 +467,7 @@ class AutoScheduleService
     private function trackRoomBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, int $roomId): void
     {
         $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
-        if (!isset($this->roomBookings[$slotKey])) {
+        if (! isset($this->roomBookings[$slotKey])) {
             $this->roomBookings[$slotKey] = [];
         }
         $this->roomBookings[$slotKey][] = $roomId;
@@ -479,7 +479,7 @@ class AutoScheduleService
     private function trackExaminerBooking(string $tanggal, string $waktuMulai, string $waktuSelesai, string $penguji1Id, string $penguji2Id): void
     {
         $slotKey = "{$tanggal}|{$waktuMulai}|{$waktuSelesai}";
-        if (!isset($this->examinerBookings[$slotKey])) {
+        if (! isset($this->examinerBookings[$slotKey])) {
             $this->examinerBookings[$slotKey] = [];
         }
         $this->examinerBookings[$slotKey][] = $penguji1Id;
@@ -582,7 +582,7 @@ class AutoScheduleService
             });
 
         // Exclude rooms already booked in-memory during this batch
-        if (!empty($inMemoryBookedRooms)) {
+        if (! empty($inMemoryBookedRooms)) {
             $query->whereNotIn('id', $inMemoryBookedRooms);
         }
 

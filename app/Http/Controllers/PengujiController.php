@@ -180,7 +180,7 @@ class PengujiController extends Controller
 
             return redirect()->route('penguji.index')->with('success', 'Penguji berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('penguji.index')->with('error', 'Terjadi kesalahan saat menghapus penguji: ' . $e->getMessage());
+            return redirect()->route('penguji.index')->with('error', 'Terjadi kesalahan saat menghapus penguji: '.$e->getMessage());
         }
     }
 }

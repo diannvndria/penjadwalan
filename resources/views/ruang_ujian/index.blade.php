@@ -1,5 +1,28 @@
 @extends('layouts.app')
 
+@section('styles')
+<style>
+    .mobile-card {
+        @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200;
+    }
+    .mobile-card-header {
+        @apply flex items-start justify-between mb-3 pb-3 border-b border-gray-100;
+    }
+    .mobile-card-body {
+        @apply space-y-2;
+    }
+    .mobile-field {
+        @apply flex justify-between items-center text-sm;
+    }
+    .mobile-field-label {
+        @apply text-gray-600 font-medium;
+    }
+    .mobile-field-value {
+        @apply text-gray-900 font-semibold;
+    }
+</style>
+@endsection
+
 @section('header')
     {{ __('Daftar Ruang Ujian') }}
 @endsection
@@ -23,7 +46,7 @@
         {{-- Action Bar --}}
         @if (Auth::user()->isAdmin())
             <div class="flex justify-end">
-                <a href="{{ route('ruang-ujian.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
+                <a href="{{ route('ruang-ujian.create') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Ruang Ujian Baru
                 </a>
@@ -33,20 +56,20 @@
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {{-- Table Header --}}
-            <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <i class="fas fa-door-open text-gray-600 mr-3"></i>
-                        <h3 class="font-semibold text-gray-800">Daftar Ruang Ujian</h3>
-                        <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                        <i class="fas fa-door-open text-gray-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                        <h3 class="font-semibold text-gray-800 text-sm sm:text-base">Daftar Ruang Ujian</h3>
+                        <span class="ml-2 sm:ml-3 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                             {{ $ruang->total() }} Total
                         </span>
                     </div>
                 </div>
             </div>
 
-            {{-- Table Container --}}
-            <div class="overflow-x-auto">
+            {{-- Desktop Table View (hidden on mobile) --}}
+            <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -161,10 +184,91 @@
                 </table>
             </div>
 
+            {{-- Mobile Card View (shown on mobile only) --}}
+            <div class="lg:hidden p-4">
+                @forelse ($ruang as $r)
+                    <div class="mobile-card">
+                        <div class="mobile-card-header">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fas fa-door-closed text-gray-500 text-sm"></i>
+                                    <h3 class="font-semibold text-gray-900 text-base">{{ $r->nama }}</h3>
+                                </div>
+                                @if($r->is_prioritas)
+                                    <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        <i class="fas fa-star mr-1 text-yellow-600 text-xs"></i>
+                                        Prioritas
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="ml-2">
+                                @if($r->is_aktif)
+                                    <span class="px-2 py-0.5 inline-flex items-center text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                        <i class="fas fa-check-circle mr-1 text-xs"></i>
+                                        Tersedia
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 inline-flex items-center text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                                        <i class="fas fa-times-circle mr-1 text-xs"></i>
+                                        Tidak Tersedia
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mobile-card-body">
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>Lokasi:</span>
+                                <span class="mobile-field-value">{{ $r->lokasi ?? '-' }}</span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-layer-group text-gray-400 mr-1"></i>Lantai:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <i class="fas fa-building mr-1 text-xs"></i>
+                                        Lantai {{ $r->lantai }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="mobile-field">
+                                <span class="mobile-field-label"><i class="fas fa-users text-gray-400 mr-1"></i>Kapasitas:</span>
+                                <span class="mobile-field-value">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
+                                        {{ $r->kapasitas }} orang
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        @if (Auth::user()->isAdmin())
+                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                                <a href="{{ route('ruang-ujian.edit', $r->id) }}"
+                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-blue-200">
+                                    <i class="fas fa-edit mr-1.5"></i>
+                                    Edit
+                                </a>
+                                <button type="button"
+                                        onclick="showDeleteModal({{ $r->id }}, '{{ $r->nama }}')"
+                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-red-200">
+                                    <i class="fas fa-trash-alt mr-1.5"></i>
+                                    Hapus
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <i class="fas fa-inbox text-4xl mb-3"></i>
+                            <p class="text-sm font-medium">Tidak ada data ruang ujian</p>
+                            <p class="text-xs mt-1">Tambahkan ruang ujian baru untuk memulai</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
             {{-- Pagination --}}
             @if($ruang->hasPages())
-                <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-                    <div class="flex justify-end">
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex justify-center sm:justify-end">
                         {{ $ruang->links('vendor.pagination.custom') }}
                     </div>
                 </div>
@@ -174,19 +278,19 @@
 
     {{-- Delete Modal --}}
     <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="relative mx-auto p-5 border w-96 shadow-2xl rounded-xl bg-white">
+        <div class="relative mx-auto p-4 sm:p-5 border w-full max-w-md shadow-2xl rounded-xl bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
-                <div class="mt-2 px-7 py-3">
+                <h3 class="text-base sm:text-lg font-medium text-gray-900" id="deleteModalTitle">Konfirmasi Hapus</h3>
+                <div class="mt-2 px-4 sm:px-7 py-3">
                     <p class="text-sm text-gray-500" id="deleteModalMessage">
                         Apakah Anda yakin ingin menghapus ruang ujian <span id="deleteItemName" class="font-semibold"></span>? Tindakan ini tidak dapat dibatalkan.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3 flex justify-center space-x-4">
-                    <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
+                <div class="items-center px-4 py-3 flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
+                    <button id="confirmDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm sm:text-base font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
                         Ya, Hapus
                     </button>
-                    <button id="cancelDeleteBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-auto hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <button id="cancelDeleteBtn" class="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white text-sm sm:text-base font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Batal
                     </button>
                 </div>
