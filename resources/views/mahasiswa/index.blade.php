@@ -25,55 +25,8 @@
         width: 100%;
     }
 
-    /* Mobile Card Styles */
-    @media (max-width: 1023px) {
-        .mobile-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            transition: all 0.15s;
-        }
-        
-        .mobile-card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border-color: #d1d5db;
-        }
 
-        .mobile-card-header {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
 
-        .mobile-card-body {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .mobile-field {
-            display: flex;
-            align-items: start;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .mobile-field-label {
-            font-weight: 600;
-            color: #6b7280;
-            min-width: 100px;
-            flex-shrink: 0;
-        }
-
-        .mobile-field-value {
-            color: #1f2937;
-            flex: 1;
-        }
-    }
 </style>
 @endsection
 
@@ -276,8 +229,8 @@
                 </div>
             </div>
 
-            {{-- Desktop Table View (hidden on mobile) --}}
-            <div class="hidden lg:block overflow-x-auto">
+            {{-- Table View --}}
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -449,83 +402,7 @@
                 </table>
             </div>
 
-            {{-- Mobile Card View (shown on mobile only) --}}
-            <div class="lg:hidden p-4">
-                @forelse ($mahasiswas as $mahasiswa)
-                    <div class="mobile-card">
-                        <div class="mobile-card-header">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <input type="checkbox" @change="toggle('{{ $mahasiswa->nim }}')" :checked="selected.includes('{{ $mahasiswa->nim }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <span class="text-xs font-mono font-semibold text-gray-600">{{ $mahasiswa->nim }}</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-900 text-base">{{ $mahasiswa->nama }}</h3>
-                                @if($mahasiswa->is_prioritas || $mahasiswa->prioritas_jadwal)
-                                    <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        <i class="fas fa-star mr-1 text-yellow-600 text-xs"></i>
-                                        Prioritas
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="flex flex-col gap-1.5 items-end ml-3">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $mahasiswa->angkatan }}
-                                </span>
-                                @if($mahasiswa->siap_sidang)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Siap
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Belum
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="mobile-card-body">
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-user-tie text-gray-400 mr-1"></i>Dospem:</span>
-                                <span class="mobile-field-value">{{ $mahasiswa->dospem->nama ?? 'N/A' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-book text-gray-400 mr-1"></i>Judul:</span>
-                                <span class="mobile-field-value">{{ $mahasiswa->judul_skripsi }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-graduation-cap text-gray-400 mr-1"></i>Profil:</span>
-                                <span class="mobile-field-value">{{ $mahasiswa->profil_lulusan ?? '-' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-code-branch text-gray-400 mr-1"></i>Penjurusan:</span>
-                                <span class="mobile-field-value">{{ $mahasiswa->penjurusan ?? '-' }}</span>
-                            </div>
-                        </div>
-                        @if (Auth::user()->isAdmin())
-                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                                <a href="{{ route('mahasiswa.edit', $mahasiswa->nim) }}"
-                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150">
-                                    <i class="fas fa-edit mr-1.5"></i>
-                                    Edit
-                                </a>
-                                <button type="button"
-                                        onclick="showDeleteModal('{{ $mahasiswa->nim }}', '{{ $mahasiswa->nama }}')"
-                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150">
-                                    <i class="fas fa-trash-alt mr-1.5"></i>
-                                    Hapus
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <div class="py-12 text-center">
-                        <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
-                        <p class="text-gray-500 font-medium">Tidak ada data mahasiswa</p>
-                        <p class="text-gray-400 text-sm mt-1">Silakan tambahkan data mahasiswa baru</p>
-                    </div>
-                @endforelse
-            </div>
+
 
             {{-- Pagination --}}
             @if($mahasiswas->hasPages())

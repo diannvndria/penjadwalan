@@ -1,27 +1,7 @@
 @extends('layouts.app')
 
-@section('styles')
-<style>
-    .mobile-card {
-        @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200;
-    }
-    .mobile-card-header {
-        @apply flex items-start justify-between mb-3 pb-3 border-b border-gray-100;
-    }
-    .mobile-card-body {
-        @apply space-y-2;
-    }
-    .mobile-field {
-        @apply flex justify-between items-center text-sm;
-    }
-    .mobile-field-label {
-        @apply text-gray-600 font-medium;
-    }
-    .mobile-field-value {
-        @apply text-gray-900 font-semibold;
-    }
-</style>
-@endsection
+
+
 
 @section('header')
     {{ __('Jadwal Penguji') }}
@@ -75,43 +55,43 @@
                 </div>
             </div>
 
-            {{-- Desktop Table View (hidden on mobile) --}}
-            <div class="hidden lg:block overflow-x-auto">
+
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-id-card text-gray-400 text-sm"></i>
                                     NIP
                                 </div>
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-user-tie text-gray-400 text-sm"></i>
                                     Penguji
                                 </div>
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-calendar text-gray-400 text-sm"></i>
                                     Tanggal
                                 </div>
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-clock text-gray-400 text-sm"></i>
                                     Waktu
                                 </div>
                             </th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center gap-1">
                                     <i class="fas fa-file-alt text-gray-400 text-sm"></i>
                                     Deskripsi
                                 </div>
                             </th>
                             @if (Auth::user()->isAdmin())
-                                <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1">
                                         <i class="fas fa-cog text-gray-400 text-sm"></i>
                                         Aksi
@@ -123,27 +103,27 @@
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($jadwalPengujis as $jadwal)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-3 py-4">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <p class="text-sm font-semibold text-gray-900">{{ $jadwal->penguji->nip ?? '-' }}</p>
                                 </td>
-                                <td class="px-3 py-4">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <p class="text-sm font-semibold text-gray-900">{{ $jadwal->penguji->nama }}</p>
                                 </td>
-                                <td class="px-3 py-4">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
                                         <i class="fas fa-calendar-day mr-1"></i>
                                         {{ $jadwal->tanggal->format('d-m-Y') }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-4">
+                                <td class="px-3 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-800 border border-green-200">
                                         <i class="fas fa-clock mr-1"></i>
                                         {{ substr($jadwal->waktu_mulai, 0, 5) }} - {{ substr($jadwal->waktu_selesai, 0, 5) }}
                                     </span>
                                 </td>
-                                <td class="px-3 py-4 text-sm text-gray-700">{{ $jadwal->deskripsi ?? '-' }}</td>
+                                <td class="px-3 py-4 text-sm text-gray-700 whitespace-nowrap">{{ $jadwal->deskripsi ?? '-' }}</td>
                                 @if (Auth::user()->isAdmin())
-                                    <td class="px-3 py-4 text-center">
+                                    <td class="px-3 py-4 text-center whitespace-nowrap">
                                         <div class="flex items-center justify-center gap-1">
                                             <a href="{{ route('jadwal-penguji.edit', $jadwal->id) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium transition-colors duration-150 border border-blue-200">
                                                 <i class="fas fa-edit mr-1"></i>
@@ -174,71 +154,6 @@
                 </table>
             </div>
 
-            {{-- Mobile Card View (shown on mobile only) --}}
-            <div class="lg:hidden p-4">
-                @forelse ($jadwalPengujis as $jadwal)
-                    <div class="mobile-card">
-                        <div class="mobile-card-header">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fas fa-user-tie text-gray-500 text-sm"></i>
-                                    <h3 class="font-semibold text-gray-900 text-base">{{ $jadwal->penguji->nama }}</h3>
-                                </div>
-                                <p class="text-xs text-gray-600 font-mono">NIP: {{ $jadwal->penguji->nip ?? '-' }}</p>
-                            </div>
-                        </div>
-                        <div class="mobile-card-body">
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-calendar text-gray-400 mr-1"></i>Tanggal:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                        <i class="fas fa-calendar-day mr-1 text-xs"></i>
-                                        {{ $jadwal->tanggal->format('d-m-Y') }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-clock text-gray-400 mr-1"></i>Waktu:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                                        <i class="fas fa-clock mr-1 text-xs"></i>
-                                        {{ substr($jadwal->waktu_mulai, 0, 5) }} - {{ substr($jadwal->waktu_selesai, 0, 5) }}
-                                    </span>
-                                </span>
-                            </div>
-                            @if($jadwal->deskripsi)
-                                <div class="mt-2 pt-2 border-t border-gray-100">
-                                    <p class="text-xs text-gray-600 mb-1"><i class="fas fa-file-alt text-gray-400 mr-1"></i>Deskripsi:</p>
-                                    <p class="text-sm text-gray-900">{{ $jadwal->deskripsi }}</p>
-                                </div>
-                            @endif
-                        </div>
-                        @if (Auth::user()->isAdmin())
-                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                                <a href="{{ route('jadwal-penguji.edit', $jadwal->id) }}"
-                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-blue-200">
-                                    <i class="fas fa-edit mr-1.5"></i>
-                                    Edit
-                                </a>
-                                <button type="button"
-                                        onclick="showDeleteModal({{ $jadwal->id }}, 'Jadwal {{ $jadwal->penguji->nama }}')"
-                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-red-200">
-                                    <i class="fas fa-trash-alt mr-1.5"></i>
-                                    Hapus
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <div class="py-12 text-center">
-                        <div class="flex flex-col items-center justify-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p class="text-sm font-medium">Tidak ada jadwal penguji</p>
-                            <p class="text-xs mt-1">Tambahkan jadwal baru untuk memulai</p>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
 
             {{-- Pagination --}}
             @if($jadwalPengujis->hasPages())

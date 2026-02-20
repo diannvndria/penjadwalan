@@ -1,27 +1,7 @@
 @extends('layouts.app')
 
-@section('styles')
-<style>
-    .mobile-card {
-        @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200;
-    }
-    .mobile-card-header {
-        @apply flex items-start justify-between mb-3 pb-3 border-b border-gray-100;
-    }
-    .mobile-card-body {
-        @apply space-y-2;
-    }
-    .mobile-field {
-        @apply flex justify-between items-center text-sm;
-    }
-    .mobile-field-label {
-        @apply text-gray-600 font-medium;
-    }
-    .mobile-field-value {
-        @apply text-gray-900 font-semibold;
-    }
-</style>
-@endsection
+
+
 
 @section('header')
     {{ __('Daftar Ruang Ujian') }}
@@ -68,8 +48,9 @@
                 </div>
             </div>
 
-            {{-- Desktop Table View (hidden on mobile) --}}
-            <div class="hidden lg:block overflow-x-auto">
+
+            {{-- Table View --}}
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -180,89 +161,9 @@
                                 </td>
                             </tr>
                         @endforelse
+
                     </tbody>
                 </table>
-            </div>
-
-            {{-- Mobile Card View (shown on mobile only) --}}
-            <div class="lg:hidden p-4">
-                @forelse ($ruang as $r)
-                    <div class="mobile-card">
-                        <div class="mobile-card-header">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fas fa-door-closed text-gray-500 text-sm"></i>
-                                    <h3 class="font-semibold text-gray-900 text-base">{{ $r->nama }}</h3>
-                                </div>
-                                @if($r->is_prioritas)
-                                    <span class="inline-flex items-center px-2 py-0.5 mt-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                        <i class="fas fa-star mr-1 text-yellow-600 text-xs"></i>
-                                        Prioritas
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="ml-2">
-                                @if($r->is_aktif)
-                                    <span class="px-2 py-0.5 inline-flex items-center text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">
-                                        <i class="fas fa-check-circle mr-1 text-xs"></i>
-                                        Tersedia
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 inline-flex items-center text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
-                                        <i class="fas fa-times-circle mr-1 text-xs"></i>
-                                        Tidak Tersedia
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="mobile-card-body">
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-map-marker-alt text-gray-400 mr-1"></i>Lokasi:</span>
-                                <span class="mobile-field-value">{{ $r->lokasi ?? '-' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-layer-group text-gray-400 mr-1"></i>Lantai:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                        <i class="fas fa-building mr-1 text-xs"></i>
-                                        Lantai {{ $r->lantai }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-users text-gray-400 mr-1"></i>Kapasitas:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
-                                        {{ $r->kapasitas }} orang
-                                    </span>
-                                </span>
-                            </div>
-                        </div>
-                        @if (Auth::user()->isAdmin())
-                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                                <a href="{{ route('ruang-ujian.edit', $r->id) }}"
-                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-blue-200">
-                                    <i class="fas fa-edit mr-1.5"></i>
-                                    Edit
-                                </a>
-                                <button type="button"
-                                        onclick="showDeleteModal({{ $r->id }}, '{{ $r->nama }}')"
-                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150 border border-red-200">
-                                    <i class="fas fa-trash-alt mr-1.5"></i>
-                                    Hapus
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <div class="py-12 text-center">
-                        <div class="flex flex-col items-center justify-center text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-3"></i>
-                            <p class="text-sm font-medium">Tidak ada data ruang ujian</p>
-                            <p class="text-xs mt-1">Tambahkan ruang ujian baru untuk memulai</p>
-                        </div>
-                    </div>
-                @endforelse
             </div>
 
             {{-- Pagination --}}

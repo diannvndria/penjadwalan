@@ -5,57 +5,8 @@
 @endsection
 
 @section('styles')
-<style>
-    /* Mobile Card Styles */
-    @media (max-width: 1023px) {
-        .mobile-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            transition: all 0.15s;
-        }
-        
-        .mobile-card:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border-color: #d1d5db;
-        }
 
-        .mobile-card-header {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
 
-        .mobile-card-body {
-            display: grid;
-            gap: 0.5rem;
-        }
-
-        .mobile-field {
-            display: flex;
-            align-items: start;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .mobile-field-label {
-            font-weight: 600;
-            color: #6b7280;
-            min-width: 120px;
-            flex-shrink: 0;
-        }
-
-        .mobile-field-value {
-            color: #1f2937;
-            flex: 1;
-        }
-    }
-</style>
 @endsection
 
 @section('content')
@@ -150,8 +101,8 @@
                 </div>
             </div>
 
-            {{-- Desktop Table View (hidden on mobile) --}}
-            <div class="hidden lg:block overflow-x-auto">
+            {{-- Table View --}}
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr class="bg-gray-50/50">
@@ -287,83 +238,7 @@
                 </table>
             </div>
 
-            {{-- Mobile Card View (shown on mobile only) --}}
-            <div class="lg:hidden p-4">
-                @forelse ($dosens as $dosen)
-                    <div class="mobile-card">
-                        <div class="mobile-card-header">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <input type="checkbox" @change="toggle({{ $dosen->nip }})" :checked="selected.includes('{{ $dosen->nip }}')" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <span class="text-xs font-mono font-semibold text-gray-600">{{ $dosen->nip }}</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-900 text-base">{{ $dosen->nama }}</h3>
-                            </div>
-                            <div class="flex flex-col gap-1.5 items-end ml-3">
-                                @if ($dosen->kapasitas_ampu > 0 && $dosen->jumlah_diampu_sekarang >= $dosen->kapasitas_ampu)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
-                                        <i class="fas fa-times-circle mr-1"></i>
-                                        Full
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Tersedia
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="mobile-card-body">
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-users text-gray-400 mr-1"></i>Diampu:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                                        {{ $dosen->jumlah_diampu_sekarang }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-gavel text-gray-400 mr-1"></i>Ketua Sidang:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
-                                        {{ $dosen->munaqosahs_count ?? 0 }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-layer-group text-gray-400 mr-1"></i>Kapasitas:</span>
-                                <span class="mobile-field-value">
-                                    {{ $dosen->kapasitas_ampu > 0 ? $dosen->kapasitas_ampu : '∞ (Tidak Terbatas)' }}
-                                    @if ($dosen->kapasitas_ampu > 0 && $dosen->jumlah_diampu_sekarang < $dosen->kapasitas_ampu)
-                                        <span class="text-xs text-gray-500">(Sisa: {{ $dosen->kapasitas_ampu - $dosen->jumlah_diampu_sekarang }})</span>
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                        @if (Auth::user()->isAdmin())
-                            <div class="mt-3 pt-3 border-t border-gray-100 flex gap-2">
-                                <a href="{{ route('dosen.edit', $dosen->nip) }}"
-                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150">
-                                    <i class="fas fa-edit mr-1.5"></i>
-                                    Edit
-                                </a>
-                                <button type="button"
-                                        onclick="showDeleteModal('{{ $dosen->nip }}', '{{ $dosen->nama }}')"
-                                        class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors duration-150">
-                                    <i class="fas fa-trash-alt mr-1.5"></i>
-                                    Hapus
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <div class="py-12 text-center">
-                        <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
-                        <p class="text-gray-500 font-medium">Tidak ada data dosen</p>
-                        <p class="text-gray-400 text-sm mt-1">Silakan tambahkan data dosen baru</p>
-                    </div>
-                @endforelse
-            </div>
+
 
             {{-- Pagination --}}
             @if($dosens->hasPages())

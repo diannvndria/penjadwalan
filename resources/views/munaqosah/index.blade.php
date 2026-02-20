@@ -1,27 +1,7 @@
 @extends('layouts.app')
 
-@section('styles')
-<style>
-    .mobile-card {
-        @apply bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow duration-200;
-    }
-    .mobile-card-header {
-        @apply flex items-start justify-between mb-3 pb-3 border-b border-gray-100;
-    }
-    .mobile-card-body {
-        @apply space-y-2.5;
-    }
-    .mobile-field {
-        @apply flex justify-between items-start text-sm gap-2;
-    }
-    .mobile-field-label {
-        @apply text-gray-600 font-medium flex-shrink-0;
-    }
-    .mobile-field-value {
-        @apply text-gray-900 font-semibold text-right;
-    }
-</style>
-@endsection
+
+
 
 @section('header')
     {{ __('Jadwal Sidang') }}
@@ -241,10 +221,10 @@
             </div>
         </div>
 
+
         {{-- Table Card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {{-- Desktop Table View (hidden on mobile) --}}
-            <div class="hidden lg:block overflow-x-auto">
+            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
                         <tr>
@@ -262,7 +242,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th scope="col" class="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <a href="{{ route('munaqosah.index', ['sort' => 'tanggal_munaqosah', 'direction' => (($sortField ?? '') === 'tanggal_munaqosah' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status, 'supervisor' => $supervisorId]) }}" class="flex items-center justify-center gap-1 hover:text-blue-600 transition-colors group">
                                     <i class="fas fa-calendar-day text-gray-400 group-hover:text-blue-500 text-sm"></i>
                                     Tanggal
@@ -273,7 +253,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th scope="col" class="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <a href="{{ route('munaqosah.index', ['sort' => 'waktu_mulai', 'direction' => (($sortField ?? '') === 'waktu_mulai' && ($sortDirection ?? 'asc') === 'asc') ? 'desc' : 'asc', 'start_date' => $startDate, 'end_date' => $endDate, 'status' => $status, 'supervisor' => $supervisorId]) }}" class="flex items-center justify-center gap-1 hover:text-blue-600 transition-colors group">
                                     <i class="fas fa-clock text-gray-400 group-hover:text-blue-500 text-sm"></i>
                                     Waktu
@@ -302,19 +282,19 @@
                                     Penguji 2
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-door-open text-gray-400 text-sm"></i>
                                     Ruang
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-info-circle text-gray-400 text-sm"></i>
                                     Status
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1">
                                     <i class="fas fa-cog text-gray-400 text-sm"></i>
                                     Aksi
@@ -381,7 +361,7 @@
                                         <i class="fas {{ $statusConfig['icon'] }} mr-1.5"></i>{{ ucfirst($munaqosah->status_konfirmasi) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center align-top">
+                                <td class="px-6 py-4 text-center align-top whitespace-nowrap">
                                     <div class="relative" x-data="{ open: false, dropUp: false }" x-init="$watch('open', value => { if(value) { const rect = $el.getBoundingClientRect(); dropUp = (window.innerHeight - rect.bottom) < 200; } })">
                                         <button @click="open = !open" class="inline-flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="Menu">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -444,119 +424,8 @@
                 </table>
             </div>
 
-            {{-- Mobile Card View (shown on mobile only) --}}
-            <div class="lg:hidden p-4">
-                @forelse ($munaqosahs as $munaqosah)
-                    <div class="mobile-card" :class="{'ring-2 ring-indigo-300 bg-indigo-50/30': selected.includes('{{ $munaqosah->id }}')}">
-                        <div class="mobile-card-header">
-                            <div class="flex-1">
-                                <div class="flex items-start gap-2 mb-1">
-                                    <input type="checkbox" value="{{ $munaqosah->id }}" @change="toggle('{{ $munaqosah->id }}')" :checked="selected.includes('{{ $munaqosah->id }}')" class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold text-gray-900 text-base">{{ $munaqosah->mahasiswa->nama ?? 'N/A' }}</h3>
-                                        <p class="text-xs text-gray-600 mt-0.5">{{ $munaqosah->mahasiswa->nim ?? '' }}</p>
-                                        @if($munaqosah->mahasiswa && ($munaqosah->mahasiswa->is_prioritas || $munaqosah->mahasiswa->prioritas_jadwal))
-                                            <span class="inline-flex items-center px-2 py-0.5 mt-1 text-[10px] font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                                <i class="fas fa-star mr-1 text-yellow-600 text-[8px]"></i>Prioritas
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ml-2">
-                                @php
-                                    $statusConfig = [
-                                        'pending' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-700', 'border' => 'border-yellow-200', 'icon' => 'fa-clock'],
-                                        'dikonfirmasi' => ['bg' => 'bg-green-50', 'text' => 'text-green-700', 'border' => 'border-green-200', 'icon' => 'fa-check-circle'],
-                                        'ditolak' => ['bg' => 'bg-red-50', 'text' => 'text-red-700', 'border' => 'border-red-200', 'icon' => 'fa-times-circle'],
-                                    ][$munaqosah->status_konfirmasi] ?? ['bg' => 'bg-gray-50', 'text' => 'text-gray-700', 'border' => 'border-gray-200', 'icon' => 'fa-question-circle'];
-                                @endphp
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusConfig['bg'] }} {{ $statusConfig['text'] }} border {{ $statusConfig['border'] }}">
-                                    <i class="fas {{ $statusConfig['icon'] }} mr-1 text-[10px]"></i>{{ ucfirst($munaqosah->status_konfirmasi) }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="mobile-card-body">
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-calendar-day text-gray-400 mr-1"></i>Tanggal:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                        {{ $munaqosah->tanggal_munaqosah->format('d-m-Y') }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-clock text-gray-400 mr-1"></i>Waktu:</span>
-                                <span class="mobile-field-value">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                                        {{ substr($munaqosah->waktu_mulai, 0, 5) }} - {{ substr($munaqosah->waktu_selesai, 0, 5) }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-user-tie text-gray-400 mr-1"></i>Dospem:</span>
-                                <span class="mobile-field-value text-sm">{{ $munaqosah->mahasiswa->dospem->nama ?? '-' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-chalkboard-teacher text-gray-400 mr-1"></i>Penguji 1:</span>
-                                <span class="mobile-field-value text-sm">{{ $munaqosah->penguji1->nama ?? 'N/A' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-user-check text-gray-400 mr-1"></i>Penguji 2:</span>
-                                <span class="mobile-field-value text-sm">{{ $munaqosah->penguji2->nama ?? '-' }}</span>
-                            </div>
-                            <div class="mobile-field">
-                                <span class="mobile-field-label"><i class="fas fa-door-open text-gray-400 mr-1"></i>Ruang:</span>
-                                <span class="mobile-field-value text-sm">{{ $munaqosah->ruangUjian->nama ?? '-' }}</span>
-                            </div>
-                        </div>
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open" class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
-                                    <i class="fas fa-ellipsis-h mr-2"></i>
-                                    Menu Aksi
-                                </button>
-                                <div x-show="open"
-                                     x-cloak
-                                     @click.away="open = false"
-                                     class="absolute left-0 right-0 mt-2 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-50">
-                                    <div class="py-1">
-                                        <a href="{{ route('munaqosah.histori', $munaqosah->id) }}"
-                                           class="flex items-center px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition">
-                                            <i class="fas fa-history mr-3 w-4"></i>Histori
-                                        </a>
-                                        @if (Auth::user()->isAdmin())
-                                            <a href="{{ route('munaqosah.edit', $munaqosah->id) }}"
-                                               class="flex items-center px-4 py-2.5 text-sm text-indigo-600 hover:bg-indigo-50 transition">
-                                                <i class="fas fa-edit mr-3 w-4"></i>Edit
-                                            </a>
-                                            <button type="button"
-                                                    onclick="showDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
-                                                    class="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
-                                                <i class="fas fa-trash mr-3 w-4"></i>Hapus
-                                            </button>
-                                            @if(strtolower($munaqosah->status_konfirmasi) === 'dikonfirmasi')
-                                                <button type="button"
-                                                        onclick="showPermanentDeleteModal({{ $munaqosah->id }}, '{{ $munaqosah->mahasiswa->nama ?? 'Jadwal ini' }}')"
-                                                        class="flex items-center w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-100 transition border-t border-gray-100">
-                                                    <i class="fas fa-trash-alt mr-3 w-4"></i>Hapus Permanen
-                                                </button>
-                                            @endif
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="py-12 text-center">
-                        <div class="flex flex-col items-center justify-center text-gray-400">
-                            <i class="fas fa-calendar-times text-5xl mb-3"></i>
-                            <p class="text-sm font-medium">Tidak ada jadwal sidang.</p>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
+
+
         </div>
 
         {{-- Pagination --}}

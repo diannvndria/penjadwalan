@@ -4,62 +4,8 @@
     Auto-Schedule Penjadwalan Sidang
 @endsection
 
-@section('styles')
-<style>
-    /* Mobile Card Styles */
-    .mobile-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        transition: all 0.2s;
-    }
-    
-    .mobile-card:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .mobile-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .mobile-card-body {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .mobile-field {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.375rem 0;
-    }
-    
-    .mobile-field-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-    }
-    
-    .mobile-field-value {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #1f2937;
-        text-align: right;
-    }
-</style>
-@endsection
+
+
 
 @section('content')
 <div class="py-12">
@@ -185,35 +131,35 @@
                 </div>
 
                 {{-- Desktop Table View --}}
-                <div class="hidden lg:block overflow-hidden rounded-xl border border-gray-200">
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
                     <table id="readyStudentsTable" class="min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr class="bg-gradient-to-r from-gray-50 to-gray-100/50">
-                                <th class="px-6 py-4 text-left">
+                                <th class="px-6 py-4 text-left whitespace-nowrap">
                                     <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <i class="fas fa-hashtag text-gray-400"></i>
                                         NIM
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left">
+                                <th class="px-6 py-4 text-left whitespace-nowrap">
                                     <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <i class="fas fa-user text-gray-400"></i>
                                         Nama
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left">
+                                <th class="px-6 py-4 text-left whitespace-nowrap">
                                     <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <i class="fas fa-graduation-cap text-gray-400"></i>
                                         Angkatan
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-left">
+                                <th class="px-6 py-4 text-left whitespace-nowrap">
                                     <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <i class="fas fa-chalkboard-teacher text-gray-400"></i>
                                         Dosen Pembimbing
                                     </div>
                                 </th>
-                                <th class="px-6 py-4 text-center">
+                                <th class="px-6 py-4 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <i class="fas fa-cogs text-gray-400"></i>
                                         Aksi
@@ -225,11 +171,6 @@
                             <!-- Will be populated by JavaScript -->
                         </tbody>
                     </table>
-                </div>
-
-                {{-- Mobile Card View --}}
-                <div id="mobileCardsContainer" class="lg:hidden">
-                    <!-- Will be populated by JavaScript -->
                 </div>
             </div>
         </div>
@@ -432,9 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateStudentsTable(students) {
         const tbody = document.getElementById('studentsTableBody');
-        const mobileContainer = document.getElementById('mobileCardsContainer');
         tbody.innerHTML = '';
-        mobileContainer.innerHTML = '';
 
         if (students.length === 0) {
             // Desktop empty state
@@ -448,16 +387,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </td>
                 </tr>
-            `;
-            
-            // Mobile empty state
-            mobileContainer.innerHTML = `
-                <div class="py-12 text-center">
-                    <div class="flex flex-col items-center justify-center text-gray-400">
-                        <i class="fas fa-inbox text-5xl mb-3"></i>
-                        <p class="text-sm font-medium">Tidak ada mahasiswa yang siap sidang</p>
-                    </div>
-                </div>
             `;
             return;
         }
@@ -496,36 +425,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             `;
             tbody.appendChild(row);
-            
-            // Mobile card
-            const card = document.createElement('div');
-            card.className = 'mobile-card';
-            card.innerHTML = `
-                <div class="mobile-card-header">
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-gray-900 text-base">${student.nama}</h3>
-                        <p class="text-xs text-gray-600 mt-0.5">${student.nim}</p>
-                    </div>
-                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                        <i class="fas fa-calendar-alt mr-1"></i>${student.angkatan}
-                    </span>
-                </div>
-                <div class="mobile-card-body">
-                    <div class="mobile-field">
-                        <span class="mobile-field-label"><i class="fas fa-chalkboard-teacher text-gray-400 mr-1"></i>Dospem:</span>
-                        <span class="mobile-field-value">${student.dospem ? student.dospem.nama : 'Belum ditentukan'}</span>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <button onclick="scheduleIndividual('${student.nim}', '${student.nama}')"
-                            id="schedule-btn-mobile-${student.nim}"
-                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
-                        <i class="fas fa-calendar-plus mr-2"></i>
-                        Jadwalkan
-                    </button>
-                </div>
-            `;
-            mobileContainer.appendChild(card);
         });
     }
 
