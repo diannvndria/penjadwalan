@@ -33,7 +33,7 @@
                             <i class="fas fa-clock text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Durasi Sidang</h4>
-                        <p id="durationDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">120 menit</p>
+                        <p id="durationDisplay" class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">120 menit</p>
                     </div>
                     
                     <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-5 rounded-xl border border-purple-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
@@ -41,7 +41,7 @@
                             <i class="fas fa-business-time text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Jam Kerja</h4>
-                        <p id="workingHoursDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">08:00 - 16:00</p>
+                        <p id="workingHoursDisplay" class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">08:00 - 16:00</p>
                     </div>
 
                     <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-5 rounded-xl border border-green-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
@@ -49,7 +49,7 @@
                             <i class="fas fa-calendar-week text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Hari Kerja</h4>
-                        <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">Senin - Jumat</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">Senin - Jumat</p>
                     </div>
 
                     <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-4 sm:p-5 rounded-xl border border-orange-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
@@ -57,7 +57,7 @@
                             <i class="fas fa-search text-white text-lg"></i>
                         </div>
                         <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Range Pencarian</h4>
-                        <p id="searchRangeDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">7 hari</p>
+                        <p id="searchRangeDisplay" class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">7 hari</p>
                     </div>
                 </div>
 
