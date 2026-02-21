@@ -13,7 +13,8 @@
                     Selamat Datang, {{ Auth::user()->name }}!
                 </h3>
                 <p class="text-blue-100 text-lg max-w-2xl">
-                    Sistem Penjadwalan Sidang Munaqosah. Pantau jadwal, kelola mahasiswa, dan atur penguji dengan mudah.
+                    <strong>Sistem Monitoring Tugas Akhir</strong><br>
+                            Kelola mahasiswa, pantau beban dosen, dan atur penjadwalan sidang berbasis prioritas dalam satu sistem yang terintegrasi.
                 </p>
             </div>
             <div class="absolute right-0 top-0 h-full w-1/3 bg-white/10 transform skew-x-12 translate-x-12"></div>

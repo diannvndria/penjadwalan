@@ -16,53 +16,48 @@
         <!-- Configuration Panel -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 mb-6">
             <div class="p-4 sm:p-6 text-gray-900">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h3 class="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
                         <i class="fas fa-cog text-indigo-600"></i>
                         Konfigurasi Auto-Schedule
                     </h3>
-                    <button id="editConfigBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                    <button id="editConfigBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
                         <i class="fas fa-edit mr-2"></i>
                         Edit Konfigurasi
                     </button>
                 </div>
 
-                <div id="configDisplay" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-100">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-blue-600 rounded-lg">
-                                <i class="fas fa-clock text-white"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-700">Durasi Sidang</h4>
+                <div id="configDisplay" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-5 rounded-xl border border-blue-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
+                        <div class="p-3 bg-blue-600 rounded-lg shadow-md mb-3">
+                            <i class="fas fa-clock text-white text-lg"></i>
                         </div>
-                        <p id="durationDisplay" class="text-2xl font-bold text-gray-800 ml-11">120 menit</p>
+                        <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Durasi Sidang</h4>
+                        <p id="durationDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">120 menit</p>
                     </div>
-                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-5 rounded-xl border border-purple-100">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-purple-600 rounded-lg">
-                                <i class="fas fa-business-time text-white"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-700">Jam Kerja</h4>
+                    
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-5 rounded-xl border border-purple-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
+                        <div class="p-3 bg-purple-600 rounded-lg shadow-md mb-3">
+                            <i class="fas fa-business-time text-white text-lg"></i>
                         </div>
-                        <p id="workingHoursDisplay" class="text-2xl font-bold text-gray-800 ml-11">08:00 - 16:00</p>
+                        <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Jam Kerja</h4>
+                        <p id="workingHoursDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">08:00 - 16:00</p>
                     </div>
-                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-100">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-green-600 rounded-lg">
-                                <i class="fas fa-calendar-week text-white"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-700">Hari Kerja</h4>
+
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-5 rounded-xl border border-green-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
+                        <div class="p-3 bg-green-600 rounded-lg shadow-md mb-3">
+                            <i class="fas fa-calendar-week text-white text-lg"></i>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800 ml-11">Senin - Jumat</p>
+                        <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Hari Kerja</h4>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">Senin - Jumat</p>
                     </div>
-                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-5 rounded-xl border border-orange-100">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-orange-600 rounded-lg">
-                                <i class="fas fa-search text-white"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-700">Range Pencarian</h4>
+
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-4 sm:p-5 rounded-xl border border-orange-100 flex flex-col items-center text-center sm:items-start sm:text-left transition-transform transform hover:scale-105">
+                        <div class="p-3 bg-orange-600 rounded-lg shadow-md mb-3">
+                            <i class="fas fa-search text-white text-lg"></i>
                         </div>
-                        <p id="searchRangeDisplay" class="text-2xl font-bold text-gray-800 ml-11">7 hari</p>
+                        <h4 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Range Pencarian</h4>
+                        <p id="searchRangeDisplay" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">7 hari</p>
                     </div>
                 </div>
 
@@ -118,12 +113,12 @@
                         <span class="sm:hidden">Siap Sidang</span>
                         <span id="readyCount" class="inline-flex items-center justify-center h-7 sm:h-8 px-2 sm:px-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-sm">0</span>
                     </h3>
-                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
-                        <button id="refreshBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3 w-full lg:w-auto">
+                        <button id="refreshBtn" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition">
                             <i class="fas fa-sync-alt mr-2"></i>
                             Refresh
                         </button>
-                        <button id="batchScheduleBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
+                        <button id="batchScheduleBtn" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition">
                             <i class="fas fa-calendar-check mr-2"></i>
                             Jadwalkan Semua
                         </button>

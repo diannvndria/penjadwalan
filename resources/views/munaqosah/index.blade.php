@@ -176,7 +176,7 @@
                     </div>
 
                     {{-- Action Buttons --}}
-                    <div class="flex flex-col gap-2">
+                    <div class="grid grid-cols-2 gap-3">
                         <button type="submit" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
                             <i class="fas fa-filter mr-2"></i>Filter
                         </button>
@@ -189,7 +189,7 @@
                         @if (Auth::user()->isAdmin())
                             <a href="{{ route('munaqosah.create') }}" class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-150 shadow-sm hover:shadow-md">
                                 <i class="fas fa-plus mr-2"></i>
-                                Buat Jadwal Sidang
+                                Buat Jadwal
                             </a>
                         @endif
                     </div>
